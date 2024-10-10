@@ -1,0 +1,32 @@
+[workspace]
+members = [
+  "crates/cobral",
+  "crates/interpreter",
+  "crates/lexer",
+  "crates/libs",
+  "crates/logger",
+  "crates/parser",
+  "crates/types",
+]
+default-members = ["crates/cobral"]
+resolver = "2"
+
+package.edition = "2021"
+package.authors = ["Luiz Henrique Xinaider"]
+package.version = "0.1.0"
+
+[workspace.dependencies]
+cobral = { path = "crates/cobral" }
+interpreter = { path = "crates/interpreter" }
+lexer = { path = "crates/lexer" }
+libs = { path = "crates/libs" }
+logger = { path = "crates/logger" }
+parser = { path = "crates/parser" }
+types = { path = "crates/types" }
+
+tauri-build = { version = "2.0.0-rc", features = [] }
+tauri = { version = "2.0.0-rc", features = [] }
+tauri-plugin-shell = "2.0.0-rc"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+colored = "2"

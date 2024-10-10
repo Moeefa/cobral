@@ -1,0 +1,29 @@
+[package]
+name = "cobral"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+path = "src/lib.rs"
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+lexer.workspace = true
+parser.workspace = true
+interpreter.workspace = true
+types.workspace = true
+logger.workspace = true
+libs.workspace = true
+
+tauri.workspace = true
+tauri-plugin-shell.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tauri-plugin-decorum = "1.1.0"
+colored = "2.1.0"
+

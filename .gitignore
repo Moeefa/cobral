@@ -1,0 +1,11 @@
+/gen/schemas
+.DS_Store
+node_modules
+/target
+.env
+.env.*
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.vscode
+bun.lockb

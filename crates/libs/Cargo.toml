@@ -1,0 +1,13 @@
+[package]
+name = "libs"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "libs"
+path = "src/libs.rs"
+
+[dependencies]
+types.workspace = true
+tauri.workspace = true

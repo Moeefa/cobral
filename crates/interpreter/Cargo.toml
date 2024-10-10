@@ -1,0 +1,15 @@
+[package]
+name = "interpreter"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "interpreter"
+path = "src/interpreter.rs"
+
+[dependencies]
+logger.workspace = true
+types.workspace = true
+libs.workspace = true
+colored.workspace = true

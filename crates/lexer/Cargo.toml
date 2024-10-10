@@ -1,0 +1,12 @@
+[package]
+name = "lexer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "lexer"
+path = "src/lexer.rs"
+
+[dependencies]
+types.workspace = true

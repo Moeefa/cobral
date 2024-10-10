@@ -1,0 +1,19 @@
+[package]
+name = "parser"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "parser"
+path = "src/parser.rs"
+
+[dependencies]
+libs.workspace = true
+types.workspace = true
+lexer.workspace = true
+
+# Only for tests
+interpreter.workspace = true
+logger.workspace = true
+colored.workspace = true
