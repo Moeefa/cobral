@@ -40,7 +40,7 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [ ] Melhorar a implementação do Lezer
 - [ ] Destacar linha durante a execução passo a passo
 - [ ] Incluir testes unitários
-- [ ] Leitura e escrita de arquivos
+- [x] Leitura e escrita de arquivos
 - [x] Console interativo para execução de código
 - [x] Incluir exemplos de código e documentação
 - [x] Implementar tipo de dados/dicas ao passar o mouse sobre uma variável, constante ou função
@@ -60,7 +60,7 @@ Para rodar um código em CobraL, você precisa ter o Rust instalado. Depois, bas
 - [Operadores](#operadores)
 - [Estruturas de controle](#estruturas-de-controle)
 - [Bibliotecas](#bibliotecas)
-  - [Entrada e saída](#entrada-e-saída)
+  - [Entrada e saída](#io-entrada-e-saída)
 
 ### Sintaxe
 
