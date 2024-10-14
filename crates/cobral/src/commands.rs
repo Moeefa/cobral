@@ -4,20 +4,30 @@ use interpreter::Interpreter;
 use lexer::Lexer;
 use logger::Logger;
 use parser::Parser;
+use serde::{Deserialize, Serialize};
 use tauri::{command, AppHandle, Emitter, Runtime, Window};
 use types::{InterpreterError, LabeledExpr};
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Payload {
+  pub message: String,
+  pub level: String,
+}
 
 static INPUT: LazyLock<Arc<Mutex<String>>> = LazyLock::new(|| Arc::new(Mutex::new(String::new())));
 static EXPRS: LazyLock<Arc<Mutex<Vec<LabeledExpr>>>> =
   LazyLock::new(|| Arc::new(Mutex::new(Vec::new())));
 static INTERPRETER: LazyLock<Arc<Mutex<Interpreter>>> =
   LazyLock::new(|| Arc::new(Mutex::new(Interpreter::new())));
+static START: LazyLock<Arc<Mutex<std::time::Instant>>> =
+  LazyLock::new(|| Arc::new(Mutex::new(std::time::Instant::now())));
 
 #[command]
 pub async fn update<R: Runtime>(_app: AppHandle<R>, _window: Window<R>, input: String) {
   *INPUT.lock().unwrap() = input;
   *EXPRS.lock().unwrap() = Vec::new();
   *INTERPRETER.lock().unwrap() = Interpreter::new();
+  *START.lock().unwrap() = std::time::Instant::now();
 }
 
 #[command]
@@ -30,6 +40,7 @@ pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
     app.emit("clear", ()).unwrap();
     *INTERPRETER.lock().unwrap() = Interpreter::new();
     *EXPRS.lock().unwrap() = parse_all(&mut parser);
+    *START.lock().unwrap() = std::time::Instant::now();
   }
 
   // Create an Interpreter instance
@@ -45,6 +56,19 @@ pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
     }
   }
 
+  if EXPRS.lock().unwrap().len() == 1 {
+    let elapsed = START.lock().unwrap().elapsed();
+    app
+      .emit(
+        "log",
+        Payload {
+          message: format!("Tempo de execução: {:?}", elapsed),
+          level: String::from("info"),
+        },
+      )
+      .unwrap();
+  }
+
   EXPRS.lock().unwrap().remove(0);
 
   EXPRS.lock().unwrap().len()
@@ -52,6 +76,10 @@ pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
 
 #[command]
 pub async fn parse<R: Runtime>(app: AppHandle<R>, _window: Window<R>, input: String) {
+  *EXPRS.lock().unwrap() = Vec::new();
+  *INTERPRETER.lock().unwrap() = Interpreter::new();
+  *START.lock().unwrap() = std::time::Instant::now();
+
   let start = std::time::Instant::now();
   let lexer = Lexer::new(&input.as_str());
   let mut parser = Parser::new(lexer);
@@ -78,7 +106,13 @@ pub async fn parse<R: Runtime>(app: AppHandle<R>, _window: Window<R>, input: Str
 
   let elapsed = start.elapsed();
   app
-    .emit("log", format!("Tempo de execução: {:?}", elapsed))
+    .emit(
+      "log",
+      Payload {
+        message: format!("Tempo de execução: {:?}", elapsed),
+        level: String::from("info"),
+      },
+    )
     .unwrap();
 }
 

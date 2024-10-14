@@ -2,18 +2,39 @@ import { Diagnostic, linter } from "@codemirror/lint";
 
 import { syntaxTree } from "@codemirror/language";
 
-// Example pseudocode linter
+enum Types {
+  Integer = "inteiro",
+  Float = "real",
+  Boolean = "lógico",
+  String = "cadeia",
+  Unknown = "desconhecido",
+}
+
+export const variableTypes = new Map<string, string>();
+const functionReturnTypes = new Map<string, string>([
+  ["escrever", Types.String],
+  ["ler", Types.String],
+]);
+
+const reservedKeywords = new Set([
+  "declare",
+  "constante",
+  "se",
+  "senao",
+  "escrever",
+  "ler",
+  "nao",
+]);
+
 export const cobralLinter = linter((view) => {
   let diagnostics: Diagnostic[] = [];
   const tree = syntaxTree(view.state);
 
-  // Variables to track declared variables and if conditions
   let declaredVariables: Set<string> = new Set();
   let usedVariables: Set<string> = new Set();
   let constants: Set<string> = new Set();
 
   tree.cursor().iterate((node) => {
-    // Check for variable declarations
     switch (node.name) {
       case "VariableDeclaration": {
         const variableNode = node.node.getChild("VariableDefinition");
@@ -21,6 +42,36 @@ export const cobralLinter = linter((view) => {
           variableNode?.from || 0,
           variableNode?.to
         );
+
+        const valueNode = node.node.getChild("Expression");
+        const variableValue = view.state.doc.sliceString(
+          valueNode?.from || 0,
+          valueNode?.to
+        );
+
+        const callNode = valueNode?.node.getChild("VariableName");
+
+        let inferredType = inferType(variableValue);
+
+        if (callNode) {
+          const functionName = view.state.doc.sliceString(
+            callNode.from,
+            callNode.to
+          );
+
+          if (functionReturnTypes.has(functionName)) {
+            inferredType = functionReturnTypes.get(functionName) || "unknown";
+          }
+        }
+
+        if (reservedKeywords.has(variableName)) {
+          diagnostics.push({
+            from: variableNode?.from || 0,
+            to: variableNode?.to || 0,
+            severity: "error",
+            message: `Variável '${variableName}' é uma palavra reservada.`,
+          });
+        }
 
         if (node.node.getChild("constante")) {
           if (constants.has(variableName)) {
@@ -31,17 +82,19 @@ export const cobralLinter = linter((view) => {
               message: `Variável '${variableName}' é declarada como constante e não pode ser reatribuída.`,
             });
           } else {
-            constants.add(variableName); // Add the constant to the set after checking
+            constants.add(variableName);
           }
         }
 
+        variableTypes.set(variableName, inferredType);
         declaredVariables.add(variableName);
         break;
       }
 
       case "VariableName": {
         const variableName = view.state.doc.sliceString(node.from, node.to);
-        usedVariables.add(variableName);
+        if (!reservedKeywords.has(variableName))
+          usedVariables.add(variableName);
         break;
       }
 
@@ -98,14 +151,17 @@ export const cobralLinter = linter((view) => {
       }
 
       case "VariableName": {
-        // TODO: Improve this check to handle nested scopes
         if (node.node.parent?.name === "CallExpression") {
-          // Skip function calls, no need to check if the variable is declared
-          break;
+          break; // Skip function calls
         }
 
         const variableName = view.state.doc.sliceString(node.from, node.to);
-        if (!declaredVariables.has(variableName)) {
+
+        // Skip checking reserved keywords
+        if (
+          !declaredVariables.has(variableName) &&
+          !reservedKeywords.has(variableName.trim())
+        ) {
           diagnostics.push({
             from: node.from,
             to: node.to,
@@ -121,9 +177,21 @@ export const cobralLinter = linter((view) => {
   return diagnostics;
 });
 
-// Helper functions for type-checking (example)
+function inferType(value: string): string {
+  if (/^-?\d+$/.test(value)) {
+    return Types.Integer;
+  } else if (/^-?\d+\.\d+$/.test(value)) {
+    return Types.Float;
+  } else if (value === "verdadeiro" || value === "falso") {
+    return Types.Boolean;
+  } else if (/^".*"$/.test(value)) {
+    return Types.String;
+  } else {
+    return Types.Unknown;
+  }
+}
+
 function getTypeOfNode(node: any, _view: any): string {
-  // Placeholder logic: In real pseudocode, you'd inspect the node to determine its type
   switch (node.name) {
     case "Integer":
       return "number";

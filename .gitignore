@@ -1,5 +1,6 @@
-/gen/schemas
+/crates/cobral/gen/schemas
 .DS_Store
+.vscode
 node_modules
 /target
 .env
@@ -7,5 +8,4 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-.vscode
 bun.lockb

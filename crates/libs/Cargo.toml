@@ -11,3 +11,5 @@ path = "src/libs.rs"
 [dependencies]
 types.workspace = true
 tauri.workspace = true
+serde.workspace = true
+serde_json.workspace = true

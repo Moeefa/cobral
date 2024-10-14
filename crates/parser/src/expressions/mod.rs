@@ -1,5 +1,6 @@
 mod data;
 mod delimiter;
+mod not;
 mod operator;
 mod symbol;
 
@@ -13,7 +14,7 @@ impl<'a> Parser<'a> {
       Token::Integer(_) | Token::Float(_) | Token::String(_) | Token::True | Token::False =>
         self.parse_expression_data(),
       Token::BracketL => self.parse_delimiter(),
-      // Token::Not => self.parse_not_expression(),
+      Token::Not => self.parse_not_expression(),
       Token::Symbol(_) => self.parse_expression_symbol(),
       _ => Err(ParseError::InvalidExpression),
     }?;

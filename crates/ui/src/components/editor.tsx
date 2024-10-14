@@ -3,29 +3,34 @@ import {
   CheckIcon,
   CrumpledPaperIcon,
 } from "@radix-ui/react-icons";
-import CodeMirror, { ViewUpdate } from "@uiw/react-codemirror";
+import CodeMirror, {
+  EditorView,
+  ViewUpdate,
+  keymap,
+} from "@uiw/react-codemirror";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { emit, listen } from "@tauri-apps/api/event";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { EditorContext } from "@/contexts/editor-context";
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cobral } from "../language/cobral";
-import { cobralLinter } from "@/language/linter";
+import { cobral } from "@/linter/cobral";
+import { cobralLinter } from "@/linter/linter";
+import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { invoke } from "@tauri-apps/api/core";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { quietlight } from "@uiw/codemirror-theme-quietlight";
+import { showMinimap } from "@replit/codemirror-minimap";
+import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
+import { wordHover } from "@/linter/hover";
 
 const CodeMirrorEditor = () => {
-  const [value, setValue] = useState("");
-  const [logs, setLogs] = useState<JSX.Element[]>([]);
-  const [setup, setSetup] = useState(false);
+  const { clearLogs, logs, value, setValue } = useContext(EditorContext);
   const [theme, setTheme] = useState(quietlight);
 
   const onChange = useCallback((val: string, _viewUpdate: ViewUpdate) => {
@@ -34,24 +39,8 @@ const CodeMirrorEditor = () => {
   }, []);
 
   const handleParse = async () => {
-    const elapsed = performance.now();
-    setLogs([]);
+    clearLogs();
     await invoke("parse", { input: value });
-
-    // setLogs([
-    //   <>
-    //     <div className="flex items-center gap-4">
-    //       <span className="text-muted-foreground">
-    //         {new Date().toLocaleTimeString("pt-BR", {
-    //           hour: "2-digit",
-    //           minute: "2-digit",
-    //           second: "2-digit",
-    //         })}{" "}
-    //       </span>
-    //       <p>Elapsed time: {performance.now() - elapsed}ms</p>
-    //     </div>
-    //   </>,
-    // ]);
   };
 
   const handleParseStep = async () => {
@@ -61,7 +50,7 @@ const CodeMirrorEditor = () => {
 
     if (payload.length === 0) {
       invoke("update", { input: value });
-      setLogs([]);
+      clearLogs();
     }
   };
 
@@ -79,60 +68,6 @@ const CodeMirrorEditor = () => {
       });
   }, []);
 
-  useEffect(() => {
-    if (setup) return;
-
-    listen<string>("read", (event) => {
-      setLogs((prev) => [
-        ...prev,
-        <div className="flex items-center gap-4">
-          <span className="text-muted-foreground">
-            {new Date().toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })}{" "}
-          </span>
-          <div className="flex gap-1 items-center w-full">
-            <p className="w-fit">{event.payload} </p>
-            <Input
-              key={new Date().toISOString()}
-              className="flex-1 bg-foreground text-background"
-              type="text"
-              onKeyDown={async (event) => {
-                if (event.key === "Enter") {
-                  event.currentTarget.disabled = true;
-                  await emit("read_input", event.currentTarget.value);
-                }
-              }}
-            />
-          </div>
-        </div>,
-      ]);
-    });
-
-    listen<string>("log", (log) =>
-      setLogs((prev) => [
-        ...prev,
-        <>
-          <div className="flex items-center gap-4">
-            <span className="text-muted-foreground">
-              {new Date().toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })}{" "}
-            </span>
-            <p>{log.payload}</p>
-          </div>
-        </>,
-      ])
-    );
-    listen("clear", () => setLogs([]));
-
-    setSetup(true);
-  }, []);
-
   return (
     <div className="h-full w-full flex flex-col">
       <ResizablePanelGroup direction="vertical">
@@ -141,9 +76,26 @@ const CodeMirrorEditor = () => {
             value={value}
             height="100%"
             width="100%"
-            className="pt-8 h-full w-full font-mono"
+            className="h-full w-full font-mono"
             theme={theme}
-            extensions={[cobral(), cobralLinter]}
+            extensions={[
+              cobral(),
+              keymap.of(vscodeKeymap),
+              indentationMarkers(),
+              showMinimap.compute(["doc"], (_state) => {
+                return {
+                  create: (_v: EditorView) => {
+                    const dom = document.createElement("div");
+                    return { dom };
+                  },
+                  displayText: "blocks",
+                  showOverlay: "always",
+                  gutters: [{ 1: "#00FF00", 2: "#00FF00" }],
+                };
+              }),
+              cobralLinter,
+              wordHover,
+            ]}
             onChange={onChange}
           />
         </ResizablePanel>
@@ -161,12 +113,12 @@ const CodeMirrorEditor = () => {
             </div>
 
             <div>
-              <Button variant="ghost" onClick={() => setLogs([])}>
+              <Button variant="ghost" onClick={clearLogs}>
                 <CrumpledPaperIcon className="mr-2" /> Limpar
               </Button>
             </div>
           </div>
-          <ScrollArea className="h-full px-2 pb-14">
+          <ScrollArea className="h-full px-2 pb-14 flex flex-col [&>div>div>div]:mb-1.5">
             {logs.map((log, id) => {
               return <React.Fragment key={id}>{log}</React.Fragment>;
             })}

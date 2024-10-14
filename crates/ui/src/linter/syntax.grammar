@@ -492,7 +492,7 @@ intersectionOp[@name=LogicOp] { "&" }
 
 @skip { spaces | newline | LineComment | BlockComment }
 
-@context trackNewline from "./tokens.js"
+@context trackNewline from "./tokens"
 
 @external tokens noSemicolon from "./tokens" { noSemi }
 

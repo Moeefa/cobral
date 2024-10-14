@@ -1,7 +1,14 @@
+use serde::{Deserialize, Serialize};
 use tauri::{Emitter, Listener};
 use types::{Data, Expr};
 
 use crate::APP_HANDLE;
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Payload {
+  pub message: String,
+  pub level: String,
+}
 
 pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
   let output = args
@@ -47,14 +54,13 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .collect::<Vec<String>>()
     .join(" ");
 
-  println!("{}", output);
-
-  let _ = APP_HANDLE
-    .lock()
-    .unwrap()
-    .as_ref()
-    .unwrap()
-    .emit("log", output.clone());
+  let _ = APP_HANDLE.lock().unwrap().as_ref().unwrap().emit(
+    "log",
+    Payload {
+      message: output.clone(),
+      level: "info".to_string(),
+    },
+  );
 
   Some(Data::String(output))
 }

@@ -13,3 +13,5 @@ colored.workspace = true
 libs.workspace = true
 tauri.workspace = true
 types.workspace = true
+serde.workspace = true
+serde_json.workspace = true

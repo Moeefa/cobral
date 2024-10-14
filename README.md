@@ -14,7 +14,7 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
   - [Operadores](#operadores)
   - [Estruturas de controle](#estruturas-de-controle)
   - [Bibliotecas](#bibliotecas)
-  - [Entrada e saída](#entrada-e-saída)
+    - [Entrada e saída](#entrada-e-saída)
 
 ## Roadmap
 
@@ -29,6 +29,9 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [ ] Implementar recursão
 - [ ] Implementar comentários
 - [ ] Implementar operadores lógicos (e, ou, não)
+  - [x] Operador `nao` para negação de valores booleanos
+  - [ ] Operador `e` para conjunção de valores booleanos
+  - [ ] Operador `ou` para disjunção de valores booleanos
 - [ ] Implementar operadores aritméticos
 - [ ] Implementar operadores de incremento e decremento
 - [ ] Implementar operadores de concatenação
@@ -39,7 +42,8 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [ ] Incluir testes unitários
 - [ ] Leitura e escrita de arquivos
 - [x] Console interativo para execução de código
-- [ ] Incluir exemplos de código e documentação
+- [x] Incluir exemplos de código e documentação
+- [x] Implementar tipo de dados/dicas ao passar o mouse sobre uma variável, constante ou função
 
 ## Como funciona?
 
@@ -56,7 +60,7 @@ Para rodar um código em CobraL, você precisa ter o Rust instalado. Depois, bas
 - [Operadores](#operadores)
 - [Estruturas de controle](#estruturas-de-controle)
 - [Bibliotecas](#bibliotecas)
-- [Entrada e saída](#entrada-e-saída)
+  - [Entrada e saída](#entrada-e-saída)
 
 ### Sintaxe
 

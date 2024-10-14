@@ -8,24 +8,25 @@ import {
 } from "@codemirror/language";
 
 import { highlight } from "./highlight.js";
-import { localCompletionSource } from "@/language/completions.js";
+import { localCompletionSource } from "@/linter/completions.js";
 import { parser } from "./parser.js";
-import { snippets } from "@/language/snippets.js";
+import { snippets } from "@/linter/snippets.js";
 
 export const cobralLanguage = LRLanguage.define({
   name: "cobral",
   parser: parser.configure({
     props: [
       indentNodeProp.add({
-        Application: delimitedIndent({ closing: ")", align: false }),
+        Block: delimitedIndent({ closing: "}", align: false }),
       }),
       foldNodeProp.add({
-        Application: foldInside,
+        Block: foldInside,
       }),
       highlight,
     ],
   }),
   languageData: {
+    indentOnInput: /^\s*[{}]$/,
     closeBrackets: { brackets: ["(", "[", "{", '"'] },
     wordChars: "$",
   },
