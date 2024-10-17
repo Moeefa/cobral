@@ -28,10 +28,10 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [x] Implementar matrizes
 - [ ] Implementar recursão
 - [ ] Implementar comentários
-- [ ] Implementar operadores lógicos (e, ou, não)
+- [x] Implementar operadores lógicos (e, ou, não)
   - [x] Operador `nao` para negação de valores booleanos
-  - [ ] Operador `e` para conjunção de valores booleanos
-  - [ ] Operador `ou` para disjunção de valores booleanos
+  - [x] Operador `e` para conjunção de valores booleanos
+  - [x] Operador `ou` para disjunção de valores booleanos
 - [ ] Implementar operadores aritméticos
 - [ ] Implementar operadores de incremento e decremento
 - [ ] Implementar operadores de concatenação

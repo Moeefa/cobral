@@ -190,7 +190,6 @@ impl Interpreter {
         })?;
 
         match (lhs_value, rhs_value, op) {
-          // Integer comparisons
           (Data::Integer(l), Data::Integer(r), Token::GreaterThan) => Ok(Data::Boolean(l > r)),
           (Data::Integer(l), Data::Integer(r), Token::GreaterThanEqual) =>
             Ok(Data::Boolean(l >= r)),
@@ -199,7 +198,6 @@ impl Interpreter {
           (Data::Integer(l), Data::Integer(r), Token::EqualEqual) => Ok(Data::Boolean(l == r)),
           (Data::Integer(l), Data::Integer(r), Token::NotEqual) => Ok(Data::Boolean(l != r)),
 
-          // Float comparisons
           (Data::Float(l), Data::Float(r), Token::GreaterThan) => Ok(Data::Boolean(l > r)),
           (Data::Float(l), Data::Float(r), Token::GreaterThanEqual) => Ok(Data::Boolean(l >= r)),
           (Data::Float(l), Data::Float(r), Token::LessThan) => Ok(Data::Boolean(l < r)),
@@ -207,25 +205,68 @@ impl Interpreter {
           (Data::Float(l), Data::Float(r), Token::EqualEqual) => Ok(Data::Boolean(l == r)),
           (Data::Float(l), Data::Float(r), Token::NotEqual) => Ok(Data::Boolean(l != r)),
 
-          // Boolean comparisons (logical AND/OR)
+          (Data::Float(l), Data::Integer(r), Token::GreaterThan) =>
+            Ok(Data::Boolean(l > (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::GreaterThanEqual) =>
+            Ok(Data::Boolean(l >= (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::LessThan) => Ok(Data::Boolean(l < (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::LessThanEqual) =>
+            Ok(Data::Boolean(l <= (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::EqualEqual) =>
+            Ok(Data::Boolean(l == (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::NotEqual) => Ok(Data::Boolean(l != (r as f64))),
+
+          (Data::Integer(l), Data::Float(r), Token::GreaterThan) =>
+            Ok(Data::Boolean((l as f64) > r)),
+          (Data::Integer(l), Data::Float(r), Token::GreaterThanEqual) =>
+            Ok(Data::Boolean((l as f64) >= r)),
+          (Data::Integer(l), Data::Float(r), Token::LessThan) => Ok(Data::Boolean((l as f64) < r)),
+          (Data::Integer(l), Data::Float(r), Token::LessThanEqual) =>
+            Ok(Data::Boolean((l as f64) <= r)),
+          (Data::Integer(l), Data::Float(r), Token::EqualEqual) =>
+            Ok(Data::Boolean((l as f64) == r)),
+          (Data::Integer(l), Data::Float(r), Token::NotEqual) => Ok(Data::Boolean((l as f64) != r)),
+
+          (Data::String(l), Data::String(r), Token::EqualEqual) => Ok(Data::Boolean(l == r)),
+          (Data::String(l), Data::String(r), Token::NotEqual) => Ok(Data::Boolean(l != r)),
+          (Data::String(l), Data::String(r), Token::GreaterThanEqual) => Ok(Data::Boolean(l >= r)),
+          (Data::String(l), Data::String(r), Token::GreaterThan) => Ok(Data::Boolean(l > r)),
+          (Data::String(l), Data::String(r), Token::LessThanEqual) => Ok(Data::Boolean(l <= r)),
+          (Data::String(l), Data::String(r), Token::LessThan) => Ok(Data::Boolean(l < r)),
+
+          (Data::String(l), Data::Integer(r), Token::EqualEqual) =>
+            Ok(Data::Boolean(l.parse::<i64>()? == r)),
+          (Data::String(l), Data::Integer(r), Token::NotEqual) =>
+            Ok(Data::Boolean(l.parse::<i64>()? != r)),
+          (Data::String(l), Data::Integer(r), Token::GreaterThanEqual) =>
+            Ok(Data::Boolean(l.parse::<i64>()? >= r)),
+          (Data::String(l), Data::Integer(r), Token::GreaterThan) =>
+            Ok(Data::Boolean(l.parse::<i64>()? > r)),
+          (Data::String(l), Data::Integer(r), Token::LessThanEqual) =>
+            Ok(Data::Boolean(l.parse::<i64>()? <= r)),
+          (Data::String(l), Data::Integer(r), Token::LessThan) =>
+            Ok(Data::Boolean(l.parse::<i64>()? < r)),
+
+          (Data::String(l), Data::Float(r), Token::GreaterThanEqual) =>
+            Ok(Data::Boolean(l.parse::<f64>()? >= r)),
+          (Data::String(l), Data::Float(r), Token::GreaterThan) =>
+            Ok(Data::Boolean(l.parse::<f64>()? > r)),
+          (Data::String(l), Data::Float(r), Token::LessThanEqual) =>
+            Ok(Data::Boolean(l.parse::<f64>()? <= r)),
+          (Data::String(l), Data::Float(r), Token::LessThan) =>
+            Ok(Data::Boolean(l.parse::<f64>()? < r)),
+          (Data::String(l), Data::Float(r), Token::EqualEqual) =>
+            Ok(Data::Boolean(l.parse::<f64>()? == r)),
+          (Data::String(l), Data::Float(r), Token::NotEqual) =>
+            Ok(Data::Boolean(l.parse::<f64>()? != r)),
+
           (Data::Boolean(l), Data::Boolean(r), Token::EqualEqual) => Ok(Data::Boolean(l == r)),
           (Data::Boolean(l), Data::Boolean(r), Token::NotEqual) => Ok(Data::Boolean(l != r)),
-          (Data::Boolean(l), Data::Boolean(r), Token::And) => Ok(Data::Boolean(l && r)),
-          (Data::Boolean(l), Data::Boolean(r), Token::Or) => Ok(Data::Boolean(l || r)),
-
-          // Handling mixed types like Integer and Boolean
-          (Data::Boolean(_), Data::Integer(_) | Data::Float(_) | Data::String(_), _)
-          | (Data::Integer(_) | Data::Float(_) | Data::String(_), Data::Boolean(_), _)
-          | (Data::Integer(_), Data::Float(_) | Data::String(_), _)
-          | (Data::Float(_), Data::Integer(_) | Data::String(_), _)
-          | (Data::String(_), Data::Integer(_) | Data::Float(_), _) => Err(
-            InterpreterError::ParseError(line, "Comparação entre tipos incompatíveis".to_string()),
-          ),
 
           // Catch-all for invalid comparisons
           _ => Err(InterpreterError::ParseError(
             line,
-            "Comparação inválida".to_string(),
+            "Comparação inválida entre tipos".to_string(),
           )),
         }
       }

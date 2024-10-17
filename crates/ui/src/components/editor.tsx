@@ -118,7 +118,7 @@ const CodeMirrorEditor = () => {
               </Button>
             </div>
           </div>
-          <ScrollArea className="h-full px-2 pb-14 flex flex-col [&>div>div>div]:mb-1.5">
+          <ScrollArea className="h-full px-2 pb-14 pt-1 flex flex-col [&>div>div>div]:mb-1.5">
             {logs.map((log, id) => {
               return <React.Fragment key={id}>{log}</React.Fragment>;
             })}

@@ -1,4 +1,4 @@
-use types::{Expr, ParseError, Token};
+use types::{Expr, ParseError};
 
 use crate::Parser;
 

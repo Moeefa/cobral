@@ -7,12 +7,11 @@ impl<'a> Lexer<'a> {
     let id = self.lookup();
     match id.as_str() {
       "declare" => {
-        self.advance(); // Move past "declare"
         self.skip_whitespace(); // Skip any whitespace
 
-        match self.peek_identifier().as_str() {
+        match self.peek().as_str() {
           "constante" => {
-            self.advance(); // Move past "constante"
+            self.next_token(); // Move past "constante"
             self.token(Token::Const)
           }
           _ => self.token(Token::Let),
@@ -34,7 +33,7 @@ impl<'a> Lexer<'a> {
     }
   }
 
-  pub fn lookup(&mut self) -> String {
+  fn lookup(&mut self) -> String {
     let mut id = String::new();
 
     // Only advance while we have valid identifier characters
@@ -50,23 +49,26 @@ impl<'a> Lexer<'a> {
     id
   }
 
-  pub fn peek_identifier(&mut self) -> String {
-    let saved_lexer_state = self.clone(); // Clone lexer state
+  fn peek(&mut self) -> String {
+    // Save current state of lexer
+    let saved_position = self.pos;
+    let saved_char = self.current_char;
 
     let mut id = String::new();
 
-    // Peek without advancing the state permanently
+    // Peek ahead without actually consuming characters
     while let Some(c) = self.current_char {
       if c.is_alphanumeric() || c == '_' {
         id.push(c);
-        self.advance(); // Temporarily advance
+        self.advance(); // Advance while peeking
       } else {
         break;
       }
     }
 
-    // Restore lexer state after peeking
-    *self = saved_lexer_state;
+    // Restore lexer state (reset position and current char)
+    self.pos = saved_position;
+    self.current_char = saved_char;
 
     id
   }

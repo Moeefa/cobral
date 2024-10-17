@@ -13,7 +13,7 @@ resolver = "2"
 
 package.edition = "2021"
 package.authors = ["Luiz Henrique Xinaider"]
-package.version = "0.1.0"
+package.version = "0.2.1"
 
 [workspace.dependencies]
 cobral = { path = "crates/cobral" }
