@@ -1,4 +1,5 @@
-use types::{LabeledToken, Token};
+use logger::Logger;
+use types::{InterpreterError, LabeledToken, Token};
 
 mod identifier;
 mod lists;
@@ -124,11 +125,21 @@ impl<'a> Lexer<'a> {
             self.advance();
             return self.token(Token::NotEqual);
           } else {
-            panic!("Caracter inesperado: {}", c);
+            Logger::error(InterpreterError::UnexpectedCharacter(
+              self.line,
+              format!("Caracter inesperado: {}", c),
+            ));
+            self.advance();
+            return self.token(Token::EOF);
           }
         }
         _ => {
-          panic!("Caracter inesperado: {}", c);
+          Logger::error(InterpreterError::UnexpectedCharacter(
+            self.line,
+            format!("Caracter inesperado: {}", c),
+          ));
+          self.advance();
+          return self.token(Token::EOF);
         }
       };
     }

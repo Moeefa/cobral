@@ -44,6 +44,8 @@ pub enum Token {
   EqualEqual,
   NotEqual,
   Not,
+  And,
+  Or,
 
   // End of file
   EOF,
@@ -94,6 +96,8 @@ impl fmt::Display for Token {
       Token::EqualEqual => write!(f, "=="),
       Token::NotEqual => write!(f, "!="),
       Token::Not => write!(f, "nao"),
+      Token::And => write!(f, "e"),
+      Token::Or => write!(f, "ou"),
       Token::EOF => write!(f, "EOF"),
     }
   }

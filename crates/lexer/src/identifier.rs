@@ -23,8 +23,11 @@ impl<'a> Lexer<'a> {
       "senao" => self.token(Token::Else), // Keyword "else"
 
       "nao" => self.token(Token::Not), // Logical NOT operator
+      "ou" => self.token(Token::Or),   // Logical OR operator
+      "e" => self.token(Token::And),   // Logical AND operator
+
       "verdadeiro" => self.token(Token::True), // Boolean literal
-      "falso" => self.token(Token::False), // Boolean literal
+      "falso" => self.token(Token::False),     // Boolean literal
       _ => {
         return self.token(Token::Symbol(id));
       }

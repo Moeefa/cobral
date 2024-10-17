@@ -23,6 +23,8 @@ pub enum Expr {
     Option<Vec<Expr>>,
   ),
 
+  Logical(Box<Expr>, Token, Box<Expr>),
+
   Comparison(Box<Expr>, Token, Box<Expr>),
 
   Not(Box<Expr>),
@@ -63,6 +65,7 @@ impl std::fmt::Display for Expr {
           .collect::<Vec<_>>()
           .join(", ")
       ),
+      Expr::Logical(left, op, right) => write!(f, "{} {} {}", left, op, right),
       Expr::If(condition, true_block, else_if_block, else_block) => {
         write!(f, "if {} {{\n", condition.as_ref().as_ref().unwrap())?;
         for expr in true_block {

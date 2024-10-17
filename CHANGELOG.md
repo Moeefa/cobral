@@ -1,8 +1,7 @@
-# Atualização 0.1.0
+# Atualização 0.2.0
 
-- Adicionado operador de negação `nao`
-- Implementado a ação de salvar e ler arquivos `.cl`
+- Adicionado a implementação de operadores lógicos `e` e `ou`.
 
 ## Correções
 
-- Corrigido erro ao declarar váriaveis
+- Corrigido erro ao executar código com erro diversas vezes, que causava PoisonError e não exibia mensagens no console.

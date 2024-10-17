@@ -1,5 +1,7 @@
+mod comparison;
 mod data;
 mod delimiter;
+mod logical;
 mod not;
 mod operator;
 mod symbol;
@@ -10,23 +12,25 @@ use crate::Parser;
 
 impl<'a> Parser<'a> {
   pub fn parse_expression(&mut self) -> Result<Option<Expr>, ParseError> {
-    let lhs = match &self.current_token.token.clone() {
+    // First, parse the comparison expression (like ==, !=, <, >)
+    let lhs = self.parse_comparison_expression()?;
+
+    if lhs.is_none() {
+      return Err(ParseError::InvalidExpression);
+    }
+
+    // Then handle logical operators (and, or) if applicable
+    self.parse_logical_expression(lhs)
+  }
+
+  fn parse_primary_expression(&mut self) -> Result<Option<Expr>, ParseError> {
+    match &self.current_token.token {
       Token::Integer(_) | Token::Float(_) | Token::String(_) | Token::True | Token::False =>
         self.parse_expression_data(),
+      Token::Symbol(_) => self.parse_expression_symbol(),
       Token::BracketL => self.parse_delimiter(),
       Token::Not => self.parse_not_expression(),
-      Token::Symbol(_) => self.parse_expression_symbol(),
       _ => Err(ParseError::InvalidExpression),
-    }?;
-
-    match self.current_token.token {
-      Token::GreaterThan
-      | Token::GreaterThanEqual
-      | Token::LessThan
-      | Token::LessThanEqual
-      | Token::EqualEqual
-      | Token::NotEqual => self.parse_expression_operator(lhs.unwrap()),
-      _ => Ok(lhs),
     }
   }
 }

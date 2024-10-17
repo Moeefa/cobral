@@ -46,6 +46,7 @@ pub enum InterpreterError {
   EvalError(usize, String),
   ParseInt(ParseIntError),
   ParseFloat(ParseFloatError),
+  UnexpectedCharacter(usize, String),
 }
 
 #[rustfmt::skip]
@@ -60,6 +61,7 @@ impl fmt::Display for InterpreterError {
       InterpreterError::ParseError(_line, message) => write!(f, "{}", message),
       InterpreterError::ParseInt(_err) => write!(f, "Dígito inválido encontrado"),
       InterpreterError::ParseFloat(_err) => write!(f, "Dígito inválido encontrado"),
+      InterpreterError::UnexpectedCharacter(line, character) => write!(f, "Linha {}: Caracter inesperado: '{}'", line, character),
     }
   }
 }

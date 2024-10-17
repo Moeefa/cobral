@@ -10,3 +10,4 @@ path = "src/lexer.rs"
 
 [dependencies]
 types.workspace = true
+logger.workspace = true

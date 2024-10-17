@@ -24,29 +24,42 @@ static START: LazyLock<Arc<Mutex<std::time::Instant>>> =
 
 #[command]
 pub async fn update<R: Runtime>(_app: AppHandle<R>, _window: Window<R>, input: String) {
-  *INPUT.lock().unwrap() = input;
-  *EXPRS.lock().unwrap() = Vec::new();
-  *INTERPRETER.lock().unwrap() = Interpreter::new();
-  *START.lock().unwrap() = std::time::Instant::now();
+  *INPUT.lock().unwrap_or_else(|e| e.into_inner()) = input;
+  *EXPRS.lock().unwrap_or_else(|e| e.into_inner()) = Vec::new();
+  *INTERPRETER.lock().unwrap_or_else(|e| e.into_inner()) = Interpreter::new();
+  *START.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
 }
 
 #[command]
 pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
-  let input = INPUT.lock().unwrap().clone();
+  let input = INPUT.lock().unwrap_or_else(|e| e.into_inner()).clone();
   let lexer = Lexer::new(&input.as_str());
   let mut parser = Parser::new(lexer);
 
-  if EXPRS.lock().unwrap().is_empty() {
+  if EXPRS
+    .lock()
+    .unwrap_or_else(|e| e.into_inner())
+    .clone()
+    .is_empty()
+  {
     app.emit("clear", ()).unwrap();
-    *INTERPRETER.lock().unwrap() = Interpreter::new();
-    *EXPRS.lock().unwrap() = parse_all(&mut parser);
-    *START.lock().unwrap() = std::time::Instant::now();
+    *INTERPRETER.lock().unwrap_or_else(|e| e.into_inner()) = Interpreter::new();
+    *EXPRS.lock().unwrap_or_else(|e| e.into_inner()) = parse_all(&mut parser);
+    *START.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
   }
 
   // Create an Interpreter instance
   let interpreter = INTERPRETER.lock().unwrap();
 
-  match interpreter.eval(EXPRS.lock().unwrap().first().unwrap().clone()) {
+  match interpreter.eval(
+    EXPRS
+      .lock()
+      .unwrap_or_else(|e| e.into_inner())
+      .clone()
+      .first()
+      .unwrap()
+      .clone(),
+  ) {
     Ok(_) => {}
     Err(e) => {
       Logger::error(InterpreterError::ParseError(
@@ -57,7 +70,11 @@ pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
   }
 
   if EXPRS.lock().unwrap().len() == 1 {
-    let elapsed = START.lock().unwrap().elapsed();
+    let elapsed = START
+      .lock()
+      .unwrap_or_else(|e| e.into_inner())
+      .clone()
+      .elapsed();
     app
       .emit(
         "log",
@@ -69,16 +86,24 @@ pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
       .unwrap();
   }
 
-  EXPRS.lock().unwrap().remove(0);
+  EXPRS
+    .lock()
+    .unwrap_or_else(|e| e.into_inner())
+    .clone()
+    .remove(0);
 
-  EXPRS.lock().unwrap().len()
+  EXPRS
+    .lock()
+    .unwrap_or_else(|e| e.into_inner())
+    .clone()
+    .len()
 }
 
 #[command]
 pub async fn parse<R: Runtime>(app: AppHandle<R>, _window: Window<R>, input: String) {
-  *EXPRS.lock().unwrap() = Vec::new();
-  *INTERPRETER.lock().unwrap() = Interpreter::new();
-  *START.lock().unwrap() = std::time::Instant::now();
+  *EXPRS.lock().unwrap_or_else(|e| e.into_inner()) = Vec::new();
+  *INTERPRETER.lock().unwrap_or_else(|e| e.into_inner()) = Interpreter::new();
+  *START.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
 
   let start = std::time::Instant::now();
   let lexer = Lexer::new(&input.as_str());
