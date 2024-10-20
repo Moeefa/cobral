@@ -2,6 +2,7 @@
 
 pub mod io;
 pub mod math;
+pub mod parse;
 
 use std::{
   collections::HashMap,
@@ -10,6 +11,7 @@ use std::{
 
 use io::*;
 use math::*;
+use parse::*;
 
 use tauri::AppHandle;
 use types::{Data, Expr};
@@ -24,11 +26,13 @@ pub fn load_libs() -> HashMap<
   let functions: [(
     &str,
     fn(Vec<Expr>, &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data>,
-  ); 4] = [
+  ); 6] = [
     ("escrever", write),
     ("ler", read),
     ("raiz", square_root),
     ("potencia", power),
+    ("int", int),
+    ("real", float),
   ];
 
   // Create the HashMap

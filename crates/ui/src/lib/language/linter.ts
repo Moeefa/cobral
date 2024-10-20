@@ -14,11 +14,15 @@ export const variableTypes = new Map<string, string>();
 const functionReturnTypes = new Map<string, string>([
   ["escrever", Types.String],
   ["ler", Types.String],
+  ["int", Types.Integer],
+  ["real", Types.Float],
 ]);
 
 const reservedKeywords = new Set([
   "declare",
   "constante",
+  "int",
+  "real",
   "se",
   "senao",
   "escrever",
@@ -60,7 +64,8 @@ export const cobralLinter = linter((view) => {
           );
 
           if (functionReturnTypes.has(functionName)) {
-            inferredType = functionReturnTypes.get(functionName) || "unknown";
+            inferredType =
+              functionReturnTypes.get(functionName) || Types.Unknown;
           }
         }
 

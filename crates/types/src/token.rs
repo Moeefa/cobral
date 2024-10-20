@@ -7,6 +7,7 @@ pub enum Token {
   Const,
   If,
   Else,
+  For,
 
   // Symbols
   Equals,
@@ -47,6 +48,12 @@ pub enum Token {
   And,
   Or,
 
+  // Binary
+  Plus,
+  Minus,
+  Times,
+  Divide,
+
   // End of file
   EOF,
 }
@@ -73,6 +80,7 @@ impl fmt::Display for Token {
       Token::Const => write!(f, "declare constante"),
       Token::If => write!(f, "se"),
       Token::Else => write!(f, "senao"),
+      Token::For => write!(f, "para"),
       Token::Equals => write!(f, "="),
       Token::Semicolon => write!(f, ";"),
       Token::ParenL => write!(f, "("),
@@ -98,6 +106,10 @@ impl fmt::Display for Token {
       Token::Not => write!(f, "nao"),
       Token::And => write!(f, "e"),
       Token::Or => write!(f, "ou"),
+      Token::Plus => write!(f, "+"),
+      Token::Minus => write!(f, "-"),
+      Token::Times => write!(f, "*"),
+      Token::Divide => write!(f, "/"),
       Token::EOF => write!(f, "EOF"),
     }
   }

@@ -19,6 +19,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EditorContext } from "@/contexts/editor-context";
+import { basename } from "@tauri-apps/api/path";
 
 // Trick to render custom titlebar in Decorum plugin for Tauri
 export const Titlebar = () => {
@@ -71,7 +72,7 @@ export const Titlebar = () => {
 };
 
 const Left = () => {
-  const { value, setValue } = useContext(EditorContext);
+  const { value, setValue, file, setFile } = useContext(EditorContext);
   const downloadFile = async () => {
     const file = await save({
       filters: [
@@ -101,6 +102,7 @@ const Left = () => {
     const content = await readTextFile(file || "");
 
     setValue(content || "");
+    setFile((await basename(file!)) || "");
   };
 
   return (
@@ -114,7 +116,7 @@ const Left = () => {
           data-tauri-drag-region
           className="text-sm font-medium leading-none select-none"
         >
-          arquivo.cl
+          {file || "arquivo.cl"}
         </small>
         <div className="flex gap-1">
           <TooltipProvider>

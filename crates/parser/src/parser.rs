@@ -2,6 +2,7 @@ mod arguments;
 mod consts;
 mod expressions;
 mod lists;
+mod r#loop;
 mod statements;
 mod vars;
 
@@ -40,6 +41,7 @@ impl<'a> Parser<'a> {
       Token::Let => self.parse_vars(),
       Token::Const => self.parse_const(),
       Token::If => self.parse_statement(),
+      Token::For => self.parse_for(),
       Token::Symbol(_) => self.parse_expression().map_err(|e| e),
       _ => Err(ParseError::UnexpectedToken(
         self.current_token.clone().token,
@@ -47,20 +49,25 @@ impl<'a> Parser<'a> {
     }
   }
 
-  pub fn skip_semicolon(&mut self) {
-    if matches!(self.current_token.token, Token::Semicolon) {
-      self.next_token(); // Consume semicolon
+  fn eat(&mut self, token: Token) -> Result<(), ParseError> {
+    if &self.current_token.token == &token {
+      self.next_token(); // Move to the next token
+      Ok(())
+    } else {
+      Err(ParseError::ExpectedToken(
+        self.current_token.line_number,
+        self.current_token.token.clone(),
+        token,
+      ))
     }
   }
 
-  fn eat(&mut self, token: Token) {
+  pub fn try_eat(&mut self, token: Token) -> Result<(), ParseError> {
     if &self.current_token.token == &token {
-      self.next_token(); // Move to the next token
-    } else {
-      panic!("Unexpected token: {:?}", self.current_token.token);
+      self.next_token(); // Consume semicolon
     }
 
-    self.skip_semicolon();
+    Ok(())
   }
 
   fn next_token(&mut self) {

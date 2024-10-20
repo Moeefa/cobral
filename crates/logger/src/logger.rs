@@ -1,47 +1,59 @@
-#[allow(non_snake_case)]
-#[allow(unreachable_code)]
-#[allow(unused_imports)]
-pub mod Logger {
-  use colored::Colorize;
-  use libs::APP_HANDLE;
-  use serde::{Deserialize, Serialize};
-  use tauri::Emitter;
-  use types::InterpreterError;
+use std::sync::{Arc, LazyLock, Mutex};
 
-  #[derive(Serialize, Deserialize, Clone)]
-  struct Payload {
-    pub message: String,
-    pub level: String,
+use colored::Colorize;
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Emitter, Runtime};
+use types::InterpreterError;
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Payload {
+  pub message: String,
+  pub level: String,
+}
+
+pub static LOG_BUFFER: LazyLock<Arc<Mutex<Vec<Payload>>>> =
+  LazyLock::new(|| Arc::new(Mutex::new(Vec::new())));
+
+pub fn emit_logs<R: Runtime>(app: &AppHandle<R>, force_emit: bool) {
+  let mut buffer = LOG_BUFFER.lock().unwrap();
+  if force_emit || buffer.len() >= 200 {
+    if !buffer.is_empty() {
+      app.emit("log_batch", buffer.clone()).unwrap();
+      buffer.clear();
+    }
   }
 
-  pub fn error(msg: InterpreterError) {
-    eprintln!("{}", "🐛 Ocorreu um erro:".on_red());
+  drop(buffer);
+}
 
-    eprintln!("{}", msg.to_string().on_red());
-    eprintln!("{}", "\t🔍 Detalhes:");
+pub fn error(msg: InterpreterError) {
+  eprintln!("{}", "🐛 Ocorreu um erro:".on_red());
 
-    eprintln!("\t{:?}\n", msg);
+  eprintln!("{}", msg.to_string().on_red());
+  eprintln!("{}", "\t🔍 Detalhes:");
 
-    let _ = APP_HANDLE.lock().unwrap().as_ref().unwrap().emit(
-      "log",
-      Payload {
-        message: msg.to_string(),
-        level: "error".to_string(),
-      },
-    );
-  }
+  eprintln!("\t{:?}\n", msg);
 
-  pub fn info(msg: &str) {
-    eprintln!("{}", "\t🗒️ Info:");
+  let mut buffer = LOG_BUFFER.lock().unwrap();
+  buffer.push(Payload {
+    message: msg.to_string(),
+    level: String::from("error"),
+  });
 
-    eprintln!("\t{:?}\n", msg);
+  drop(buffer);
+}
 
-    let _ = APP_HANDLE.lock().unwrap().as_ref().unwrap().emit(
-      "log",
-      Payload {
-        message: msg.to_string(),
-        level: "info".to_string(),
-      },
-    );
-  }
+pub fn info(msg: &str) {
+  eprintln!("{}", "\t🗒️ Info:");
+
+  eprintln!("\t{:?}\n", msg);
+
+  let msg_clone = msg.to_string();
+  let mut buffer = LOG_BUFFER.lock().unwrap();
+  buffer.push(Payload {
+    message: msg_clone,
+    level: String::from("info"),
+  });
+
+  drop(buffer);
 }

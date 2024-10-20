@@ -25,7 +25,9 @@ impl<'a> Parser<'a> {
       if let Some(rhs) = rhs {
         expr = Some(Expr::Comparison(Box::new(expr.unwrap()), op, Box::new(rhs)));
       } else {
-        return Err(ParseError::InvalidExpression);
+        return Err(ParseError::InvalidExpression(
+          "Missing right-hand side of comparison expression".to_string(),
+        ));
       }
     }
 

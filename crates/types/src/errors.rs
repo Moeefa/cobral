@@ -12,20 +12,22 @@ use std::{
 pub enum ParseError {
   UnexpectedToken(Token),
   UnknownFunction(String),
+  ExpectedToken(usize, Token, Token),
   ExpectedVariableName(usize, Token),
   ExpectedConstantName(usize, Token),
-  InvalidExpression,
+  InvalidExpression(String),
 }
 
 #[rustfmt::skip]
 impl fmt::Display for ParseError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
+      ParseError::ExpectedToken(line, found, expected) => write!(f, "Linha {}: Esperava-se '{}', econtrou: '{}'", line, expected, found),
       ParseError::ExpectedConstantName(line, name) => write!(f, "Linha {}: Esperava-se nome de constante, econtrou: '{}'", line, name),
       ParseError::ExpectedVariableName(line, name) => write!(f, "Linha {}: Esperava-se nome de variável, econtrou: '{}'", line, name),
       ParseError::UnknownFunction(name) => write!(f, "Função desconhecida: '{}'", name),
       ParseError::UnexpectedToken(token) => write!(f, "Token inesperado: '{}'", token),
-      ParseError::InvalidExpression => write!(f, "Expressão inválida"),
+      ParseError::InvalidExpression(name) => write!(f, "Expressão inválida: '{}'", name),
     }
   }
 }

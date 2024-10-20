@@ -1,7 +1,7 @@
 import { hoverTooltip } from "@codemirror/view";
 import { markdownToHTML } from "@/lib/utils";
 import { syntaxTree } from "@codemirror/language";
-import { variableTypes } from "@/linter/linter";
+import { variableTypes } from "@/lib/language/linter";
 
 const functionDescriptions = new Map<string, string>([
   [
@@ -11,6 +11,14 @@ const functionDescriptions = new Map<string, string>([
   [
     "ler",
     'Lê um valor da entrada padrão.\n\nExemplo:\n\n```declare x = ler("Digite um valor:")```',
+  ],
+  [
+    "int",
+    "Converte um valor para inteiro.\n\nExemplo:\n\n```declare x = int(3.14)```",
+  ],
+  [
+    "real",
+    "Converte um valor para real.\n\nExemplo:\n\n```declare x = real(42)```",
   ],
 ]);
 
@@ -34,9 +42,9 @@ export const wordHover = hoverTooltip((view, pos, side) => {
   tree.cursor().iterate((_node) => {
     // Variable hover: check if the word is a declared variable
     if (variableTypes.has(word)) {
-      typeInfo = `Variável <span style="color: blue">${word}</span>: ${variableTypes.get(
+      typeInfo = `Variável <span class="ͼ3f">${word}</span>: <span class="ͼ3k">${variableTypes.get(
         word
-      )}`;
+      )}</span>`;
     }
 
     // Built-in function hover: check if the word matches a known function

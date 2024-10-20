@@ -7,7 +7,7 @@ impl<'a> Parser<'a> {
     let mut elements = Vec::new();
 
     if self.current_token.token == Token::List(vec![]) {
-      self.eat(Token::BracketL); // Consume the opening bracket `[`
+      self.eat(Token::BracketL)?; // Consume the opening bracket `[`
 
       while self.current_token.token != Token::BracketR && self.current_token.token != Token::EOF {
         // Parse an element and add it to the list
@@ -16,7 +16,7 @@ impl<'a> Parser<'a> {
 
           // Check for comma to continue to the next element
           if self.current_token.token == Token::Comma {
-            self.eat(Token::Comma); // Consume comma
+            self.eat(Token::Comma)?; // Consume comma
           } else if self.current_token.token != Token::BracketR {
             // If we encounter any unexpected token, report error
             return Err(ParseError::UnexpectedToken(
@@ -31,7 +31,7 @@ impl<'a> Parser<'a> {
       }
 
       if self.current_token.token == Token::BracketR {
-        self.eat(Token::BracketR); // Consume closing bracket `]`
+        self.eat(Token::BracketR)?; // Consume closing bracket `]`
       } else {
         return Err(ParseError::UnexpectedToken(
           self.current_token.token.clone(),
@@ -68,6 +68,8 @@ impl<'a> Parser<'a> {
         self.current_token.token.clone(),
       ));
     }
+
+    self.try_eat(Token::Semicolon)?;
 
     Ok(elements) // Return Vec<Expr> here
   }

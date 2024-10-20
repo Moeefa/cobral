@@ -13,3 +13,4 @@ logger.workspace = true
 types.workspace = true
 libs.workspace = true
 colored.workspace = true
+tauri.workspace = true

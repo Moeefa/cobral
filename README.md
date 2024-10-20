@@ -10,11 +10,17 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [Como rodar?](#como-rodar)
 - [Exemplo](#exemplo)
 - [Documentação](#documentação)
+  - [Sintaxe](#sintaxe)
   - [Tipos de dados](#tipos-de-dados)
-  - [Operadores](#operadores)
+  - [Operadores de comparação](#operadores-de-comparação)
+  - [Operadores lógicos](#operadores-lógicos)
+  - [Operadores aritméticos](#operadores-aritméticos)
   - [Estruturas de controle](#estruturas-de-controle)
+  - [Estruturas de repetição](#estruturas-de-repetição)
   - [Bibliotecas](#bibliotecas)
     - [Entrada e saída](#entrada-e-saída)
+    - [Matemática](#matemática)
+    - [Parsing](#parsing)
 
 ## Roadmap
 
@@ -22,22 +28,22 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [x] Implementar estruturas de controle
 - [x] Implementar biblioteca de entrada e saída
 - [x] Implementar biblioteca de matemática
+- [x] Implementar biblioteca para parsing de tipos de dados
 - [ ] Implementar funções
-- [ ] Implementar loops
+- [x] Implementar loops
 - [x] Implementar vetores
 - [x] Implementar matrizes
-- [ ] Implementar recursão
 - [ ] Implementar comentários
 - [x] Implementar operadores lógicos (e, ou, não)
   - [x] Operador `nao` para negação de valores booleanos
   - [x] Operador `e` para conjunção de valores booleanos
   - [x] Operador `ou` para disjunção de valores booleanos
-- [ ] Implementar operadores aritméticos
+- [x] Implementar operadores aritméticos
 - [ ] Implementar operadores de incremento e decremento
-- [ ] Implementar operadores de concatenação
+- [x] Implementar operadores de concatenação
 - [x] Implementar operadores de comparação
 - [x] Implementar linter para análise de código
-- [ ] Melhorar a implementação do Lezer
+- [x] Melhorar a implementação do Lezer
 - [ ] Destacar linha durante a execução passo a passo
 - [ ] Incluir testes unitários
 - [x] Leitura e escrita de arquivos
@@ -52,15 +58,6 @@ CobraL é um pseudocódigo baseado em Rust, com algumas simplificações e adiç
 ## Como rodar?
 
 Para rodar um código em CobraL, você precisa ter o Rust instalado. Depois, basta rodar o comando `npm tauri dev` no diretório do projeto.
-
-## Documentação
-
-- [Sintaxe](#sintaxe)
-- [Tipos de dados](#tipos-de-dados)
-- [Operadores](#operadores)
-- [Estruturas de controle](#estruturas-de-controle)
-- [Bibliotecas](#bibliotecas)
-  - [Entrada e saída](#io-entrada-e-saída)
 
 ### Sintaxe
 
@@ -97,7 +94,7 @@ declare variavel = falso
 declare variavel = [1, 2, 3]
 ```
 
-### Operadores
+### Operadores de comparação
 
 - `==`: igualdade
 - `!=`: diferença
@@ -110,13 +107,44 @@ declare variavel = [1, 2, 3]
 declare x = 10 == 10
 ```
 
+### Operadores lógicos
+
+- `nao`: negação
+- `e`: conjunção
+- `ou`: disjunção
+
+```cobral
+declare x = verdadeiro
+declare y = falso
+
+declare z = nao x
+declare w = x e y
+declare v = x ou y
+```
+
+### Operadores aritméticos
+
+- `+`: adição
+- `-`: subtração
+- `*`: multiplicação
+- `/`: divisão
+- `%`: módulo
+
+```cobral
+declare x = 10 + 10
+declare y = 20 - 10
+declare z = 10 * 10
+declare w = 10 / 2
+declare v = 10 % 2
+```
+
 ### Estruturas de controle
 
 - `se`: executa um bloco de código se uma condição for verdadeira
 - `senao`: executa um bloco de código se a condição do `se` for falsa
 
 ```cobral
-declare x = 10
+declare x = 10 + 10
 declare y = 20
 
 se (x == y) {
@@ -126,11 +154,23 @@ se (x == y) {
 }
 ```
 
+### Estruturas de repetição
+
+- `para`: executa um bloco de código um número específico de vezes
+
+```cobral
+para (declare i = 0; i < 10; i = i + 1) {
+  escrever(i)
+}
+```
+
 ### Bibliotecas
 
-- [IO](#io-entrada-e-saída): para entrada e saída de dados
+- [IO](#entrada-e-saída): para entrada e saída de dados
+- [Matemática](#matemática): para operações matemáticas
+- [Parsing](#parsing): para parsing de tipos de dados
 
-#### IO: Entrada e saída
+#### Entrada e saída
 
 Para entrada e saída de dados, você pode usar a biblioteca `io`.
 Você não precisa importar a biblioteca, ela já está disponível por padrão.
@@ -138,4 +178,27 @@ Você não precisa importar a biblioteca, ela já está disponível por padrão.
 ```cobral
 declare x = ler("Digite seu nome:")
 escrever("Você digitou: ", x)
+```
+
+#### Matemática
+
+Para operações matemáticas, você pode usar a biblioteca `matematica`.
+Você não precisa importar a biblioteca, ela já está disponível por padrão.
+
+```cobral
+declare raiz = raiz(50)
+escrever(raiz)
+```
+
+#### Parsing
+
+Para fazer parsing de tipos de dados, você pode usar a biblioteca `parsing`.
+Você não precisa importar a biblioteca, ela já está disponível por padrão.
+
+```cobral
+declare x = int(10)
+escrever(x)
+
+declare y = real(10.5)
+escrever(y)
 ```

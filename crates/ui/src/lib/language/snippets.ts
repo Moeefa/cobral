@@ -64,9 +64,25 @@ export const snippets: readonly Completion[] = [
 
   snippet("potencia(${})", {
     label: "potencia",
-    detail: "mateática",
+    detail: "matemática",
     type: "function",
     section: "Matemática",
     info: "Calcula a potência de um número.",
+  }),
+
+  snippet("int(${})", {
+    label: "int",
+    detail: "conversão",
+    type: "function",
+    section: "Conversão de Tipos",
+    info: "Converte um valor para inteiro.",
+  }),
+
+  snippet("real(${})", {
+    label: "real",
+    detail: "conversão",
+    type: "function",
+    section: "Conversão de Tipos",
+    info: "Converte um valor para real.",
   }),
 ];

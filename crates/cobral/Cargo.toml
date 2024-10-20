@@ -20,6 +20,7 @@ types.workspace = true
 logger.workspace = true
 libs.workspace = true
 
+tokio.workspace = true
 tauri.workspace = true
 tauri-plugin-shell.workspace = true
 serde.workspace = true

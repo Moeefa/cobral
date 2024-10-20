@@ -1,8 +1,9 @@
 use crate::Token;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum Expr {
+  Assignment(String, Box<Expr>),
   Let(String, Box<Expr>),
   Const(String, Box<Expr>),
 
@@ -16,6 +17,8 @@ pub enum Expr {
   String(String),
   List(Vec<Expr>),
 
+  Binary(Box<Expr>, Token, Box<Expr>),
+
   If(
     Box<Option<Expr>>,
     Vec<Expr>,
@@ -28,6 +31,8 @@ pub enum Expr {
   Comparison(Box<Expr>, Token, Box<Expr>),
 
   Not(Box<Expr>),
+
+  For(Box<Expr>, Box<Expr>, Box<Expr>, Vec<Expr>),
 }
 
 #[derive(Debug, Clone)]
@@ -39,6 +44,7 @@ pub struct LabeledExpr {
 impl std::fmt::Display for Expr {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
+      Expr::Assignment(name, value) => write!(f, "{} = {}", name, value),
       Expr::Let(name, value) => write!(f, "let {} = {}", name, value),
       Expr::Const(name, value) => write!(f, "const {} = {}", name, value),
       Expr::FunctionCall(name, args) => write!(
@@ -65,6 +71,7 @@ impl std::fmt::Display for Expr {
           .collect::<Vec<_>>()
           .join(", ")
       ),
+      Expr::Binary(left, op, right) => write!(f, "{} {} {}", left, op, right),
       Expr::Logical(left, op, right) => write!(f, "{} {} {}", left, op, right),
       Expr::If(condition, true_block, else_if_block, else_block) => {
         write!(f, "if {} {{\n", condition.as_ref().as_ref().unwrap())?;
@@ -87,6 +94,13 @@ impl std::fmt::Display for Expr {
           write!(f, "}}")?;
         }
         Ok(())
+      }
+      Expr::For(init, condition, update, block) => {
+        write!(f, "for {} {} {} {{\n", init, condition, update)?;
+        for expr in block {
+          write!(f, "  {}\n", expr)?;
+        }
+        write!(f, "}}")
       }
       Expr::Comparison(left, op, right) => {
         write!(f, "{} {} {}", left, op, right)

@@ -8,9 +8,9 @@ import {
 } from "@codemirror/language";
 
 import { highlight } from "./highlight.js";
-import { localCompletionSource } from "@/linter/completions.js";
+import { localCompletionSource } from "@/lib/language/completions.js";
 import { parser } from "./parser.js";
-import { snippets } from "@/linter/snippets.js";
+import { snippets } from "@/lib/language/snippets.js";
 
 export const cobralLanguage = LRLanguage.define({
   name: "cobral",

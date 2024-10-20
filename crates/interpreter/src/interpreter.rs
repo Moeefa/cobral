@@ -3,7 +3,8 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use libs::load_libs;
-use logger::Logger;
+use libs::APP_HANDLE;
+use tauri::Listener;
 use types::{Data, Expr, InterpreterError, LabeledExpr, Token};
 
 pub struct Interpreter {
@@ -28,6 +29,26 @@ impl Interpreter {
     let line = labeled_expr.line_number;
 
     let evaluated = match labeled_expr.expr {
+      Expr::Assignment(name, value) => {
+        // Ensure the variable has been declared before reassigning
+        if self.variables.lock().unwrap().contains_key(&name) {
+          let value = self.eval(LabeledExpr {
+            expr: *value,
+            line_number: line,
+          })?;
+          self
+            .variables
+            .lock()
+            .unwrap()
+            .insert(name.clone(), value.clone());
+          Ok(value)
+        } else {
+          Err(InterpreterError::EvalError(
+            line,
+            format!("Variável desconhecida: {}", value),
+          ))
+        }
+      }
       Expr::Let(name, value) => {
         let value = self.eval(LabeledExpr {
           expr: *value,
@@ -44,7 +65,7 @@ impl Interpreter {
       }
       Expr::Const(name, value) => {
         if self.constants.lock().unwrap().contains_key(&name) {
-          Logger::error(InterpreterError::ConstantRedeclarationError(
+          logger::error(InterpreterError::ConstantRedeclarationError(
             line,
             name.clone(),
           ));
@@ -67,7 +88,7 @@ impl Interpreter {
           }) {
             Ok(value) => Some(value),
             Err(e) => {
-              Logger::error(InterpreterError::ExpressionEvaluationFailure(
+              logger::error(InterpreterError::ExpressionEvaluationFailure(
                 line,
                 e.to_string(),
               ));
@@ -234,32 +255,6 @@ impl Interpreter {
           (Data::String(l), Data::String(r), Token::LessThanEqual) => Ok(Data::Boolean(l <= r)),
           (Data::String(l), Data::String(r), Token::LessThan) => Ok(Data::Boolean(l < r)),
 
-          (Data::String(l), Data::Integer(r), Token::EqualEqual) =>
-            Ok(Data::Boolean(l.parse::<i64>()? == r)),
-          (Data::String(l), Data::Integer(r), Token::NotEqual) =>
-            Ok(Data::Boolean(l.parse::<i64>()? != r)),
-          (Data::String(l), Data::Integer(r), Token::GreaterThanEqual) =>
-            Ok(Data::Boolean(l.parse::<i64>()? >= r)),
-          (Data::String(l), Data::Integer(r), Token::GreaterThan) =>
-            Ok(Data::Boolean(l.parse::<i64>()? > r)),
-          (Data::String(l), Data::Integer(r), Token::LessThanEqual) =>
-            Ok(Data::Boolean(l.parse::<i64>()? <= r)),
-          (Data::String(l), Data::Integer(r), Token::LessThan) =>
-            Ok(Data::Boolean(l.parse::<i64>()? < r)),
-
-          (Data::String(l), Data::Float(r), Token::GreaterThanEqual) =>
-            Ok(Data::Boolean(l.parse::<f64>()? >= r)),
-          (Data::String(l), Data::Float(r), Token::GreaterThan) =>
-            Ok(Data::Boolean(l.parse::<f64>()? > r)),
-          (Data::String(l), Data::Float(r), Token::LessThanEqual) =>
-            Ok(Data::Boolean(l.parse::<f64>()? <= r)),
-          (Data::String(l), Data::Float(r), Token::LessThan) =>
-            Ok(Data::Boolean(l.parse::<f64>()? < r)),
-          (Data::String(l), Data::Float(r), Token::EqualEqual) =>
-            Ok(Data::Boolean(l.parse::<f64>()? == r)),
-          (Data::String(l), Data::Float(r), Token::NotEqual) =>
-            Ok(Data::Boolean(l.parse::<f64>()? != r)),
-
           (Data::Boolean(l), Data::Boolean(r), Token::EqualEqual) => Ok(Data::Boolean(l == r)),
           (Data::Boolean(l), Data::Boolean(r), Token::NotEqual) => Ok(Data::Boolean(l != r)),
 
@@ -320,6 +315,149 @@ impl Interpreter {
             "Operação lógica inválida".to_string(),
           )),
         }
+      }
+      Expr::Binary(lhs, op, rhs) => {
+        let lhs_value = self.eval(LabeledExpr {
+          expr: *lhs,
+          line_number: line,
+        })?;
+
+        let rhs_value = self.eval(LabeledExpr {
+          expr: *rhs,
+          line_number: line,
+        })?;
+
+        match (lhs_value, rhs_value, op) {
+          // Handle integer arithmetic
+          (Data::Integer(l), Data::Integer(r), Token::Plus) => Ok(Data::Integer(l + r)),
+          (Data::Integer(l), Data::Integer(r), Token::Minus) => Ok(Data::Integer(l - r)),
+          (Data::Integer(l), Data::Integer(r), Token::Times) => Ok(Data::Integer(l * r)),
+          (Data::Integer(l), Data::Integer(r), Token::Divide) =>
+            if r == 0 {
+              Err(InterpreterError::EvalError(
+                line,
+                "Divisão por zero".to_string(),
+              ))
+            } else {
+              Ok(Data::Integer(l / r))
+            },
+
+          // Handle float arithmetic
+          (Data::Float(l), Data::Float(r), Token::Plus) => Ok(Data::Float(l + r)),
+          (Data::Float(l), Data::Float(r), Token::Minus) => Ok(Data::Float(l - r)),
+          (Data::Float(l), Data::Float(r), Token::Times) => Ok(Data::Float(l * r)),
+          (Data::Float(l), Data::Float(r), Token::Divide) =>
+            if r == 0.0 {
+              Err(InterpreterError::EvalError(
+                line,
+                "Divisão por zero".to_string(),
+              ))
+            } else {
+              Ok(Data::Float(l / r))
+            },
+
+          // Mixed type arithmetic (integer and float)
+          (Data::Integer(l), Data::Float(r), Token::Plus) => Ok(Data::Float((l as f64) + r)),
+          (Data::Integer(l), Data::Float(r), Token::Minus) => Ok(Data::Float((l as f64) - r)),
+          (Data::Integer(l), Data::Float(r), Token::Times) => Ok(Data::Float((l as f64) * r)),
+          (Data::Integer(l), Data::Float(r), Token::Divide) =>
+            if r == 0.0 {
+              Err(InterpreterError::EvalError(
+                line,
+                "Divisão por zero".to_string(),
+              ))
+            } else {
+              Ok(Data::Float((l as f64) / r))
+            },
+          (Data::Float(l), Data::Integer(r), Token::Plus) => Ok(Data::Float(l + (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::Minus) => Ok(Data::Float(l - (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::Times) => Ok(Data::Float(l * (r as f64))),
+          (Data::Float(l), Data::Integer(r), Token::Divide) =>
+            if r == 0 {
+              Err(InterpreterError::EvalError(
+                line,
+                "Divisão por zero".to_string(),
+              ))
+            } else {
+              Ok(Data::Float(l / (r as f64)))
+            },
+
+          // String concatenation
+          (Data::String(l), Data::String(r), Token::Plus) =>
+            Ok(Data::String(format!("{}{}", l, r))),
+          (Data::String(l), Data::Integer(r), Token::Plus) =>
+            Ok(Data::String(format!("{}{}", l, r))),
+          (Data::String(l), Data::Float(r), Token::Plus) => Ok(Data::String(format!("{}{}", l, r))),
+          (Data::Integer(l), Data::String(r), Token::Plus) =>
+            Ok(Data::String(format!("{}{}", l, r))),
+          (Data::Float(l), Data::String(r), Token::Plus) => Ok(Data::String(format!("{}{}", l, r))),
+          (Data::String(l), Data::Boolean(r), Token::Plus) =>
+            Ok(Data::String(format!("{}{}", l, r))),
+          (Data::Boolean(l), Data::String(r), Token::Plus) =>
+            Ok(Data::String(format!("{}{}", l, r))),
+          (Data::String(l), Data::List(r), Token::Plus) =>
+            Ok(Data::String(format!("{}{:#?}", l, r))),
+          (Data::List(l), Data::String(r), Token::Plus) =>
+            Ok(Data::String(format!("{:#?}{}", l, r))),
+          (Data::String(l), Data::None, Token::Plus) => Ok(Data::String(format!("{}{}", l, ""))),
+          (Data::None, Data::String(r), Token::Plus) => Ok(Data::String(format!("{}{}", "", r))),
+
+          // Error for incompatible types
+          _ => Err(InterpreterError::EvalError(
+            line,
+            "Operação inválida entre tipos incompatíveis".to_string(),
+          )),
+        }
+      }
+      Expr::For(initializer, condition, update, body) => {
+        // 1. Evaluate the initializer (e.g., `i = 0`)
+        self.eval(LabeledExpr {
+          expr: *initializer.clone(),
+          line_number: line,
+        })?;
+
+        let has_received_event = std::sync::Arc::new(std::sync::Mutex::new(false));
+        let has_received_event_clone = std::sync::Arc::clone(&has_received_event);
+
+        // Listen for the break_exec event
+        APP_HANDLE
+          .lock()
+          .unwrap()
+          .as_ref()
+          .unwrap()
+          .listen("break_exec", move |_| {
+            let mut should_break = has_received_event_clone.lock().unwrap();
+            *should_break = true;
+          });
+
+        // 2. Loop while the condition is true
+        while match self.eval(LabeledExpr {
+          expr: *condition.clone(),
+          line_number: line,
+        })? {
+          Data::Boolean(b) => b,
+          _ => {
+            return Err(InterpreterError::EvalError(
+              line,
+              "Condição do loop deve ser booleana.".to_string(),
+            ));
+          }
+        } {
+          if *has_received_event.lock().unwrap() {
+            println!("Breaking the loop due to event.");
+            break;
+          }
+          // 3. Evaluate the body of the loop
+          self.eval_block(body.clone())?;
+
+          // 4. Update the loop variable (e.g., `i = i + 1`)
+          self.eval(LabeledExpr {
+            expr: *update.clone(),
+            line_number: line,
+          })?;
+        }
+
+        Ok(Data::None)
       }
     };
 

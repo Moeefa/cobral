@@ -19,7 +19,9 @@ impl<'a> Parser<'a> {
       if let Some(rhs) = rhs {
         expr = Some(Expr::Logical(Box::new(expr.unwrap()), op, Box::new(rhs)));
       } else {
-        return Err(ParseError::InvalidExpression);
+        return Err(ParseError::InvalidExpression(
+          "Missing right-hand side of logical expression".to_string(),
+        ));
       }
     }
 

@@ -1,4 +1,5 @@
 mod commands;
+mod context;
 
 use libs::APP_HANDLE;
 use tauri::Manager;

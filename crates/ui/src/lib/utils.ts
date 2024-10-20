@@ -6,6 +6,7 @@ import remarkParse from "remark-parse";
 import remarkUnlink from "remark-unlink";
 import remarkRehype from "remark-rehype";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { unified } from "unified";
 
 export function cn(...inputs: ClassValue[]) {
@@ -17,7 +18,8 @@ export async function markdownToHTML(markdown: string) {
     .use(remarkParse)
     .use(remarkUnlink)
     .use(remarkGfm)
-    .use(remarkRehype)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
     .use(rehypePrettyCode, {
       theme: {
         light: "min-light",

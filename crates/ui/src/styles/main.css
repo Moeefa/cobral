@@ -140,7 +140,7 @@
 }
 
 .cm-tooltip {
-  @apply rounded-lg !bg-background/20 border border-border;
+  @apply rounded-lg !bg-background/20 backdrop-blur border border-border;
 }
 
 .cm-tooltip ul li {

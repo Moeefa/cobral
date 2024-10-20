@@ -10,7 +10,7 @@ impl<'a> Parser<'a> {
     while self.current_token.token != Token::ParenR && self.current_token.token != Token::EOF {
       if !first_argument {
         if self.current_token.token == Token::Comma {
-          self.eat(Token::Comma);
+          self.eat(Token::Comma)?;
         } else {
           return Err(ParseError::UnexpectedToken(
             self.current_token.clone().token,
@@ -33,12 +33,14 @@ impl<'a> Parser<'a> {
     }
 
     if self.current_token.token == Token::ParenR {
-      self.eat(Token::ParenR);
+      self.eat(Token::ParenR)?;
     } else {
       return Err(ParseError::UnexpectedToken(
         self.current_token.clone().token,
       ));
     }
+
+    self.try_eat(Token::Semicolon)?;
 
     Ok(args)
   }

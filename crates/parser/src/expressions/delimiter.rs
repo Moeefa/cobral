@@ -7,7 +7,6 @@ impl<'a> Parser<'a> {
     match self.current_token.token {
       Token::BracketL => {
         let list = self.parse_list()?;
-        self.skip_semicolon();
         Ok(Some(Expr::List(list)))
       }
       _ => Ok(None),

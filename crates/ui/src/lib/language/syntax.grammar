@@ -1,0 +1,127 @@
+@dialects { cobral }
+
+@precedence {
+  exp @left,
+  else @right,
+  times @left,
+  plus @left,
+  shift @left,
+  loop,
+  rel @left,
+  equal @left,
+  bitAnd @left,
+  bitXor @left,
+  bitOr @left,
+  and @left,
+  or @left,
+  call,
+  assign @right,
+  comma @left,
+  statement @cut
+}
+
+@top Script { statement* }
+
+@top SingleExpression { expression }
+
+statement[@isGroup=Statement] {
+  IfStatement { kw<"se"> ParenthesizedExpression statement (!else kw<"senao"> statement)? } |
+  WhileStatement { kw<"enquanto"> ParenthesizedExpression statement } |
+  ForStatement { kw<"para"> (ForSpec | ForInSpec | ForOfSpec) statement } |
+  Block |
+  declaration |
+  ExpressionStatement { expression semi }
+}
+
+declaration {
+  FunctionDeclaration |
+  VariableDeclaration
+}
+
+FunctionDeclaration {
+  kw<"funcao"> VariableDefinition ParamList Block
+}
+
+VariableDeclaration {
+  kw<"declare"> kw<"constante">? VariableDefinition ("=" expression)? semi
+}
+
+Block { "{" statement* "}" }
+
+expression[@isGroup=Expression] {
+  Number |
+  String |
+  VariableName |
+  boolean |
+  ParenthesizedExpression |
+  CallExpression |
+  BinaryExpression |
+  AssignmentExpression
+}
+
+BinaryExpression {
+  expression !exp ArithOp<"*"> expression |
+  expression !plus plusMin expression |
+  expression !rel CompareOp<"<" | "<=" | ">" | ">="> expression |
+  expression !equal CompareOp<"==" | "!="> expression |
+  expression !and kw<"e"> expression |
+  expression !or kw<"ou"> expression
+}
+
+AssignmentExpression {
+  VariableName "=" expression
+}
+
+CallExpression {
+  VariableName !call ArgList
+}
+
+ParenthesizedExpression { "(" expression ")" }
+
+ArgList {
+  "(" commaSep<expression> ")"
+}
+
+boolean {
+  kw<"verdadeiro"> | kw<"falso">
+}
+
+VariableName { identifier }
+
+VariableDefinition { identifier }
+
+commaSep<content> {
+  content ("," content)*
+}
+
+semi { ";" }
+
+@skip { spaces | newline }
+
+@tokens {
+  identifier { $[_a-zA-Z] $[_a-zA-Z0-9]* }
+
+  spaces { $[\t\u000b\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]+ }
+  newline { $[\r\n\u2028\u2029] }
+
+  Number {
+    @digit+ ("." @digit+)? (("e" | "E") ("+" | "-")? @digit+)?
+  }
+
+  String {
+    '"' (!["\\] | "\\")* '"'
+  }
+}
+
+ArithOp<expr> { expr }
+CompareOp<expr> { expr }
+
+ForSpec { VariableDefinition ";" expression ";" expression }
+ForInSpec { VariableDefinition kw<"em"> expression }
+ForOfSpec { VariableDefinition kw<"de"> expression }
+
+ParamList { "(" commaSep<VariableDefinition> ")" }
+
+plusMin { ArithOp<"+" | "-"> }
+
+kw<term> { @specialize[@name={term}]<identifier, term> }

@@ -4,13 +4,13 @@ use crate::Parser;
 
 impl<'a> Parser<'a> {
   pub fn parse_statement(&mut self) -> Result<Option<Expr>, ParseError> {
-    self.eat(Token::If); // Consume 'if'
-    self.eat(Token::ParenL); // Consume '('
+    self.eat(Token::If)?; // Consume 'if'
+    self.eat(Token::ParenL)?; // Consume '('
 
     // Parse condition
     let condition = Box::new(self.parse_expression()?);
 
-    self.eat(Token::ParenR); // Consume ')'
+    self.eat(Token::ParenR)?; // Consume ')'
 
     // Parse true block
     let true_block = self.parse_block()?;
@@ -19,16 +19,16 @@ impl<'a> Parser<'a> {
     // Parse 'else if' blocks
     let mut else_if_blocks = Vec::new();
     while self.current_token.token == Token::Else && self.current_token.token != Token::EOF {
-      self.eat(Token::Else);
+      self.eat(Token::Else)?;
 
       if self.current_token.token == Token::If {
-        self.eat(Token::If);
+        self.eat(Token::If)?;
 
-        self.eat(Token::ParenL); // Consume '('
+        self.eat(Token::ParenL)?; // Consume '('
 
         let else_if_condition = Box::new(self.parse_expression()?);
 
-        self.eat(Token::ParenR); // Consume ')'
+        self.eat(Token::ParenR)?; // Consume ')'
 
         let else_if_block = self.parse_block()?;
 
@@ -39,6 +39,8 @@ impl<'a> Parser<'a> {
       }
     }
 
+    self.try_eat(Token::Semicolon)?;
+
     Ok(Some(Expr::If(
       condition,
       true_block,
@@ -47,8 +49,8 @@ impl<'a> Parser<'a> {
     )))
   }
 
-  fn parse_block(&mut self) -> Result<Vec<Expr>, ParseError> {
-    self.eat(Token::BraceL); // Consume `{`
+  pub fn parse_block(&mut self) -> Result<Vec<Expr>, ParseError> {
+    self.eat(Token::BraceL)?; // Consume `{`
 
     let mut statements = Vec::new();
 
@@ -63,7 +65,7 @@ impl<'a> Parser<'a> {
     }
 
     if self.current_token.token == Token::BraceR {
-      self.eat(Token::BraceR); // Consume `}`
+      self.eat(Token::BraceR)?; // Consume `}`
     } else {
       return Err(ParseError::UnexpectedToken(
         self.current_token.clone().token,
