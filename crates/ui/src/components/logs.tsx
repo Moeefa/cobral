@@ -47,6 +47,7 @@ export const Logs = () => {
           width={width}
           itemData={logs}
           ref={listRef}
+          className="bg-secondary border-t border-border pb-1"
         >
           {Row}
         </FixedSizeList>

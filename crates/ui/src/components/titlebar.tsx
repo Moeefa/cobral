@@ -1,4 +1,13 @@
-import { DownloadIcon, FileIcon, GearIcon } from "@radix-ui/react-icons";
+import { CogIcon, SettingsIcon } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,23 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link, Outlet } from "react-router-dom";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { open, save } from "@tauri-apps/plugin-dialog";
-import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { useContext, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EditorContext } from "@/contexts/editor-context";
-import { basename } from "@tauri-apps/api/path";
+import { Link } from "react-router-dom";
 
 // Trick to render custom titlebar in Decorum plugin for Tauri
-export const Titlebar = () => {
+export const Titlebar = ({ children }: { children: React.ReactNode }) => {
   const [running, setRunning] = useState(true);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const Titlebar = () => {
       "div[data-tauri-decorum-tb]"
     ) as HTMLElement;
 
-    const root = document.getElementById("root") as HTMLElement;
+    const root = document.getElementById("main-layout") as HTMLElement;
 
     root.insertBefore(element, root.firstChild);
   }, []);
@@ -44,7 +44,8 @@ export const Titlebar = () => {
 
     if (element) {
       element.style.display = "flex";
-      element.style.justifyContent = "space-between";
+      element.style.justifyContent = "justify-between";
+      element.parentElement!.style.position = "static";
 
       // Render titlebar content
       const titlebar = document.querySelector("#titlebar") as HTMLElement;
@@ -59,100 +60,39 @@ export const Titlebar = () => {
       <div
         data-tauri-drag-region
         id="titlebar"
-        className="flex justify-between items-center w-full"
+        className="flex justify-between items-center w-full bg-background"
       >
         <Left />
         <Right />
       </div>
-      <div className="w-full overflow-auto h-[calc(100%-2rem)] mt-8">
-        <Outlet />
-      </div>
+      <div className="w-full overflow-auto h-full">{children}</div>
     </>
   );
 };
 
 const Left = () => {
-  const { value, setValue, file, setFile } = useContext(EditorContext);
-  const downloadFile = async () => {
-    const file = await save({
-      filters: [
-        {
-          name: "arquivo",
-          extensions: ["cl"],
-        },
-      ],
-    });
-
-    await writeTextFile(file || "", value);
-  };
-
-  const readFile = async () => {
-    const file = await open({
-      multiple: false,
-      directory: false,
-      canCreateDirectories: true,
-      filters: [
-        {
-          name: "arquivo",
-          extensions: ["cl"],
-        },
-      ],
-    });
-
-    const content = await readTextFile(file || "");
-
-    setValue(content || "");
-    setFile((await basename(file!)) || "");
-  };
+  const { file } = useContext(EditorContext);
 
   return (
     <div
       id="left"
       data-tauri-drag-region
-      className="flex items-center h-full px-4"
+      className="flex items-center h-full gap-1 px-4 p-1"
     >
-      <div data-tauri-drag-region className="flex items-center space-x-3">
-        <small
-          data-tauri-drag-region
-          className="text-sm font-medium leading-none select-none"
-        >
-          {file || "arquivo.cl"}
-        </small>
-        <div className="flex gap-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-7 rounded-sm"
-                  onClick={downloadFile}
-                >
-                  <DownloadIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Baixar arquivo</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="size-7 rounded-sm"
-                  onClick={readFile}
-                >
-                  <FileIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Abrir um arquivo</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+      <div
+        data-tauri-drag-region
+        className="border border-border aspect-square rounded-lg bg-background"
+      >
+        <h3 data-tauri-drag-region className="select-none p-1">
+          <img src="/static/cobral.png" height={24} width={24} />
+        </h3>
       </div>
+      <h4
+        data-tauri-drag-region
+        className="text-base font-medium leading-none select-none"
+      >
+        {file || "arquivo.cl"}
+      </h4>
     </div>
   );
 };
@@ -164,22 +104,38 @@ const Right = () => {
       data-tauri-drag-region
       className="flex items-center h-full px-4"
     >
-      <DropdownMenu>
-        <DropdownMenuTrigger className="outline-none rounded-full group size-6 flex items-center justify-center">
-          <GearIcon className="group-hover:rotate-[55deg] transition-transform size-[1.05rem]" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>Configurações</DropdownMenuItem>
-          <Link to="/docs">
-            <DropdownMenuItem>Documentação</DropdownMenuItem>
-          </Link>
-          <Link to="/changelog">
-            <DropdownMenuItem>Novidades</DropdownMenuItem>
-          </Link>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>Sair</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Dialog>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="outline-none group size-6 flex items-center justify-center">
+            <SettingsIcon className="group-hover:rotate-[55deg] ease-in-out transition-transform size-[1.05rem]" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DialogTrigger asChild>
+              <DropdownMenuItem>Configurações</DropdownMenuItem>
+            </DialogTrigger>
+            <Link to="/docs">
+              <DropdownMenuItem>Documentação</DropdownMenuItem>
+            </Link>
+            <Link to="/changelog">
+              <DropdownMenuItem>Novidades</DropdownMenuItem>
+            </Link>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Sair</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Are you sure you want to permanently
+              delete this file from our servers?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="submit">Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -16,11 +16,7 @@
         "width": 1000,
         "height": 600,
         "visible": false,
-        "center": true,
-        "transparent": true,
-        "windowEffects": {
-          "effects": ["acrylic", "fullScreenUI"]
-        }
+        "center": true
       }
     ],
     "security": {

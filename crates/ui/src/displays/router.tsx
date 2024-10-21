@@ -1,14 +1,14 @@
 import { Route, Routes } from "react-router-dom";
 
-import { Changelog } from "./routes/changelog";
+import { Changelog } from "@/displays/routes/changelog";
 import { Docs } from "@/displays/routes/documentation";
-import { Page } from "./routes/index";
-import { Titlebar } from "@/components/titlebar";
+import { Layout } from "@/displays/layouts/main";
+import { Page } from "@/displays/routes/index";
 
 export default function RoutesElement() {
   return (
     <Routes>
-      <Route element={<Titlebar />}>
+      <Route element={<Layout />}>
         <Route path="/" element={<Page />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/changelog" element={<Changelog />} />
