@@ -186,8 +186,8 @@ Para operações matemáticas, você pode usar a biblioteca `matematica`.
 Você não precisa importar a biblioteca, ela já está disponível por padrão.
 
 ```cobral
-declare raiz = raiz(50)
-escrever(raiz)
+declare x = raiz(50)
+escrever(x)
 ```
 
 #### Parsing

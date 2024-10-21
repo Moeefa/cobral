@@ -53,6 +53,7 @@ pub enum Token {
   Minus,
   Times,
   Divide,
+  Rem,
 
   // End of file
   EOF,
