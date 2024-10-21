@@ -111,6 +111,7 @@ impl fmt::Display for Token {
       Token::Minus => write!(f, "-"),
       Token::Times => write!(f, "*"),
       Token::Divide => write!(f, "/"),
+      Token::Rem => write!(f, "%"),
       Token::EOF => write!(f, "EOF"),
     }
   }
