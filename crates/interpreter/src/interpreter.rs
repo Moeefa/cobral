@@ -344,7 +344,7 @@ impl Interpreter {
             },
 
           // Handle float arithmetic
-          (Data::Float(l), Data::Float(r), Token::Rem) => Ok(Data::Integer(l % r)),
+          (Data::Float(l), Data::Float(r), Token::Rem) => Ok(Data::Float(l % r)),
           (Data::Float(l), Data::Float(r), Token::Plus) => Ok(Data::Float(l + r)),
           (Data::Float(l), Data::Float(r), Token::Minus) => Ok(Data::Float(l - r)),
           (Data::Float(l), Data::Float(r), Token::Times) => Ok(Data::Float(l * r)),
@@ -359,7 +359,7 @@ impl Interpreter {
             },
 
           // Mixed type arithmetic (integer and float)
-          (Data::Integer(l), Data::Float(r), Token::Rem) => Ok(Data::Integer(l % r)),
+          (Data::Integer(l), Data::Float(r), Token::Rem) => Ok(Data::Float((l as f64) % r)),
           (Data::Integer(l), Data::Float(r), Token::Plus) => Ok(Data::Float((l as f64) + r)),
           (Data::Integer(l), Data::Float(r), Token::Minus) => Ok(Data::Float((l as f64) - r)),
           (Data::Integer(l), Data::Float(r), Token::Times) => Ok(Data::Float((l as f64) * r)),
@@ -372,7 +372,7 @@ impl Interpreter {
             } else {
               Ok(Data::Float((l as f64) / r))
             },
-          (Data::Float(l), Data::Integer(r), Token::Rem) => Ok(Data::Float(l % r)),
+          (Data::Float(l), Data::Integer(r), Token::Rem) => Ok(Data::Float(l % (r as f64))),
           (Data::Float(l), Data::Integer(r), Token::Plus) => Ok(Data::Float(l + (r as f64))),
           (Data::Float(l), Data::Integer(r), Token::Minus) => Ok(Data::Float(l - (r as f64))),
           (Data::Float(l), Data::Integer(r), Token::Times) => Ok(Data::Float(l * (r as f64))),
