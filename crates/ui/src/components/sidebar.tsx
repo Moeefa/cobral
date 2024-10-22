@@ -79,7 +79,7 @@ const Actions = () => {
                 <DownloadIcon className="size-4" />
               </TooltipTrigger>
               <TooltipContent collisionPadding={5}>
-                <p>Baixar arquivo</p>
+                <p>Salvar arquivo</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>

@@ -20,7 +20,7 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
   - [Bibliotecas](#bibliotecas)
     - [Entrada e saída](#entrada-e-saída)
     - [Matemática](#matemática)
-    - [Parsing](#parsing)
+    - [Conversão de tipos de dados](#conversão-de-tipos-de-dados)
 
 ## Roadmap
 
@@ -168,12 +168,13 @@ para (declare i = 0; i < 10; i = i + 1) {
 
 - [IO](#entrada-e-saída): para entrada e saída de dados
 - [Matemática](#matemática): para operações matemáticas
-- [Parsing](#parsing): para parsing de tipos de dados
+- [Conversão de tipos de dados](#conversão-de-tipos-de-dados): para conversão de tipos de dados
+
+Você não precisa importar nenhuma biblioteca, elas estão disponíveis por padrão durante a execução do código.
 
 #### Entrada e saída
 
-Para entrada e saída de dados, você pode usar a biblioteca `io`.
-Você não precisa importar a biblioteca, ela já está disponível por padrão.
+Para entrada e saída de dados, você pode usar a biblioteca de entrada e saída de dados.
 
 ```cobral
 declare x = ler("Digite seu nome:")
@@ -182,18 +183,16 @@ escrever("Você digitou: ", x)
 
 #### Matemática
 
-Para operações matemáticas, você pode usar a biblioteca `matematica`.
-Você não precisa importar a biblioteca, ela já está disponível por padrão.
+Para operações matemáticas, você pode usar a biblioteca de matemática.
 
 ```cobral
 declare x = raiz(50)
 escrever(x)
 ```
 
-#### Parsing
+#### Conversão de tipos de dados
 
-Para fazer parsing de tipos de dados, você pode usar a biblioteca `parsing`.
-Você não precisa importar a biblioteca, ela já está disponível por padrão.
+Para fazer conversão de tipos de dados, você pode usar a biblioteca de conversão.
 
 ```cobral
 declare x = int(10)
