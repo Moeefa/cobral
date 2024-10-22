@@ -86,7 +86,7 @@ pub fn read(args: Vec<Expr>, _: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<
 
   // Set up the listener for the "read_input" event
   let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
-  let listener = app_handle.listen("read_input", move |msg| {
+  app_handle.listen("read_input", move |msg| {
     let mut received_data = event_received_clone.lock().unwrap();
     *received_data = msg.payload().trim_matches('"').to_string();
 
@@ -96,7 +96,7 @@ pub fn read(args: Vec<Expr>, _: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<
 
   // Handle the "break_read" event to exit the loop
   let has_received_event_clone_for_break = Arc::clone(&has_received_event);
-  let break_listener = app_handle.listen("break_read", move |_| {
+  app_handle.listen("break_read", move |_| {
     let mut received_flag = has_received_event_clone_for_break.lock().unwrap();
     *received_flag = true;
   });

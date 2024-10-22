@@ -1,7 +1,4 @@
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc, Mutex,
-};
+use std::sync::{Arc, Mutex};
 
 use interpreter::Interpreter;
 use lexer::Lexer;

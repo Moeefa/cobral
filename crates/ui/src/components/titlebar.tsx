@@ -84,7 +84,7 @@ const Left = () => {
         className="border border-border aspect-square rounded-lg bg-background"
       >
         <h3 data-tauri-drag-region className="select-none p-1">
-          <img src="/static/cobral.png" height={24} width={24} />
+          <img src="/cobral.png" height={24} width={24} />
         </h3>
       </div>
       <h4

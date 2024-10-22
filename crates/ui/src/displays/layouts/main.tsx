@@ -12,11 +12,11 @@ export const Layout = () => {
   return (
     <div className="flex h-full">
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={18} minSize={15}>
+        <ResizablePanel defaultSize={18} minSize={18}>
           <Sidebar />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel>
+        <ResizablePanel minSize={50}>
           <div
             className="flex flex-col h-full w-full bg-background"
             id="main-layout"
