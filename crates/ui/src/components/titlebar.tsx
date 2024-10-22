@@ -1,4 +1,3 @@
-import { CogIcon, SettingsIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,7 @@ import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EditorContext } from "@/contexts/editor-context";
 import { Link } from "react-router-dom";
+import { SettingsIcon } from "lucide-react";
 
 // Trick to render custom titlebar in Decorum plugin for Tauri
 export const Titlebar = ({ children }: { children: React.ReactNode }) => {

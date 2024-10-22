@@ -1,5 +1,5 @@
 import { DownloadIcon, FileIcon } from "lucide-react";
-import { File, Folder, Tree } from "@/components/ui/file-tree";
+import { File, Tree } from "@/components/ui/file-tree";
 import {
   Tooltip,
   TooltipContent,
