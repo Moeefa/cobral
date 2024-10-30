@@ -11,11 +11,12 @@ impl<'a> Parser<'a> {
     self.eat(Token::Let)?; // Consume `let`
     let name = match &self.current_token.token {
       Token::Symbol(ref name) => name.clone(),
-      _ =>
+      _ => {
         return Err(ParseError::ExpectedVariableName(
           self.current_token.line_number,
           self.current_token.token.clone(),
-        )),
+        ))
+      }
     };
     self.next_token(); // Consume variable name
     self.eat(Token::Equals)?; // Consume `=`
@@ -39,7 +40,7 @@ impl<'a> Parser<'a> {
 
     // Parse the update expression (e.g., i = i + 1)
     let update = match &self.current_token.token {
-      Token::Let => self.parse_vars(),
+      Token::Let => self.parse_let(),
       Token::Symbol(_) => self.parse_expression().map_err(|e| e),
       _ => Err(ParseError::UnexpectedToken(
         self.current_token.clone().token,

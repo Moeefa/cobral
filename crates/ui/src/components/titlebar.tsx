@@ -1,13 +1,4 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,7 +7,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useContext, useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { EditorContext } from "@/contexts/editor-context";
 import { Link } from "react-router-dom";
 import { SettingsIcon } from "lucide-react";
@@ -77,7 +67,7 @@ const Left = () => {
     <div
       id="left"
       data-tauri-drag-region
-      className="flex items-center h-full gap-1 px-4 p-1"
+      className="flex items-center h-full gap-2.5 px-4 p-1"
     >
       <div
         data-tauri-drag-region
@@ -104,38 +94,24 @@ const Right = () => {
       data-tauri-drag-region
       className="flex items-center h-full px-4"
     >
-      <Dialog>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="outline-none group size-6 flex items-center justify-center">
-            <SettingsIcon className="group-hover:rotate-[55deg] ease-in-out transition-transform size-[1.05rem]" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DialogTrigger asChild>
-              <DropdownMenuItem>Configurações</DropdownMenuItem>
-            </DialogTrigger>
-            <Link to="/docs">
-              <DropdownMenuItem>Documentação</DropdownMenuItem>
-            </Link>
-            <Link to="/changelog">
-              <DropdownMenuItem>Novidades</DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Sair</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. Are you sure you want to permanently
-              delete this file from our servers?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button type="submit">Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="outline-none group size-6 flex items-center justify-center">
+          <SettingsIcon className="group-hover:rotate-[55deg] ease-in-out transition-transform size-[1.05rem]" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <Link to="/settings">
+            <DropdownMenuItem>Configurações</DropdownMenuItem>
+          </Link>
+          <Link to="/docs">
+            <DropdownMenuItem>Documentação</DropdownMenuItem>
+          </Link>
+          <Link to="/changelog">
+            <DropdownMenuItem>Novidades</DropdownMenuItem>
+          </Link>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Sair</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

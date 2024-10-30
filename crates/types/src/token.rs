@@ -8,6 +8,8 @@ pub enum Token {
   If,
   Else,
   For,
+  Function,
+  Return,
 
   // Symbols
   Equals,
@@ -55,6 +57,9 @@ pub enum Token {
   Divide,
   Rem,
 
+  // Unary
+  Unary,
+
   // End of file
   EOF,
 }
@@ -82,6 +87,8 @@ impl fmt::Display for Token {
       Token::If => write!(f, "se"),
       Token::Else => write!(f, "senao"),
       Token::For => write!(f, "para"),
+      Token::Function => write!(f, "funcao"),
+      Token::Return => write!(f, "retorne"),
       Token::Equals => write!(f, "="),
       Token::Semicolon => write!(f, ";"),
       Token::ParenL => write!(f, "("),
@@ -112,6 +119,7 @@ impl fmt::Display for Token {
       Token::Times => write!(f, "*"),
       Token::Divide => write!(f, "/"),
       Token::Rem => write!(f, "%"),
+      Token::Unary => write!(f, "unario"),
       Token::EOF => write!(f, "EOF"),
     }
   }

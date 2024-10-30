@@ -39,8 +39,6 @@ impl<'a> Parser<'a> {
       }
     }
 
-    self.try_eat(Token::Semicolon)?;
-
     Ok(Some(Expr::If(
       condition,
       true_block,

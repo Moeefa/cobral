@@ -5,6 +5,7 @@ pub enum Data {
   Boolean(bool),
   String(String),
   List(Vec<Data>),
+  Return(Box<Data>),
   None,
   Undefined,
 }
@@ -18,6 +19,7 @@ impl std::fmt::Display for Data {
       Data::Boolean(b) => write!(f, "{}", b),
       Data::String(s) => write!(f, "{}", s),
       Data::Undefined => write!(f, "Indefinido"),
+      Data::Return(data) => write!(f, "Retorno: {}", data),
       Data::List(datas) => write!(
         f,
         "[{}]",

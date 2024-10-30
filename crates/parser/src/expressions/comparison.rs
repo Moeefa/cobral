@@ -18,7 +18,7 @@ impl<'a> Parser<'a> {
         | Token::GreaterThanEqual
     ) {
       let op = self.current_token.token.clone();
-      self.next_token(); // Consume the operator
+      self.eat(op.clone())?; // Consume the operator
 
       // Parse the right-hand side (RHS) of the comparison
       let rhs = self.parse_primary_expression()?;

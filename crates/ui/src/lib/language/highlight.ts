@@ -16,8 +16,8 @@ export const highlight = styleTags({
   "FunctionDeclaration/VariableDefinition": t.function(
     t.definition(t.variableName)
   ),
-  // "LineComment Hashbang": t.lineComment,
-  // BlockComment: t.blockComment,
+  LineComment: t.lineComment,
+  BlockComment: t.blockComment,
   Number: t.number,
   String: t.string,
   ArithOp: t.arithmeticOperator,

@@ -41,13 +41,13 @@ export const Logs = () => {
     <AutoSizer>
       {({ height, width }) => (
         <FixedSizeList
-          height={height - 47.2}
+          height={height - 46.5}
           itemCount={logs.length}
-          itemSize={24}
+          itemSize={26}
           width={width}
           itemData={logs}
           ref={listRef}
-          className="bg-secondary border-t border-border pb-1"
+          className="bg-secondary border-t border-border"
         >
           {Row}
         </FixedSizeList>

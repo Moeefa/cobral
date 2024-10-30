@@ -2,11 +2,13 @@ use types::{Data, Expr};
 
 pub fn square_root(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
   if let Some(arg) = args.get(0) {
-    match eval(arg.clone()) {
+    let result = match eval(arg.clone()) {
       Some(Data::Float(f)) => Some(Data::Float(f.sqrt())),
       Some(Data::Integer(i)) => Some(Data::Integer((i as f64).sqrt() as i64)),
       _ => None,
-    }
+    };
+
+    result
   } else {
     None
   }

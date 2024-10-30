@@ -20,8 +20,6 @@ impl<'a> Parser<'a> {
 
     let expr = self.parse_expression()?;
 
-    self.try_eat(Token::Semicolon)?;
-
     Ok(Some(Expr::Const(name, Box::new(expr.unwrap()))))
   }
 }

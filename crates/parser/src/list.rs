@@ -69,8 +69,6 @@ impl<'a> Parser<'a> {
       ));
     }
 
-    self.try_eat(Token::Semicolon)?;
-
     Ok(elements) // Return Vec<Expr> here
   }
 }

@@ -15,6 +15,7 @@ pub enum ParseError {
   ExpectedToken(usize, Token, Token),
   ExpectedVariableName(usize, Token),
   ExpectedConstantName(usize, Token),
+  ExpectedFunctionName(usize, Token),
   InvalidExpression(String),
 }
 
@@ -25,6 +26,7 @@ impl fmt::Display for ParseError {
       ParseError::ExpectedToken(line, found, expected) => write!(f, "Linha {}: Esperava-se '{}', econtrou: '{}'", line, expected, found),
       ParseError::ExpectedConstantName(line, name) => write!(f, "Linha {}: Esperava-se nome de constante, econtrou: '{}'", line, name),
       ParseError::ExpectedVariableName(line, name) => write!(f, "Linha {}: Esperava-se nome de variável, econtrou: '{}'", line, name),
+      ParseError::ExpectedFunctionName(line, name) => write!(f, "Linha {}: Esperava-se nome de função, econtrou: '{}'", line, name),
       ParseError::UnknownFunction(name) => write!(f, "Função desconhecida: '{}'", name),
       ParseError::UnexpectedToken(token) => write!(f, "Token inesperado: '{}'", token),
       ParseError::InvalidExpression(name) => write!(f, "Expressão inválida: '{}'", name),
@@ -44,11 +46,13 @@ pub enum InterpreterError {
   ExpressionEvaluationFailure(usize, String),
   ExpectedSymbolError(usize, Token, Token),
   ExpectedVariableError(usize, Token),
+  ArgumentMismatchError(usize, String),
   ParseError(usize, String),
   EvalError(usize, String),
   ParseInt(ParseIntError),
   ParseFloat(ParseFloatError),
   UnexpectedCharacter(usize, String),
+  RuntimeError(usize, String),
 }
 
 #[rustfmt::skip]
@@ -59,11 +63,13 @@ impl fmt::Display for InterpreterError {
       InterpreterError::ExpressionEvaluationFailure(line, message) => write!(f, "Linha {}: Falha na avaliação da expressão: '{}'", line, message),
       InterpreterError::ExpectedSymbolError(line, found, expected) => write!(f, "Linha {}: Esperava um símbolo '{:?}', mas encontrou '{:?}'", line, expected, found),
       InterpreterError::ExpectedVariableError(line, token) => write!(f, "Linha {}: Esperava uma variável, mas encontrou '{:?}'", line, token),
+      InterpreterError::ArgumentMismatchError(line, message) => write!(f, "Linha {}: Erro de argumento: '{}'", line, message),
       InterpreterError::EvalError(line, message) => write!(f, "Linha {}: Erro de avaliação: '{}'", line, message),
       InterpreterError::ParseError(_line, message) => write!(f, "{}", message),
       InterpreterError::ParseInt(_err) => write!(f, "Dígito inválido encontrado"),
       InterpreterError::ParseFloat(_err) => write!(f, "Dígito inválido encontrado"),
       InterpreterError::UnexpectedCharacter(line, character) => write!(f, "Linha {}: Caracter inesperado: '{}'", line, character),
+      InterpreterError::RuntimeError(line, message) => write!(f, "Linha {}: Erro em tempo de execução: '{}'", line, message),
     }
   }
 }

@@ -56,9 +56,8 @@ export const Editor = () => {
               const dom = document.createElement("div");
               return { dom };
             },
-            displayText: "blocks",
+            // displayText: "blocks",
             showOverlay: "always",
-            gutters: [{ 1: "#00FF00", 2: "#00FF00" }],
           };
         }),
         cobralLinter,

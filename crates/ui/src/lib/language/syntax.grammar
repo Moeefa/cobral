@@ -96,7 +96,7 @@ commaSep<content> {
 
 semi { ";" }
 
-@skip { spaces | newline }
+@skip { spaces | newline | LineComment | BlockComment }
 
 @tokens {
   identifier { $[_a-zA-Z] $[_a-zA-Z0-9]* }
@@ -110,6 +110,14 @@ semi { ";" }
 
   String {
     '"' (!["\\] | "\\")* '"'
+  }
+
+  LineComment {
+    "//" (![\n\r])*
+  }
+
+  BlockComment {
+    "/*" (![*] | "*" ![/])* "*/"
   }
 }
 

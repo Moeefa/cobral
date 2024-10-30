@@ -19,7 +19,7 @@ export const EditorContext = createContext({} as EditorContextProps);
 
 const LogEntry = React.memo(
   ({ log }: { log: { level: string; message: string } }) => (
-    <div className="flex items-center gap-4" key={log.message}>
+    <div className="flex items-center gap-4 h-6" key={log.message}>
       <span className="text-muted-foreground">
         {new Date().toLocaleTimeString("pt-BR", {
           hour: "2-digit",
@@ -40,7 +40,7 @@ const LogEntry = React.memo(
 const InputEntry = React.memo(
   ({ message }: { message: string; onSubmit: (value: string) => void }) => {
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 h-6">
         <span className="text-muted-foreground">
           {new Date().toLocaleTimeString("pt-BR", {
             hour: "2-digit",
@@ -52,7 +52,7 @@ const InputEntry = React.memo(
           <p className="w-fit">{message} </p>
           <Input
             key={new Date().toISOString()}
-            className="log-input flex-1 bg-muted/50 text-foreground h-6 rounded-lg"
+            className="log-input flex-1 bg-muted/50 text-foreground rounded-lg"
             type="text"
             onKeyDown={async (event) => {
               if (event.key === "Enter") {

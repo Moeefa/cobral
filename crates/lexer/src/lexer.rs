@@ -86,7 +86,6 @@ impl<'a> Lexer<'a> {
         }
         '=' => {
           self.advance();
-
           if self.current_char == Some('=') {
             self.advance();
             return self.token(Token::EqualEqual);
@@ -99,8 +98,7 @@ impl<'a> Lexer<'a> {
           return self.token(Token::Comma);
         }
         '>' => {
-          self.advance(); // Move to the next character
-
+          self.advance();
           if self.current_char == Some('=') {
             self.advance();
             return self.token(Token::GreaterThanEqual);
@@ -109,8 +107,7 @@ impl<'a> Lexer<'a> {
           return self.token(Token::GreaterThan);
         }
         '<' => {
-          self.advance(); // Move to the next character
-
+          self.advance();
           if self.current_char == Some('=') {
             self.advance();
             return self.token(Token::LessThanEqual);
@@ -123,13 +120,6 @@ impl<'a> Lexer<'a> {
           if self.current_char == Some('=') {
             self.advance();
             return self.token(Token::NotEqual);
-          } else {
-            logger::error(InterpreterError::UnexpectedCharacter(
-              self.line,
-              format!("Caracter inesperado: {}", c),
-            ));
-            self.advance();
-            return self.token(Token::EOF);
           }
         }
         '+' => {
@@ -146,7 +136,32 @@ impl<'a> Lexer<'a> {
         }
         '/' => {
           self.advance();
-          return self.token(Token::Divide);
+          if self.current_char == Some('/') {
+            self.advance();
+            while let Some(c) = self.current_char {
+              if c == '\n' {
+                break;
+              }
+              self.advance();
+            }
+            self.advance();
+          } else if self.current_char == Some('*') {
+            // Handle multi-line comments
+            self.advance(); // Move past the '*'
+            while let Some(c) = self.current_char {
+              if c == '*' {
+                self.advance(); // Move past '*'
+                if self.current_char == Some('/') {
+                  self.advance(); // Move past '/'
+                  break;
+                }
+              } else {
+                self.advance();
+              }
+            }
+          } else {
+            return self.token(Token::Divide);
+          }
         }
         _ => {
           logger::error(InterpreterError::UnexpectedCharacter(

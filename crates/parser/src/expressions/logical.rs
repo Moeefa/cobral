@@ -12,7 +12,7 @@ impl<'a> Parser<'a> {
     // Handle logical operators (and, or)
     while matches!(self.current_token.token, Token::And | Token::Or) {
       let op = self.current_token.token.clone();
-      self.next_token(); // Consume the operator
+      self.eat(op.clone())?; // Consume the operator
 
       // Parse the right-hand side (RHS)
       let rhs = self.parse_comparison_expression()?;

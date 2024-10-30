@@ -28,12 +28,13 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [x] Implementar estruturas de controle
 - [x] Implementar biblioteca de entrada e saída
 - [x] Implementar biblioteca de matemática
-- [x] Implementar biblioteca para parsing de tipos de dados
-- [ ] Implementar funções
+- [x] Implementar biblioteca para conversão de tipos de dados
+- [x] Implementar funções
+  - [ ] Corrigir chamada de funções recursivas
 - [x] Implementar loops
 - [x] Implementar vetores
 - [x] Implementar matrizes
-- [ ] Implementar comentários
+- [x] Implementar comentários
 - [x] Implementar operadores lógicos (e, ou, não)
   - [x] Operador `nao` para negação de valores booleanos
   - [x] Operador `e` para conjunção de valores booleanos
@@ -50,6 +51,7 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [x] Console interativo para execução de código
 - [x] Incluir exemplos de código e documentação
 - [x] Implementar tipo de dados/dicas ao passar o mouse sobre uma variável, constante ou função
+- [ ] Implementar condições escolha-caso (switch-case)
 
 ## Como funciona?
 

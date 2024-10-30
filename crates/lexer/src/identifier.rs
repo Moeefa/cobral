@@ -26,6 +26,9 @@ impl<'a> Lexer<'a> {
       "ou" => self.token(Token::Or),   // Logical OR operator
       "e" => self.token(Token::And),   // Logical AND operator
 
+      "funcao" => self.token(Token::Function), // Keyword "function"
+      "retorne" => self.token(Token::Return),  // Keyword "return"
+
       "verdadeiro" => self.token(Token::True), // Boolean literal
       "falso" => self.token(Token::False),     // Boolean literal
       _ => self.token(Token::Symbol(id)),

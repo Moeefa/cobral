@@ -128,7 +128,7 @@
 
 .cm-activeLineGutter,
 .cm-activeLine {
-  @apply !bg-secondary;
+  @apply !bg-secondary/50;
 }
 
 .cm-gutters {
@@ -162,6 +162,20 @@
 
 .cm-editor .cm-tooltip.cm-tooltip-autocomplete > ul > completion-section {
   @apply border-border;
+}
+
+.cm-button {
+  background-image: none !important;
+  @apply !rounded-full !bg-background !border-border !border;
+}
+
+.cm-textfield {
+  background-image: none !important;
+  @apply !rounded-full !bg-background !border-border !border;
+}
+
+.cm-panels-bottom {
+  @apply !bg-secondary !border-border !border-t;
 }
 
 div[data-tauri-decorum-tb] {
@@ -235,11 +249,11 @@ code[data-line-numbers-max-digits="3"] > [data-line]::before {
 }
 
 input[type="checkbox"][disabled][checked] {
-  @apply dark:invert dark:hue-rotate-[18deg] dark:brightness-[5];
+  filter: invert(100%) hue-rotate(18deg) brightness(5);
 }
 
 input[type="checkbox"][disabled] {
-  @apply dark:invert dark:hue-rotate-[18deg] dark:brightness-[5];
+  filter: invert(100%) hue-rotate(18deg) brightness(5);
 }
 
 .decorum-tb-btn {

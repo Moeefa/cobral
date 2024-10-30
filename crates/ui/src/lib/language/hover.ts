@@ -42,7 +42,7 @@ export const wordHover = hoverTooltip((view, pos, side) => {
   tree.cursor().iterate((_node) => {
     // Variable hover: check if the word is a declared variable
     if (variableTypes.has(word)) {
-      typeInfo = `Variável <span class="ͼ3f">${word}</span>: <span class="ͼ3k">${variableTypes.get(
+      typeInfo = `Variável <span class="ͼ3f ͼ3m">${word}</span>: <span class="ͼ3k">${variableTypes.get(
         word
       )}</span>`;
     }
