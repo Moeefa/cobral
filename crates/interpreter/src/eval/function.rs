@@ -9,7 +9,6 @@ impl Interpreter {
     line: usize,
   ) -> Result<Data, InterpreterError> {
     if let Some(func) = self.libs.get(&name) {
-      // Standard library function handling
       let mut eval_fn = |expr: Expr| match self.eval(LabeledExpr {
         expr,
         line_number: line,
@@ -28,12 +27,17 @@ impl Interpreter {
         line,
         format!("Erro ao executar a função: {}", name),
       ))
-    } else if let Some((params, body)) = self.functions.lock().unwrap().get(&name) {
+    } else if let Some((params, body)) = {
+      // Limit the lock scope to this line
+      let functions_lock = self.functions.lock().unwrap();
+      functions_lock.get(&name).cloned() // Clone to move out of the lock scope
+    } {
       if args.len() != params.len() {
         return Err(InterpreterError::ArgumentMismatchError(line, name));
       }
 
-      let evaluated_args: Vec<Data> = args
+      // Evaluate arguments
+      let evaluated_args = args
         .into_iter()
         .map(|arg| {
           self.eval(LabeledExpr {
@@ -42,6 +46,9 @@ impl Interpreter {
           })
         })
         .collect::<Result<Vec<_>, _>>()?;
+
+      // Store the current variable state
+      let current_vars = self.variables.lock().unwrap().clone();
 
       // Set up argument bindings
       for (param, arg_value) in params.iter().zip(evaluated_args) {
@@ -52,20 +59,14 @@ impl Interpreter {
           .insert(param.clone(), arg_value);
       }
 
+      // `functions` lock is already released here
       // Evaluate function body
-      let mut result = Data::None;
-      for stmt in body {
-        result = self.eval(LabeledExpr {
-          expr: stmt.clone(),
-          line_number: line,
-        })?;
+      let result = self.eval_block(body);
 
-        if let Data::Return(value) = result {
-          return Ok(*value); // Early return
-        }
-      }
+      // Restore variable state after function execution
+      *self.variables.lock().unwrap() = current_vars;
 
-      Ok(result)
+      result
     } else {
       Err(InterpreterError::EvalError(
         line,

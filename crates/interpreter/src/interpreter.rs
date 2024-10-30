@@ -92,11 +92,16 @@ impl Interpreter {
 
   fn eval_block(&self, block: Vec<Expr>) -> Result<Data, InterpreterError> {
     for expr in block {
-      self.eval(LabeledExpr {
+      let result = self.eval(LabeledExpr {
         expr,
         line_number: 0, // Adjust line number tracking
       })?;
+
+      if let Data::Return(value) = result {
+        return Ok(*value); // Early return
+      }
     }
+
     Ok(Data::None)
   }
 }

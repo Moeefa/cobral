@@ -506,7 +506,7 @@ dependencies = [
 
 [[package]]
 name = "cobral"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "colored",
  "interpreter",
@@ -1809,7 +1809,7 @@ dependencies = [
 
 [[package]]
 name = "interpreter"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "colored",
  "libs",
@@ -1964,7 +1964,7 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "lexer"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "logger",
  "types",
@@ -2022,7 +2022,7 @@ dependencies = [
 
 [[package]]
 name = "libs"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "logger",
  "serde",
@@ -2078,7 +2078,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "colored",
  "serde",
@@ -2568,7 +2568,7 @@ dependencies = [
 
 [[package]]
 name = "parser"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "colored",
  "interpreter",
@@ -4268,7 +4268,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "types"
-version = "0.3.1"
+version = "0.4.0"
 
 [[package]]
 name = "uds_windows"

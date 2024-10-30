@@ -30,7 +30,7 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [x] Implementar biblioteca de matemática
 - [x] Implementar biblioteca para conversão de tipos de dados
 - [x] Implementar funções
-  - [ ] Corrigir chamada de funções recursivas
+  - [x] Corrigir chamada de funções recursivas
 - [x] Implementar loops
 - [x] Implementar vetores
 - [x] Implementar matrizes
