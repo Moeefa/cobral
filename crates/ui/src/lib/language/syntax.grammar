@@ -28,6 +28,7 @@ statement[@isGroup=Statement] {
   IfStatement { kw<"se"> ParenthesizedExpression statement (!else kw<"senao"> statement)? } |
   WhileStatement { kw<"enquanto"> ParenthesizedExpression statement } |
   ForStatement { kw<"para"> (ForSpec | ForInSpec | ForOfSpec) statement } |
+  ReturnStatement { kw<"retorne"> expression semi } |
   Block |
   declaration |
   ExpressionStatement { expression semi }

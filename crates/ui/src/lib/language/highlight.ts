@@ -7,7 +7,7 @@ export const highlight = styleTags({
   "vedadeiro falso": t.bool,
   "e ou": t.logicOperator,
   nao: t.operator,
-  para: t.keyword,
+  "para funcao retorne": t.keyword,
 
   VariableName: t.variableName,
   "CallExpression/VariableName VariableName": t.function(t.variableName),
@@ -28,7 +28,4 @@ export const highlight = styleTags({
   "{ }": t.brace,
   ".": t.derefOperator,
   ", ;": t.separator,
-
-  TypeName: t.typeName,
-  TypeDefinition: t.definition(t.typeName),
 });

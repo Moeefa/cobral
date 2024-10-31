@@ -61,7 +61,7 @@ impl Interpreter {
 
       // `functions` lock is already released here
       // Evaluate function body
-      let result = self.eval_block(body);
+      let result = self.eval_function_block(body);
 
       // Restore variable state after function execution
       *self.variables.lock().unwrap() = current_vars;
@@ -73,5 +73,20 @@ impl Interpreter {
         format!("Função desconhecida: {}", name),
       ))
     }
+  }
+
+  fn eval_function_block(&self, block: Vec<Expr>) -> Result<Data, InterpreterError> {
+    for expr in block {
+      let result = self.eval(LabeledExpr {
+        expr,
+        line_number: 0, // Adjust line number tracking
+      })?;
+
+      if let Data::Return(value) = result {
+        return Ok(*value); // Early return
+      }
+    }
+
+    Ok(Data::None)
   }
 }
