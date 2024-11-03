@@ -15,6 +15,7 @@
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
     "core:window:default",
+    "core:webview:allow-set-webview-zoom",
     "decorum:allow-show-snap-overlay",
     "core:event:allow-listen",
     "core:event:default",
@@ -32,6 +33,10 @@
     "core:path:allow-join",
     "core:path:default",
     "fs:allow-write-text-file",
+    "fs:write-all",
+    "fs:write-files",
+    "fs:allow-write",
+    "fs:allow-write-file",
     {
       "identifier": "fs:scope",
       "allow": [

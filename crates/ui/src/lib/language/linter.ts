@@ -36,10 +36,38 @@ export const cobralLinter = linter((view) => {
 
   let declaredVariables: Set<string> = new Set();
   let usedVariables: Set<string> = new Set();
+  let functionVariables: Map<string, Set<string>> = new Map();
   let constants: Set<string> = new Set();
 
   tree.cursor().iterate((node) => {
     switch (node.name) {
+      case "FunctionDeclaration": {
+        const functionNode = node.node.getChild("VariableDefinition");
+        const funtionName = view.state.doc.sliceString(
+          functionNode?.from || 0,
+          functionNode?.to
+        );
+        const paramListNode = node.node.getChild("ParamList");
+
+        if (paramListNode) {
+          let paramNode = paramListNode.firstChild;
+          while (paramNode) {
+            const paramName = view.state.doc.sliceString(
+              paramNode.from,
+              paramNode.to
+            );
+
+            functionVariables.set(
+              funtionName,
+              functionVariables.get(funtionName)?.add(paramName) ||
+                new Set([paramName])
+            );
+            paramNode = paramNode.nextSibling;
+          }
+        }
+        break;
+      }
+
       case "VariableDeclaration": {
         const variableNode = node.node.getChild("VariableDefinition");
         const variableName = view.state.doc.sliceString(
@@ -162,18 +190,49 @@ export const cobralLinter = linter((view) => {
 
         const variableName = view.state.doc.sliceString(node.from, node.to);
 
-        // Skip checking reserved keywords
-        if (
-          !declaredVariables.has(variableName) &&
-          !reservedKeywords.has(variableName.trim())
-        ) {
-          diagnostics.push({
-            from: node.from,
-            to: node.to,
-            severity: "error",
-            message: `Variável '${variableName}' não declarada.`,
-          });
+        // Check if any node in the parent chain is a function
+        let currentNode = node.node.parent;
+        while (currentNode) {
+          if (currentNode.name === "FunctionDeclaration") {
+            const functionNode = currentNode.getChild("VariableDefinition");
+            const functionName = view.state.doc.sliceString(
+              functionNode?.from || 0,
+              functionNode?.to
+            );
+
+            if (
+              !functionVariables.get(functionName)?.has(variableName) &&
+              !reservedKeywords.has(variableName.trim())
+            ) {
+              diagnostics.push({
+                from: node.from,
+                to: node.to,
+                severity: "error",
+                message: `Variável '${variableName}' não declarada na função '${functionName}'.`,
+              });
+            }
+            break;
+          }
+
+          currentNode = currentNode.parent;
         }
+
+        if (!currentNode) {
+          if (
+            !declaredVariables.has(variableName) &&
+            !reservedKeywords.has(variableName.trim())
+          ) {
+            diagnostics.push({
+              from: node.from,
+              to: node.to,
+              severity: "error",
+              message: `Variável '${variableName}' não declarada.`,
+            });
+          }
+        } else {
+          break;
+        }
+
         break;
       }
     }

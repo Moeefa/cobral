@@ -61,22 +61,45 @@ export const Terminal = () => {
     <>
       <div className="flex justify-between gap-1 p-1 bg-background">
         <div>
-          <Button ref={runButton} variant="ghost" onClick={handleParse}>
-            <SparklesIcon className="mr-2 size-4" /> Executar
+          <Button
+            ref={runButton}
+            variant="expandIcon"
+            Icon={SparklesIcon}
+            iconPlacement="left"
+            onClick={handleParse}
+          >
+            Executar
           </Button>
 
-          <Button ref={stepButton} variant="ghost" onClick={handleParseStep}>
-            <FootprintsIcon className="mr-2 size-4" /> Passo a passo
+          <Button
+            ref={stepButton}
+            variant="expandIcon"
+            Icon={FootprintsIcon}
+            iconPlacement="left"
+            onClick={handleParseStep}
+          >
+            Passo a passo
           </Button>
 
-          <Button ref={breakButton} variant="ghost" onClick={handleBreak}>
-            <BanIcon className="mr-2 size-4" /> Interromper
+          <Button
+            ref={breakButton}
+            variant="expandIcon"
+            Icon={BanIcon}
+            iconPlacement="left"
+            onClick={handleBreak}
+          >
+            Interromper
           </Button>
         </div>
 
         <div>
-          <Button variant="ghost" onClick={clearLogs}>
-            <ArchiveIcon className="mr-2 size-4" /> Limpar
+          <Button
+            variant="expandIcon"
+            Icon={ArchiveIcon}
+            iconPlacement="left"
+            onClick={clearLogs}
+          >
+            Limpar
           </Button>
         </div>
       </div>

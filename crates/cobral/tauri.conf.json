@@ -1,6 +1,6 @@
 {
   "productName": "cobral",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "identifier": "com.cobral.app",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -16,7 +16,8 @@
         "width": 1000,
         "height": 600,
         "visible": false,
-        "center": true
+        "center": true,
+        "zoomHotkeysEnabled": true
       }
     ],
     "security": {

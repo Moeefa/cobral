@@ -2,7 +2,7 @@ const { fontFamily } = require("tailwindcss/defaultTheme");
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: "media",
+  darkMode: "class",
   content: ["./crates/ui/src/**/*.{html,js,tsx,ts,jsx}", "./index.html"],
   theme: {
     container: {
@@ -56,7 +56,7 @@ export default {
         },
       },
       borderWidth: {
-        DEFAULT: "2px",
+        DEFAULT: "1px",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -67,6 +67,10 @@ export default {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
       keyframes: {
+        shine: {
+          from: { backgroundPosition: "200% 0" },
+          to: { backgroundPosition: "-200% 0" },
+        },
         "accordion-down": {
           from: {
             height: "0",
@@ -85,6 +89,7 @@ export default {
         },
       },
       animation: {
+        shine: "shine 8s ease-in-out infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },

@@ -4,6 +4,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 
+import { CommandMenu } from "@/components/command";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "@/components/sidebar";
 import { Titlebar } from "@/components/titlebar";
@@ -11,6 +12,7 @@ import { Titlebar } from "@/components/titlebar";
 export const Layout = () => {
   return (
     <div className="flex h-full">
+      <CommandMenu />
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={18} minSize={18}>
           <Sidebar />

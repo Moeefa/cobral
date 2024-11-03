@@ -1,5 +1,8 @@
-# Atualização 0.4.1
+# Atualização 0.5.0
+
+- Adicionado configurações de tema e escala da interface
+- Melhorias na interface de usuário
 
 ## Correções
 
-- Corrigido erro ao usar funções recursivas.
+- Corrigido linter para não exibir erros em variáveis em escopo de função

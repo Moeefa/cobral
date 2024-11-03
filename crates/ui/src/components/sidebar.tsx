@@ -19,7 +19,7 @@ export const Sidebar = () => {
       <div className="flex flex-col h-full">
         <div
           data-tauri-drag-region
-          className="flex items-center justify-between w-full border-b border-border min-h-11"
+          className="flex items-center justify-between w-full border-b border-border min-h-11 p-[3.5px]"
         >
           <h1
             data-tauri-drag-region
@@ -71,8 +71,8 @@ const Actions = () => {
 
   return (
     <div id="left" data-tauri-drag-region className="flex items-center px-4">
-      <div data-tauri-drag-region className="flex items-center space-x-3">
-        <div className="flex gap-2">
+      <div data-tauri-drag-region className="flex items-center space-x-4">
+        <div className="flex gap-3">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger onClick={downloadFile}>

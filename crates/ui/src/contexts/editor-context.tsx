@@ -6,10 +6,12 @@ import React from "react";
 
 interface EditorContextProps {
   value: string;
+  theme: string;
   logs: React.JSX.Element[];
   file: string | null;
   setFile: (file: string | null) => void;
   setValue: (value: string) => void;
+  setTheme: (theme: string) => void;
   addLog: (log: { level: string; message: string }[]) => void;
   addInput: (message: string) => void;
   clearLogs: () => void;
@@ -69,6 +71,7 @@ const InputEntry = React.memo(
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [value, setValue] = useState("");
+  const [theme, setTheme] = useState("quietlight");
   const [logs, setLogs] = useState<React.JSX.Element[]>([]);
   const [file, setFile] = useState<string | null>("arquivo.cl");
 
@@ -128,6 +131,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   return (
     <EditorContext.Provider
       value={{
+        theme,
+        setTheme,
         file,
         setFile,
         value,

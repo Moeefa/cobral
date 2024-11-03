@@ -1,6 +1,6 @@
-# CobraL
+# Portugol CobraL
 
-CobraL é um [pseudocódigo](https://pt.wikipedia.org/wiki/Pseudoc%C3%B3digo) com o objetivo de ensinar conceitos básicos de programação de forma simples e intuitiva. O código é interpretado e executado em Rust, mas com algumas restrições e adições.
+CobraL é uma linguagem extremamente rápida baseada no [Portugol (Português estruturado)](https://pt.wikipedia.org/wiki/Portugol) com o objetivo de ensinar conceitos básicos de programação de forma simples e intuitiva. O código é interpretado e executado em Rust, mas com algumas restrições e adições.
 
 O projeto ainda está em desenvolvimento e novas funcionalidades serão adicionadas em breve. Se você quiser contribuir, fique à vontade para abrir uma issue ou um pull request.
 

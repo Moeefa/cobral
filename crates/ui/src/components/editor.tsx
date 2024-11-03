@@ -3,22 +3,20 @@ import CodeMirror, {
   ViewUpdate,
   keymap,
 } from "@uiw/react-codemirror";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
 import { EditorContext } from "@/contexts/editor-context";
 import { cobral } from "@/lib/language/cobral";
 import { cobralLinter } from "@/lib/language/linter";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { invoke } from "@tauri-apps/api/core";
-import { okaidia } from "@uiw/codemirror-theme-okaidia";
-import { quietlight } from "@uiw/codemirror-theme-quietlight";
+import { resolveTheme } from "@/lib/utils";
 import { showMinimap } from "@replit/codemirror-minimap";
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
 import { wordHover } from "@/lib/language/hover";
 
 export const Editor = () => {
-  const { value, setValue } = useContext(EditorContext);
-  const [theme, setTheme] = useState(quietlight);
+  const { value, theme, setTheme, setValue } = useContext(EditorContext);
 
   const onChange = useCallback((val: string, _viewUpdate: ViewUpdate) => {
     setValue(val);
@@ -28,14 +26,14 @@ export const Editor = () => {
   useEffect(() => {
     setTheme(
       window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? okaidia
-        : quietlight
+        ? "okaidia"
+        : "quietlight"
     );
 
     window
       .matchMedia("(prefers-color-scheme: dark)")
       .addEventListener("change", (event) => {
-        event.matches ? setTheme(okaidia) : setTheme(quietlight);
+        event.matches ? setTheme("okaidia") : setTheme("quietlight");
       });
   }, []);
 
@@ -45,7 +43,7 @@ export const Editor = () => {
       height="100%"
       width="100%"
       className="h-full w-full font-mono"
-      theme={theme}
+      theme={resolveTheme(theme)}
       extensions={[
         cobral(),
         keymap.of(vscodeKeymap),
@@ -56,8 +54,7 @@ export const Editor = () => {
               const dom = document.createElement("div");
               return { dom };
             },
-            // displayText: "blocks",
-            showOverlay: "always",
+            showOverlay: "mouse-over",
           };
         }),
         cobralLinter,
