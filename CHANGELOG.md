@@ -1,8 +1,6 @@
-# Atualização 0.5.0
+# Atualização 0.6.0
 
-- Adicionado configurações de tema e escala da interface
-- Melhorias na interface de usuário
-
-## Correções
-
-- Corrigido linter para não exibir erros em variáveis em escopo de função
+- Implementado o Monaco
+- Importação de arquivos `.cl`
+- Implementado linter para o Monaco
+- Implementado tm-grammars

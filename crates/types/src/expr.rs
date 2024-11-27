@@ -36,6 +36,8 @@ pub enum Expr {
   UnaryNot(Box<Expr>),
 
   For(Box<Expr>, Box<Expr>, Box<Expr>, Vec<Expr>),
+
+  Import(String),
 }
 
 #[derive(Debug, Clone)]
@@ -122,6 +124,7 @@ impl std::fmt::Display for Expr {
       }
       Expr::UnaryMinus(expr) => write!(f, "-{}", expr),
       Expr::UnaryNot(expr) => write!(f, "nao {}", expr),
+      Expr::Import(path) => write!(f, "import '{}'", path),
     }
   }
 }

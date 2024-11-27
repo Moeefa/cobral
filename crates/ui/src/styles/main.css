@@ -105,13 +105,12 @@
   }
 
   body {
-    @apply text-base bg-background/75;
+    @apply text-base bg-background/75 [font-family:"Inter",sans-serif];
   }
 
   * {
     scrollbar-color: hsl(var(--foreground)) transparent;
     scrollbar-width: 20px;
-    font-family: "Inter", sans;
     @apply border-border;
   }
 }
@@ -120,7 +119,7 @@
   font-feature-settings: "calt" 0, "zero", "liga" 0, "ss01" !important;
 }
 
-.cm-editor,
+/* .cm-editor,
 .cm-editor .cm-gutters,
 .cm-editor .cm-gutters {
   @apply !bg-background;
@@ -241,7 +240,7 @@ code > [data-line]::before {
   content: counter(line);
 
   /* Tailwind classes */
-  @apply inline-block w-4 mr-8 text-right text-gray-500;
+/* @apply inline-block w-4 mr-8 text-right text-gray-500;
 }
 
 code[data-line-numbers-max-digits="2"] > [data-line]::before {
@@ -251,6 +250,7 @@ code[data-line-numbers-max-digits="2"] > [data-line]::before {
 code[data-line-numbers-max-digits="3"] > [data-line]::before {
   @apply w-12;
 }
+*/
 
 input[type="checkbox"][disabled][checked] {
   filter: invert(100%) hue-rotate(18deg) brightness(5);
@@ -265,5 +265,20 @@ input[type="checkbox"][disabled] {
 }
 
 div[data-tauri-decorum-tb] {
-  @apply !h-max !z-0;
+  @apply !h-max !z-0 border-b;
 }
+
+/* .line:before {
+  color: #6f6f6f;
+  counter-increment: line;
+  content: counter(line);
+  width: 2em;
+  text-align: right;
+  display: inline-block;
+  margin-right: 1em;
+  flex: 0 0 auto;
+} */
+
+/* .reset {
+  counter-reset: line;
+} */

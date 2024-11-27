@@ -10,6 +10,7 @@ pub enum Token {
   For,
   Function,
   Return,
+  Import,
 
   // Symbols
   Equals,
@@ -89,6 +90,7 @@ impl fmt::Display for Token {
       Token::For => write!(f, "para"),
       Token::Function => write!(f, "funcao"),
       Token::Return => write!(f, "retorne"),
+      Token::Import => write!(f, "importar"),
       Token::Equals => write!(f, "="),
       Token::Semicolon => write!(f, ";"),
       Token::ParenL => write!(f, "("),

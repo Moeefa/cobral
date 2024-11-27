@@ -35,7 +35,7 @@ export const Terminal = () => {
       input: value,
     });
 
-    if (payload.length === 0) {
+    if (!payload.length) {
       invoke("update", { input: value });
       clearLogs();
     }

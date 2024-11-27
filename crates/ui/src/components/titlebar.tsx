@@ -16,7 +16,6 @@ import {
 import { useContext, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { DiscordLogoIcon } from "@radix-ui/react-icons";
 import { EditorContext } from "@/contexts/editor-context";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
@@ -32,9 +31,6 @@ export const Titlebar = ({ children }: { children: React.ReactNode }) => {
     const element = document.querySelector<HTMLElement>(
       "div[data-tauri-decorum-tb]"
     ) as HTMLElement;
-
-    element.classList.add("border-b");
-
     const root = document.getElementById("main-layout") as HTMLElement;
 
     root.insertBefore(element, root.firstChild);

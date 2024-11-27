@@ -28,9 +28,11 @@ impl<'a> Lexer<'a> {
 
       "funcao" => self.token(Token::Function), // Keyword "function"
       "retorne" => self.token(Token::Return),  // Keyword "return"
+      "importe" => self.token(Token::Import),  // Keyword "import"
 
       "verdadeiro" => self.token(Token::True), // Boolean literal
       "falso" => self.token(Token::False),     // Boolean literal
+
       _ => self.token(Token::Symbol(id)),
     }
   }

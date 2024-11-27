@@ -2,6 +2,7 @@ mod argument;
 mod r#const;
 mod expressions;
 mod function;
+mod import;
 mod r#let;
 mod list;
 mod r#loop;
@@ -45,6 +46,7 @@ impl<'a> Parser<'a> {
       Token::If => self.parse_statement(),
       Token::For => self.parse_for(),
       Token::Function => self.parse_function(),
+      Token::Import => self.parse_import(),
       Token::Return => self.parse_return(),
       Token::Symbol(_) => self.parse_expression().map_err(|e| e),
       _ => Err(ParseError::UnexpectedToken(

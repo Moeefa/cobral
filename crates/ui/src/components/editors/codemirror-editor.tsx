@@ -6,16 +6,16 @@ import CodeMirror, {
 import { useCallback, useContext, useEffect } from "react";
 
 import { EditorContext } from "@/contexts/editor-context";
-import { cobral } from "@/lib/language/cobral";
-import { cobralLinter } from "@/lib/language/linter";
+import { cobral } from "@/lib/codemirror/cobral";
+import { cobralLinter } from "@/lib/codemirror/linter";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { invoke } from "@tauri-apps/api/core";
 import { resolveTheme } from "@/lib/utils";
 import { showMinimap } from "@replit/codemirror-minimap";
 import { vscodeKeymap } from "@replit/codemirror-vscode-keymap";
-import { wordHover } from "@/lib/language/hover";
+import { wordHover } from "@/lib/codemirror/hover";
 
-export const Editor = () => {
+export const CodemirrorEditor = () => {
   const { value, theme, setTheme, setValue } = useContext(EditorContext);
 
   const onChange = useCallback((val: string, _viewUpdate: ViewUpdate) => {

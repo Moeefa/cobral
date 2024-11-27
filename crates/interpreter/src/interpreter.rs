@@ -45,6 +45,7 @@ impl Interpreter {
       Expr::Comparison(lhs, op, rhs) => self.eval_comparison(lhs, op, rhs, line),
       Expr::Logical(lhs, op, rhs) => self.eval_logical(lhs, op, rhs, line),
       Expr::Binary(lhs, op, rhs) => self.eval_binary(lhs, op, rhs, line),
+      Expr::Import(file_path) => self.eval_import(file_path),
 
       Expr::FunctionDeclaration(name, params, body) => {
         self.functions.lock().unwrap().insert(name, (params, body));

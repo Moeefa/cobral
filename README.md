@@ -43,8 +43,8 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [ ] Implementar operadores de incremento e decremento
 - [x] Implementar operadores de concatenação
 - [x] Implementar operadores de comparação
+- [ ] Ajustar o Textmate para a sintaxe de CobraL
 - [x] Implementar linter para análise de código
-- [x] Melhorar a implementação do Lezer
 - [ ] Destacar linha durante a execução passo a passo
 - [ ] Incluir testes unitários
 - [x] Leitura e escrita de arquivos

@@ -53,6 +53,8 @@ pub enum InterpreterError {
   ParseFloat(ParseFloatError),
   UnexpectedCharacter(usize, String),
   RuntimeError(usize, String),
+  FileNotFound(String),
+  FileReadError(String, String),
 }
 
 #[rustfmt::skip]
@@ -70,6 +72,8 @@ impl fmt::Display for InterpreterError {
       InterpreterError::ParseFloat(_err) => write!(f, "Dígito inválido encontrado"),
       InterpreterError::UnexpectedCharacter(line, character) => write!(f, "Linha {}: Caracter inesperado: '{}'", line, character),
       InterpreterError::RuntimeError(line, message) => write!(f, "Linha {}: Erro em tempo de execução: '{}'", line, message),
+      InterpreterError::FileNotFound(file) => write!(f, "Arquivo não encontrado: '{}'", file),
+      InterpreterError::FileReadError(file, message) => write!(f, "Erro ao ler arquivo '{}': '{}'", file, message),
     }
   }
 }

@@ -47,7 +47,7 @@ impl<'a> Lexer<'a> {
   pub fn next_token(&mut self) -> LabeledToken {
     while let Some(c) = self.current_char {
       match c {
-        ' ' | '\t' | '\n' => {
+        ' ' | '\t' | '\n' | '\r' => {
           self.skip_whitespace();
           continue;
         }

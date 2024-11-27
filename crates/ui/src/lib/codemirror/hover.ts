@@ -1,7 +1,7 @@
 import { hoverTooltip } from "@codemirror/view";
 import { markdownToHTML } from "@/lib/utils";
 import { syntaxTree } from "@codemirror/language";
-import { variableTypes } from "@/lib/language/linter";
+import { variableTypes } from "@/lib/codemirror/linter";
 
 const functionDescriptions = new Map<string, string>([
   [

@@ -21,8 +21,8 @@ export const EditorContext = createContext({} as EditorContextProps);
 
 const LogEntry = React.memo(
   ({ log }: { log: { level: string; message: string } }) => (
-    <div className="flex items-center gap-4 h-6" key={log.message}>
-      <span className="text-muted-foreground">
+    <div className="flex items-start gap-4" key={log.message}>
+      <span className="text-muted-foreground select-none">
         {new Date().toLocaleTimeString("pt-BR", {
           hour: "2-digit",
           minute: "2-digit",
@@ -31,7 +31,7 @@ const LogEntry = React.memo(
       </span>
       <p
         data-level={log.level}
-        className="dark:data-[level=error]:bg-red-500 data-[level=error]:bg-red-400"
+        className="log-entry dark:data-[level=error]:bg-red-500 data-[level=error]:bg-red-400"
       >
         {log.message}
       </p>
@@ -42,25 +42,23 @@ const LogEntry = React.memo(
 const InputEntry = React.memo(
   ({ message }: { message: string; onSubmit: (value: string) => void }) => {
     return (
-      <div className="flex items-center gap-4 h-6">
-        <span className="text-muted-foreground">
+      <div className="flex items-start gap-4">
+        <span className="text-muted-foreground select-none">
           {new Date().toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
           })}{" "}
         </span>
-        <div className="flex gap-1 items-center w-full">
+        <div className="flex gap-1 items-start w-full log-entry">
           <p className="w-fit">{message} </p>
           <Input
             key={new Date().toISOString()}
-            className="log-input flex-1 bg-muted/50 text-foreground rounded-lg"
+            className="log-input bg-foreground text-background h-max flex-1 rounded-lg"
             type="text"
-            onKeyDown={async (event) => {
-              if (event.key === "Enter") {
-                event.currentTarget.disabled = true;
-                await emit("read_input", event.currentTarget.value);
-              }
+            onSubmit={async (event) => {
+              event.currentTarget.disabled = true;
+              await emit("read_input", event.currentTarget.value);
             }}
           />
         </div>
@@ -70,7 +68,11 @@ const InputEntry = React.memo(
 );
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(
+    `declare x = 0;
+declare y = 0;
+`
+  );
   const [theme, setTheme] = useState("quietlight");
   const [logs, setLogs] = useState<React.JSX.Element[]>([]);
   const [file, setFile] = useState<string | null>("arquivo.cl");
