@@ -1,4 +1,9 @@
-import { DownloadIcon, FileIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { File, Tree } from "@/components/ui/file-tree";
 import {
   Tooltip,
@@ -10,21 +15,19 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 
 import { EditorContext } from "@/contexts/editor-context";
+import { EllipsisIcon } from "lucide-react";
 import { basename } from "@tauri-apps/api/path";
 import { useContext } from "react";
 
 export const Sidebar = () => {
   return (
-    <div className="h-full bg-background">
+    <div className="h-full bg-[color-mix(in_srgb,var(--vscode-editor-background)_70%,transparent)]">
       <div className="flex flex-col h-full">
         <div
           data-tauri-drag-region
           className="flex items-center justify-between w-full border-b border-border min-h-11 p-[3.5px]"
         >
-          <h1
-            data-tauri-drag-region
-            className="text-sm select-none font-semibold px-4 p-2.5"
-          >
+          <h1 data-tauri-drag-region className="text-sm select-none px-4 p-2.5">
             Explorador
           </h1>
           <Actions />
@@ -72,24 +75,27 @@ const Actions = () => {
   return (
     <div id="left" data-tauri-drag-region className="flex items-center px-4">
       <div data-tauri-drag-region className="flex items-center space-x-4">
-        <div className="flex gap-3">
+        <div className="flex gap-1.5">
           <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger onClick={downloadFile}>
-                <DownloadIcon className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent collisionPadding={5}>
-                <p>Salvar arquivo</p>
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger onClick={readFile}>
-                <FileIcon className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent collisionPadding={5}>
-                <p>Abrir um arquivo</p>
-              </TooltipContent>
-            </Tooltip>
+            <DropdownMenu>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger className="flex items-center justify-center">
+                    <EllipsisIcon className="size-4" />
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Ações</TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent className="w-24">
+                <DropdownMenuItem onClick={downloadFile}>
+                  Salvar arquivo
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={readFile}>
+                  Abrir arquivo
+                </DropdownMenuItem>
+                <DropdownMenuItem>Abrir pasta</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </TooltipProvider>
         </div>
       </div>
@@ -101,12 +107,9 @@ function FileTreeDemo() {
   const { file } = useContext(EditorContext);
 
   return (
-    <Tree
-      className="p-2 h-full overflow-hidden rounded-md bg-background"
-      elements={ELEMENTS}
-    >
+    <Tree className="p-2 h-full overflow-hidden" elements={ELEMENTS}>
       <File value="3">
-        <p>{file}</p>
+        <p className="select-none">{file}</p>
       </File>
     </Tree>
   );

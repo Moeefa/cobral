@@ -53,7 +53,7 @@ export function MonacoEditor() {
         autoClosingComments: "always",
         autoIndent: "full",
 
-        fontFamily: "JetBrains Mono",
+        fontFamily: "SF Pro Mono",
         tabSize: 4,
         fontSize: 16,
         lineHeight: 24,
@@ -65,6 +65,10 @@ export function MonacoEditor() {
         },
       }
     );
+
+    document.fonts.ready.then(() => {
+      monaco.editor.remeasureFonts();
+    });
 
     editorRef.current?.getModel()?.onDidChangeContent(() => {
       updateMarkers();
@@ -78,6 +82,7 @@ export function MonacoEditor() {
   }, []);
 
   useEffect(() => {
+    updateMarkers();
     editorRef.current?.getModel()?.applyEdits([
       {
         range:

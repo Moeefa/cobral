@@ -1,48 +1,44 @@
-export const extractSymbols = (text: string) => {
-  const lines = text.split("\n");
+import { Token, Tokenizer } from "@/lib/monaco/helpers/tokenizer";
 
+export const extractSymbols = (text: string) => {
   const symbols: {
     [scope: string]: { variables: Set<string>; functions: Set<string> };
-  } = {
-    ["global"]: { variables: new Set(), functions: new Set() },
-  };
+  } = { global: { variables: new Set(), functions: new Set() } };
+  const tokenizer = new Tokenizer(text);
 
   let currentScope = "global";
-  let scopeStack: string[] = [];
+  const scopeStack: string[] = [];
 
-  lines.forEach((line, index) => {
-    const lineNumber = index + 1;
+  let token: Token | null;
 
-    // Check for function declarations
-    const functionMatch = /funcao\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g.exec(line);
-    if (functionMatch) {
-      const functionName = functionMatch[1];
-      symbols["global"].functions.add(functionName);
+  while ((token = tokenizer.next())) {
+    if (token.type === "keyword" && token.value === "funcao") {
+      const nextToken = tokenizer.next();
+      if (nextToken?.type === "identifier") {
+        symbols.global.functions.add(nextToken.value);
 
-      // Enter a new scope for the function
-      currentScope = `function:${functionName}`;
-      symbols[currentScope] = {
-        variables: new Set(),
-        functions: new Set(),
-      };
-
-      scopeStack.push(currentScope);
-    }
-
-    // Check for variable declarations
-    const variableMatch = /\bdeclare\s+([a-zA-Z_][a-zA-Z0-9_]*)/g.exec(line);
-    if (variableMatch) symbols[currentScope].variables.add(variableMatch[1]);
-
-    // Handle block scope
-    if (/\{/g.test(line)) {
-      const newScope = `block:${lineNumber}`;
+        currentScope = `function:${nextToken.value}`;
+        symbols[currentScope] = { variables: new Set(), functions: new Set() };
+        scopeStack.push(currentScope);
+      }
+    } else if (
+      token.type === "keyword" &&
+      (token.value === "declare" || token.value == "constante")
+    ) {
+      let nextToken = tokenizer.next();
+      if (nextToken?.value === "constante") nextToken = tokenizer.next();
+      if (nextToken?.type === "identifier") {
+        symbols[currentScope].variables.add(nextToken.value);
+      }
+    } else if (token.type === "delimiter" && token.value === "{") {
+      const newScope = `block:${token.line}:${token.column}`;
       symbols[newScope] = { variables: new Set(), functions: new Set() };
       scopeStack.push(currentScope);
       currentScope = newScope;
+    } else if (token.type === "delimiter" && token.value === "}") {
+      currentScope = scopeStack.pop() || "global";
     }
-
-    if (/\}/g.test(line)) currentScope = scopeStack.pop() || "global";
-  });
+  }
 
   return symbols;
 };

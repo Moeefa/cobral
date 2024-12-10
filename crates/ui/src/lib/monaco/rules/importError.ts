@@ -1,37 +1,47 @@
 import * as monaco from "monaco-editor-core";
 
+import { Token, Tokenizer } from "@/lib/monaco/helpers/tokenizer";
+
 import { exists } from "@tauri-apps/plugin-fs";
 
-export const checkImportError = async (lines: string[]) => {
+export const checkImportError = async (
+  tokenizer: Tokenizer
+): Promise<monaco.editor.IMarkerData[]> => {
+  tokenizer.reset(); // Reset tokenizer to the beginning of the text
   const markers: monaco.editor.IMarkerData[] = [];
 
-  for (const [index, line] of lines.entries()) {
-    const importMatch = /importe\s+"([^"]+)"/g.exec(line);
-    if (!importMatch) continue;
+  // Iterate through tokens to find and validate "importe" statements
+  let token: Token | null;
+  while ((token = tokenizer.next())) {
+    if (token.type === "keyword" && token.value === "importe") {
+      const pathToken = tokenizer.next();
+      if (pathToken && pathToken.type === "string") {
+        const importPath = pathToken.value.slice(1, -1); // Remove quotes around the string
+        try {
+          if (await exists(importPath)) continue;
 
-    const importPath = importMatch[1];
-    try {
-      if (await exists(importPath)) continue;
-
-      markers.push({
-        severity: monaco.MarkerSeverity.Error,
-        startLineNumber: index + 1,
-        endLineNumber: index + 1,
-        startColumn: line.indexOf(importPath) + 1,
-        endColumn: line.indexOf(importPath) + importPath.length + 1,
-        message: `Erro ao carregar o arquivo: "${importPath}". Verifique o caminho ou as permissões.`,
-        code: "cobral.importError",
-      });
-    } catch (error) {
-      markers.push({
-        severity: monaco.MarkerSeverity.Error,
-        startLineNumber: index + 1,
-        endLineNumber: index + 1,
-        startColumn: line.indexOf(importPath) + 1,
-        endColumn: line.indexOf(importPath) + importPath.length + 1,
-        message: `Erro ao carregar o arquivo: "${importPath}". Verifique o caminho ou as permissões.`,
-        code: "cobral.importError",
-      });
+          // Create an error marker for invalid import paths
+          markers.push({
+            severity: monaco.MarkerSeverity.Error,
+            startLineNumber: token.line,
+            endLineNumber: token.line,
+            startColumn: pathToken.column + 1,
+            endColumn: pathToken.column + pathToken.value.length - 1,
+            message: `Erro ao carregar o arquivo: "${importPath}". Verifique o caminho ou as permissões.`,
+            code: "cobral.importError",
+          });
+        } catch (error) {
+          markers.push({
+            severity: monaco.MarkerSeverity.Error,
+            startLineNumber: token.line,
+            endLineNumber: token.line,
+            startColumn: pathToken.column + 1,
+            endColumn: pathToken.column + pathToken.value.length - 1,
+            message: `Erro ao carregar o arquivo: "${importPath}". Verifique o caminho ou as permissões.`,
+            code: "cobral.importError",
+          });
+        }
+      }
     }
   }
 

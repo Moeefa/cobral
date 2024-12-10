@@ -1,74 +1,121 @@
-import { ReactNode, useContext, useEffect, useRef } from "react";
+import { AutoSizer, IndexRange, InfiniteLoader, List } from "react-virtualized";
+import React, {
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 
-import AutoSizer from "react-virtualized-auto-sizer";
 import { EditorContext } from "@/contexts/editor-context";
-import { VariableSizeList } from "react-window";
 
-export const Logs = () => {
-  const { logs } = useContext(EditorContext);
-
-  const rowHeights = useRef<{ [index: number]: number }>({});
-  const listRef = useRef<VariableSizeList>(null);
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      listRef.current?.scrollToItem(logs.length - 1, "end");
-    }, 0);
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [logs]);
-
-  const Row = ({
+const Row = React.memo(
+  ({
     index,
     style,
     data,
+    rowHeights,
   }: {
     index: number;
     style: React.CSSProperties;
     data: ReactNode[];
+    rowHeights: React.MutableRefObject<{ [index: number]: number }>;
   }) => {
     const rowRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-      if (!rowRef.current) return;
-
-      const height =
-        rowRef.current.getElementsByClassName("log-entry")[0]?.clientHeight;
-      if (rowHeights.current[index] !== height) setRowHeight(index, height);
-    }, [rowRef, index, data[index]]); // Ensure height is recalculated when row content changes.
-
-    const setRowHeight = (index: number, height: number) => {
-      rowHeights.current = { ...rowHeights.current, [index]: height };
-      listRef.current?.resetAfterIndex(index); // Reset the size cache for the updated row.
+    const updateRowHeight = (index: number, height: number) => {
+      rowHeights.current[index] = height;
     };
 
+    useLayoutEffect(() => {
+      if (!rowRef.current) return;
+
+      const logEntry = rowRef.current.getElementsByClassName("log-entry")[0];
+      const measuredHeight = logEntry?.clientHeight;
+
+      if (measuredHeight) updateRowHeight(index, measuredHeight);
+    }, [index, data[index]]);
+
     return (
-      <div ref={rowRef} className="px-2 min-h-9" style={{ ...style }}>
+      <div
+        ref={rowRef}
+        style={style}
+        data-index={index}
+        className="log-entry-container"
+      >
         {data[index]}
       </div>
     );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.index === nextProps.index &&
+      prevProps.data[prevProps.index] === nextProps.data[nextProps.index]
+    );
+  }
+);
+
+export const Logs = React.memo(() => {
+  const { logs } = useContext(EditorContext);
+
+  const rowHeights = useRef<{ [index: number]: number }>({});
+
+  const isRowLoaded = ({ index }: { index: number }) => {
+    return !!logs[index];
   };
+
+  const loadMoreRows = async (params: IndexRange) => {
+    return logs.slice(params.startIndex, params.stopIndex);
+  };
+
+  const rowRenderer = useCallback(
+    ({
+      index,
+      key,
+      style,
+    }: {
+      index: number;
+      key: React.Key;
+      style: React.CSSProperties;
+    }) => (
+      <Row
+        index={index}
+        key={key}
+        style={style}
+        data={logs}
+        rowHeights={rowHeights}
+      />
+    ),
+    [logs, rowHeights]
+  );
 
   return (
     <AutoSizer>
-      {({ height, width }) => (
-        <VariableSizeList
-          height={height - 48}
-          itemCount={logs.length}
-          estimatedItemSize={24}
-          itemSize={(index) => rowHeights.current[index] || 24} // Default to 24px if not measured yet.
-          width={width}
-          itemData={logs}
-          ref={listRef}
-          className="bg-secondary border-t border-border"
+      {({ width, height }) => (
+        <InfiniteLoader
+          isRowLoaded={isRowLoaded}
+          loadMoreRows={loadMoreRows}
+          rowCount={logs.length}
+          minimumBatchSize={10}
         >
-          {({ index, style }) => (
-            <Row index={index} style={style} data={logs} />
+          {({ onRowsRendered, registerChild }) => (
+            <List
+              ref={registerChild}
+              width={width}
+              height={height - 48}
+              rowCount={logs.length}
+              rowHeight={({ index }) => rowHeights.current[index] || 26}
+              rowRenderer={rowRenderer}
+              onRowsRendered={onRowsRendered}
+              scrollToIndex={logs.length - 1}
+              scrollToAlignment="end"
+              overscanRowCount={5}
+              className="border-border px-2 bg-[var(--vscode-editor-background)] ![font-family:'SF_Pro_Mono',monospace]"
+            />
           )}
-        </VariableSizeList>
+        </InfiniteLoader>
       )}
     </AutoSizer>
   );
-};
+});

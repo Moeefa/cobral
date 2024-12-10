@@ -1,5 +1,6 @@
 import * as monaco from "monaco-editor-core";
 
+import { Tokenizer } from "@/lib/monaco/helpers/tokenizer";
 import { checkImportError } from "./rules/importError";
 import { checkIncompatibleComparisons } from "@/lib/monaco/rules/incompatibleComparison";
 import { checkUndefinedDeclarations } from "./rules/undefinedDeclarations";
@@ -11,9 +12,10 @@ export const linter = async (model: monaco.editor.ITextModel) => {
   const markers: monaco.editor.IMarkerData[] = [];
   const text = model.getValue();
   const lines = text.split("\n");
+  const tokenizer = new Tokenizer(text);
 
   const symbols = extractSymbols(text);
-  const imports = await extractImports(lines);
+  const imports = await extractImports(text);
 
   symbols.global = {
     variables: new Set([
@@ -27,10 +29,10 @@ export const linter = async (model: monaco.editor.ITextModel) => {
   };
 
   markers.push(
-    ...(await checkImportError(lines)),
-    ...checkUndefinedDeclarations(lines, symbols),
-    ...checkUnusedDeclarations(lines, symbols),
-    ...checkIncompatibleComparisons(lines)
+    ...(await checkImportError(tokenizer)),
+    ...checkUndefinedDeclarations(tokenizer, symbols),
+    ...checkUnusedDeclarations(tokenizer, symbols),
+    ...checkIncompatibleComparisons(tokenizer, symbols)
   );
 
   return markers;

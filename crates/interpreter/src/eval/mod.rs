@@ -8,6 +8,8 @@ pub mod r#let;
 pub mod list;
 pub mod logical;
 pub mod r#loop;
+pub mod postfix;
+pub mod prefix;
 pub mod statement;
 pub mod unary;
 

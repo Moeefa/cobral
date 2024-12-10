@@ -1,14 +1,16 @@
 import * as monaco from "monaco-editor-core";
 
+import { Token, Tokenizer } from "@/lib/monaco/helpers/tokenizer";
+
 import { reservedKeywords } from "@/lib/monaco/constants";
 
-// Check for undefined variables and functions
 export const checkUndefinedDeclarations = (
-  lines: string[],
+  tokenizer: Tokenizer,
   scopes: {
     [scope: string]: { variables: Set<string>; functions: Set<string> };
   }
 ): monaco.editor.IMarkerData[] => {
+  tokenizer.reset(); // Reset tokenizer to the beginning of the text
   const markers: monaco.editor.IMarkerData[] = [];
 
   // Pre-calculate inherited variables and functions for each scope
@@ -36,47 +38,32 @@ export const checkUndefinedDeclarations = (
     };
   });
 
-  // Process each line for undefined identifiers
-  lines.forEach((line, lineIndex) => {
-    const sanitizedLine = line
-      .replace(/\/\/.*/g, "") // Remove line comments
-      .replace(/\/\*[\s\S]*?\*\//g, "") // Remove block comments
-      .replace(/"(?:[^"\\]|\\.)*"/g, ""); // Remove strings
+  // Tokenize the entire input text for processing
+  let token: Token | null;
 
-    let match;
-    const identifierRegex = /\b([a-zA-Z_][a-zA-Z0-9_]*)\b/g;
-    identifierRegex.lastIndex = 0; // Reset regex state
+  // Process tokens for undefined identifiers
+  while ((token = tokenizer.next())) {
+    const { type, value, line, column } = token;
 
-    while ((match = identifierRegex.exec(sanitizedLine)) !== null) {
-      const name = match[1];
+    if (type !== "identifier") continue; // Skip non-identifiers
+    if (reservedKeywords.has(value)) continue; // Skip reserved keywords
 
-      // Ignore reserved keywords or declarations
-      if (reservedKeywords.has(name)) continue;
+    const isDefined = Object.values(inheritedData).some(
+      (data) => data.variables.has(value) || data.functions.has(value)
+    );
 
-      // Skip declared identifiers
-      if (/\b(declare|funcao)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g.test(line)) continue;
-
-      // Check if the identifier is undefined
-      const scope = Object.values(inheritedData).find(
-        (data) => data.variables.has(name) || data.functions.has(name)
-      );
-
-      if (!scope) {
-        const lineNumber = lineIndex + 1;
-        const columnStart = match.index + 1;
-
-        markers.push({
-          severity: monaco.MarkerSeverity.Error,
-          startLineNumber: lineNumber,
-          endLineNumber: lineNumber,
-          startColumn: columnStart,
-          endColumn: columnStart + name.length,
-          message: `Identificador '${name}' é usado mas não é declarado.`,
-          code: "cobral.undefinedIdentifier",
-        });
-      }
+    if (!isDefined) {
+      markers.push({
+        severity: monaco.MarkerSeverity.Error,
+        startLineNumber: line,
+        endLineNumber: line,
+        startColumn: column,
+        endColumn: column + value.length,
+        message: `Identificador '${value}' é usado mas não é declarado.`,
+        code: "cobral.undefinedIdentifier",
+      });
     }
-  });
+  }
 
   return markers;
 };

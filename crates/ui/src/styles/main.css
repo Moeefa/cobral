@@ -52,7 +52,7 @@
 
   .dark {
     --background: 0 0% 10.9%;
-    --foreground: 0 0% 98%;
+    --foreground: 45.88 19.1% 82.55%;
 
     --muted: 0 0% 13%;
     --muted-foreground: 0 0% 63.9%;
@@ -95,17 +95,35 @@
 }
 
 @layer base {
-  @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
-  @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+  /* @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"); */
+
+  @font-face {
+    font-family: "SF Pro Mono";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/SFMono-Regular.otf") format("opentype");
+  }
+
+  @font-face {
+    font-family: "SF Pro";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/SF-Regular.ttf") format("truetype");
+  }
 
   html,
   body,
-  #root {
+  #root,
+  .main-wrapper {
     @apply h-full w-full text-foreground overflow-hidden;
   }
 
-  body {
-    @apply text-base bg-background/75 [font-family:"Inter",sans-serif];
+  body,
+  .main-wrapper {
+    @apply !text-base ![font-family:"SF_Pro",sans-serif];
   }
 
   * {
@@ -261,24 +279,36 @@ input[type="checkbox"][disabled] {
 }
 
 .decorum-tb-btn {
-  @apply select-none !h-full;
+  @apply select-none !h-full bg-[var(--vscode-editor-background)];
 }
 
 div[data-tauri-decorum-tb] {
-  @apply !h-max !z-0 border-b;
+  @apply !h-max !z-0 shadow-lg;
 }
 
-/* .line:before {
-  color: #6f6f6f;
-  counter-increment: line;
-  content: counter(line);
-  width: 2em;
-  text-align: right;
-  display: inline-block;
-  margin-right: 1em;
-  flex: 0 0 auto;
-} */
+.log-input {
+  background-color: transparent;
+  color: #dcdcdc;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 1rem;
+}
 
-/* .reset {
-  counter-reset: line;
-} */
+.log-input::placeholder {
+  color: #555;
+}
+
+.blinking-cursor {
+  display: inline-block;
+  width: 1px;
+  height: 1.2em;
+  background-color: #dcdcdc;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    background-color: transparent;
+  }
+}

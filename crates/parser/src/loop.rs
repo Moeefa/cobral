@@ -41,12 +41,24 @@ impl<'a> Parser<'a> {
     // Parse the update expression (e.g., i = i + 1)
     let update = match &self.current_token.token {
       Token::Let => self.parse_let(),
-      Token::Symbol(_) => self.parse_expression().map_err(|e| e),
+      Token::Increment | Token::Decrement | Token::Symbol(_) => {
+        self.parse_expression().map_err(|e| e)
+      }
       _ => Err(ParseError::UnexpectedToken(
         self.current_token.clone().token,
       )),
     }?;
-    if !matches!(update, Some(Expr::Assignment(_, _) | Expr::Let(_, _))) {
+    if !matches!(
+      update,
+      Some(
+        Expr::Assignment(_, _)
+          | Expr::PostfixDecrement(_)
+          | Expr::PostfixIncrement(_)
+          | Expr::PrefixDecrement(_)
+          | Expr::PrefixIncrement(_)
+          | Expr::Let(_, _)
+      )
+    ) {
       return Err(ParseError::InvalidExpression(
         "Era esperado a atualização de uma variável".to_string(),
       ));

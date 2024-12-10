@@ -124,10 +124,20 @@ impl<'a> Lexer<'a> {
         }
         '+' => {
           self.advance();
+          if self.current_char == Some('+') {
+            self.advance();
+            return self.token(Token::Increment);
+          }
+
           return self.token(Token::Plus);
         }
         '-' => {
           self.advance();
+          if self.current_char == Some('-') {
+            self.advance();
+            return self.token(Token::Decrement);
+          }
+
           return self.token(Token::Minus);
         }
         '*' => {

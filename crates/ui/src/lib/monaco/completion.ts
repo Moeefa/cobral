@@ -1,5 +1,6 @@
 import * as monaco from "monaco-editor-core";
 
+import { Tokenizer } from "@/lib/monaco/helpers/tokenizer";
 import { extractImports } from "@/lib/monaco/helpers/extractImports";
 
 export const completionItemProvider =
@@ -95,12 +96,12 @@ export const completionItemProvider =
        */
       const keywords = [
         {
-          regex: /funcao\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g,
+          regex: /funcao\s+([\p{L}_][\p{L}0-9_]*)\s*\(/gu,
           kind: monaco.languages.CompletionItemKind.Function,
           documentation: "Função declarada.",
         },
         {
-          regex: /\bdeclare\s+([a-zA-Z_][a-zA-Z0-9_]*)/g,
+          regex: /\bdeclare\s+([\p{L}_][\p{L}0-9_]*)/gu,
           kind: monaco.languages.CompletionItemKind.Variable,
           documentation: "Variável declarada.",
         },
@@ -123,8 +124,8 @@ export const completionItemProvider =
         }
       });
 
-      const lines = model.getValue().split("\n");
-      const importedSymbols = await extractImports(lines);
+      const tokenizer = new Tokenizer(model.getValue());
+      const importedSymbols = await extractImports(model.getValue());
 
       importedSymbols.global.variables.forEach((variable) => {
         suggestions.push({

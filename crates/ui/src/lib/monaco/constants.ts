@@ -9,6 +9,9 @@ export const reservedKeywords = new Set([
   "enquanto",
   "se",
   "senao",
+  "e",
+  "ou",
+  "nao",
 
   // Data types
   "verdadeiro",
@@ -25,4 +28,8 @@ export const reservedKeywords = new Set([
   // Math library
   "raiz",
   "potencia",
+
+  // Convert
+  "int",
+  "real",
 ]);

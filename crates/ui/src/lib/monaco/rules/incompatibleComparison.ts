@@ -1,186 +1,221 @@
 import * as monaco from "monaco-editor-core";
 
+import { Token, Tokenizer } from "@/lib/monaco/helpers/tokenizer";
+
+// Check for incompatible comparisons
 export const checkIncompatibleComparisons = (
-  lines: string[]
+  tokenizer: Tokenizer,
+  scopes: {
+    [scope: string]: { variables: Set<string>; functions: Set<string> };
+  }
 ): monaco.editor.IMarkerData[] => {
+  tokenizer.reset(); // Start from the beginning of the tokens
   const markers: monaco.editor.IMarkerData[] = [];
-  const variables = extractVariables(lines); // Extract declared variables and their types
+  const scopeStack: string[] = []; // Track nested scopes
+  const variableTypes: Map<string, string> = new Map(); // Map to track variable types
 
-  lines.forEach((line, lineIndex) => {
-    const tokens = tokenize(line);
-    const comparisons = extractComparisons(tokens);
+  let currentScope = "global"; // Start in the global scope
 
-    comparisons.forEach(({ leftOperand, rightOperand, range }) => {
-      const leftType = inferType(leftOperand, variables);
-      const rightType = inferType(rightOperand, variables);
+  let previousToken: Token | null = null; // Track the previous token
+  let token: Token | null;
 
-      // Debugging: Log operands, types, and ranges
-      console.log("Left Operand:", leftOperand, "Type:", leftType);
-      console.log("Right Operand:", rightOperand, "Type:", rightType);
+  while ((token = tokenizer.next())) {
+    if (token.type === "keyword") {
+      if (token.value === "funcao") {
+        // Enter a new function scope
+        const nextToken = tokenizer.next();
+        if (nextToken?.type === "identifier") {
+          currentScope = `function:${nextToken.value}`;
+          scopeStack.push(currentScope);
+          scopes[currentScope] = { variables: new Set(), functions: new Set() }; // Initialize function scope
+        }
+      } else if (token.value === "declare") {
+        // Handle variable declaration in the current scope
+        tokenizer.peek()?.value === "constante" ? tokenizer.next() : null;
+
+        const nextToken = tokenizer.next();
+        if (nextToken?.type === "identifier") {
+          scopes[currentScope] = scopes[currentScope] || {
+            variables: new Set(),
+            functions: new Set(),
+          };
+          scopes[currentScope].variables.add(nextToken.value);
+
+          // Infer and store the variable's type
+          const assignmentToken = tokenizer.peek();
+          if (assignmentToken?.value === "=") {
+            tokenizer.next(); // Consume "="
+            const valueToken = tokenizer.next();
+            if (valueToken) {
+              const inferredType = inferType(valueToken.value);
+              variableTypes.set(nextToken.value, inferredType || "unknown");
+            }
+          }
+        }
+      }
+    }
+
+    if (token.type === "delimiter") {
+      if (token.value === "{") {
+        // Enter a new block scope
+        const blockScope = `block:${token.line}`;
+        scopeStack.push(currentScope); // Save current scope
+        currentScope = blockScope;
+        scopes[currentScope] = { variables: new Set(), functions: new Set() }; // Initialize block scope
+      } else if (token.value === "}") {
+        // Exit the current block or function scope
+        currentScope = scopeStack.pop() || "global";
+      }
+    }
+
+    // Handle comparisons
+    if (["==", "!=", "<", ">", "<=", ">="].includes(token.value)) {
+      // Ensure previous token exists and is valid
+      if (
+        !previousToken ||
+        !["identifier", "string", "number"].includes(previousToken.type)
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          startLineNumber: token.line,
+          endLineNumber: token.line,
+          startColumn: token.column,
+          endColumn: token.column + token.value.length,
+          message: "Operação de comparação incompleta.",
+          code: "cobral.incompleteComparison",
+        });
+
+        continue; // Skip incomplete comparisons
+      }
+
+      const leftOperandToken = previousToken;
+      const rightOperandToken = tokenizer.next();
+
+      // Ensure the right operand exists and is valid
+      if (
+        !rightOperandToken ||
+        !["identifier", "string", "number"].includes(rightOperandToken.type)
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          startLineNumber: token.line,
+          endLineNumber: token.line,
+          startColumn: leftOperandToken.column,
+          endColumn: token.column + token.value.length,
+          message: "Operação de comparação incompleta.",
+          code: "cobral.incompleteComparison",
+        });
+
+        continue; // Skip incomplete comparisons
+      }
+
+      if (
+        !leftOperandToken ||
+        !["identifier", "string", "number"].includes(leftOperandToken.type)
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          startLineNumber: token.line,
+          endLineNumber: token.line,
+          startColumn: token.column,
+          endColumn: rightOperandToken.column + rightOperandToken.value.length,
+          message: "Operação de comparação incompleta.",
+          code: "cobral.incompleteComparison",
+        });
+
+        continue; // Skip incomplete comparisons
+      }
+
+      const rightOperand = rightOperandToken.value;
+      const leftOperand = leftOperandToken.value;
+      console.log("leftOperand", leftOperand);
+      console.log("rightOperand", rightOperand);
+
+      const leftType = resolveType(
+        leftOperand,
+        currentScope,
+        scopes,
+        variableTypes
+      );
+      const rightType = resolveType(
+        rightOperand,
+        currentScope,
+        scopes,
+        variableTypes
+      );
 
       // Ignore comparisons between compatible types
       if (
         (leftType === "inteiro" && rightType === "real") ||
         (leftType === "real" && rightType === "inteiro")
       ) {
-        return;
+        previousToken = token; // Update previous token and continue
+        continue;
       }
 
       // Check for incompatibility
       if (leftType && rightType && leftType !== rightType) {
         markers.push({
           severity: monaco.MarkerSeverity.Error,
-          startLineNumber: lineIndex + 1,
-          endLineNumber: lineIndex + 1,
-          startColumn: range.start + 1, // 1-based index
-          endColumn: range.end + 1, // 1-based index
+          startLineNumber: token.line,
+          endLineNumber: token.line,
+          startColumn: leftOperandToken.column,
+          endColumn: rightOperandToken.column + rightOperand.length,
           message: `Comparação incompatível: '${leftOperand}' (${leftType}) e '${rightOperand}' (${rightType}) não podem ser comparados.`,
           code: "cobral.incompatibleComparison",
         });
       }
-    });
-  });
+    }
+
+    previousToken = token; // Update the previous token at the end of the loop
+  }
 
   return markers;
 };
 
-// Extract variable declarations and their types
-const extractVariables = (lines: string[]): Record<string, string> => {
-  const variables: Record<string, string> = {};
-  const declarationRegex = /\bdeclare\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.+);/;
-
-  lines.forEach((line) => {
-    const match = declarationRegex.exec(line);
-    if (match) {
-      const variableName = match[1];
-      const variableValue = match[2];
-      variables[variableName] = evaluateExpression(variableValue, variables);
-    }
-  });
-
-  console.log("Extracted Variables:", variables);
-  return variables;
-};
-
-// Tokenizer: Breaks the line into meaningful tokens with positions
-const tokenize = (line: string) => {
-  const tokenRegex =
-    /(\d+\.\d+|\d+|verdadeiro|falso|==|!=|<=|>=|<|>|[a-zA-Z_][a-zA-Z0-9_]*|["'][^"']*["']|[()])/g;
-  const tokens = [];
-  let match;
-
-  while ((match = tokenRegex.exec(line)) !== null) {
-    tokens.push({
-      value: match[0],
-      start: match.index, // Start character position
-      end: match.index + match[0].length, // End character position
-    });
-  }
-
-  return tokens;
-};
-
-// Evaluate an expression and return its resulting type
-const evaluateExpression = (
-  expression: string,
-  variables: Record<string, string>
-): string => {
-  // Tokenize the expression
-  const tokens = tokenize(expression);
-
-  // Check for simple literals or variables
-  if (tokens.length === 1) {
-    return inferType(tokens[0].value, variables) || "unknown";
-  }
-
-  // Check for comparison operations
-  const comparisonRegex = /([^\s]+)\s*(==|!=|<|>|<=|>=)\s*([^\s]+)/;
-  const match = comparisonRegex.exec(expression);
-  if (match) {
-    const leftOperand = match[1];
-    const rightOperand = match[3];
-    const leftType = inferType(leftOperand, variables);
-    const rightType = inferType(rightOperand, variables);
-
-    // A comparison always results in a boolean
-    if (leftType && rightType) {
-      return "lógico";
-    }
-  }
-
-  // Fallback for unsupported expressions
-  return "unknown";
-};
-
-// Extract comparisons from tokens with accurate ranges
-const extractComparisons = (
-  tokens: { value: string; start: number; end: number }[]
-): {
-  leftOperand: string;
-  rightOperand: string;
-  range: { start: number; end: number };
-}[] => {
-  const comparisons: {
-    leftOperand: string;
-    rightOperand: string;
-    range: { start: number; end: number };
-  }[] = [];
-  let currentComparison: {
-    leftOperand?: string;
-    operator?: string;
-    rightOperand?: string;
-    range: { start: number; end: number };
-  } = {
-    range: { start: 0, end: 0 },
-  };
-
-  tokens.forEach((token) => {
-    if (["==", "!=", "<", ">", "<=", ">="].includes(token.value)) {
-      // Set operator and initial range
-      currentComparison.operator = token.value;
-      currentComparison.range.start = currentComparison.leftOperand
-        ? currentComparison.range.start
-        : token.start;
-      currentComparison.range.end = token.end;
-    } else if (currentComparison.operator && !currentComparison.rightOperand) {
-      if (currentComparison.leftOperand) {
-        // Set right operand and finalize range
-        currentComparison.rightOperand = token.value;
-        currentComparison.range.end = token.end;
-
-        comparisons.push({
-          leftOperand: currentComparison.leftOperand,
-          rightOperand: currentComparison.rightOperand,
-          range: { ...currentComparison.range },
-        });
-
-        // Reset for next comparison
-        currentComparison = { range: { start: 0, end: 0 } };
-      } else {
-        // Set left operand if not yet set
-        currentComparison.leftOperand = token.value;
-        currentComparison.range.start = token.start;
-      }
-    } else if (!currentComparison.operator) {
-      // Update left operand and range
-      currentComparison.leftOperand = token.value;
-      currentComparison.range.start = token.start;
-      currentComparison.range.end = token.end;
-    }
-  });
-
-  return comparisons;
-};
-
-// Infer type of a token or variable
-const inferType = (
-  token: string,
-  variables: Record<string, string> = {}
+// Resolve the type of a variable or literal
+const resolveType = (
+  name: string,
+  scope: string,
+  scopes: {
+    [scope: string]: { variables: Set<string>; functions: Set<string> };
+  },
+  variableTypes: Map<string, string>
 ): string | null => {
-  if (/^".*"$|^'.*'$/.test(token)) return "cadeia"; // Matches strings
-  if (/^\d+$/.test(token)) return "inteiro"; // Matches integers
-  if (/^\d+\.\d+$/.test(token)) return "real"; // Matches floats
-  if (/^(verdadeiro|falso)$/.test(token)) return "lógico"; // Matches booleans
-  if (variables[token]) return variables[token]; // Resolve variable type
+  // Check if it's a literal
+  if (/^".*"$|^'.*'$/.test(name)) return "cadeia"; // Matches strings
+  if (/^\d+$/.test(name)) return "inteiro"; // Matches integers
+  if (/^\d+\.\d+$/.test(name)) return "real"; // Matches floats
+  if (/^(verdadeiro|falso)$/.test(name)) return "lógico"; // Matches booleans
+
+  // Resolve variable type from the current or parent scopes
+  let currentScope = scope;
+  while (currentScope) {
+    const variables = scopes[currentScope]?.variables;
+
+    if (variables && variables.has(name)) {
+      return variableTypes.get(name) || "unknown";
+    }
+
+    // Exit the loop if we are already in the global scope
+    if (currentScope === "global") {
+      break;
+    }
+
+    // Update currentScope to its parent
+    currentScope = currentScope.includes(":")
+      ? currentScope.split(":")[0]
+      : "global";
+  }
+
+  return null; // Unknown type
+};
+
+// Infer type of a literal or value
+const inferType = (value: string): string | null => {
+  if (/^".*"$|^'.*'$/.test(value)) return "cadeia"; // String
+  if (/^\d+$/.test(value)) return "inteiro"; // Integer
+  if (/^\d+\.\d+$/.test(value)) return "real"; // Float
+  if (/^(verdadeiro|falso)$/.test(value)) return "lógico"; // Boolean
   return null; // Unknown type
 };

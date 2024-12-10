@@ -16,11 +16,6 @@ pub async fn update<R: Runtime>(_app: AppHandle<R>, _window: Window<R>, input: S
 }
 
 #[command]
-pub async fn step<R: Runtime>(app: AppHandle<R>, _window: Window<R>) -> usize {
-  CONTEXT.lock().unwrap_or_else(|e| e.into_inner()).step(app)
-}
-
-#[command]
 pub async fn parse<R: Runtime>(app: AppHandle<R>, _window: Window<R>, input: String) {
   CONTEXT
     .lock()

@@ -40,11 +40,11 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
   - [x] Operador `e` para conjunção de valores booleanos
   - [x] Operador `ou` para disjunção de valores booleanos
 - [x] Implementar operadores aritméticos
-- [ ] Implementar operadores de incremento e decremento
+- [x] Implementar operadores de incremento e decremento
 - [x] Implementar operadores de concatenação
 - [x] Implementar operadores de comparação
-- [ ] Ajustar o Textmate para a sintaxe de CobraL
-- [x] Implementar linter para análise de código
+- [x] Ajustar o Textmate para a sintaxe de CobraL
+- [x] Implementar análise de código
 - [ ] Destacar linha durante a execução passo a passo
 - [ ] Incluir testes unitários
 - [x] Leitura e escrita de arquivos

@@ -2,7 +2,6 @@ use std::{fs, path::Path};
 
 use lexer::Lexer;
 use parser::Parser;
-use tauri::http::{self, Request};
 use types::{Data, InterpreterError, LabeledExpr};
 
 use crate::Interpreter;
@@ -12,12 +11,6 @@ impl Interpreter {
     let path = Path::new(&file);
 
     if !path.exists() {
-      // let mut request = Request::builder().uri(file.clone());
-
-      // let response = request.(()).unwrap();
-
-      // println!("{:?}", response);
-
       return Err(InterpreterError::FileNotFound(file));
     }
 

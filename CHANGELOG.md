@@ -1,6 +1,9 @@
-# Atualização 0.6.0
+# Atualização 0.7.0
 
-- Implementado o Monaco
-- Importação de arquivos `.cl`
-- Implementado linter para o Monaco
-- Implementado tm-grammars
+- Linter aprimorado para identificar erros de sintaxe
+- Adicionado operadores de incremento e decremento
+- Melhorado a interface do usuário
+
+Correções:
+
+- Corrigido erro ao finalizar programa com função de escrever após a função de ler

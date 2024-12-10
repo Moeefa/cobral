@@ -32,71 +32,6 @@ impl Context {
     *self.start.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
   }
 
-  pub fn step<R: Runtime>(&self, app: AppHandle<R>) -> usize {
-    let input = self.input.lock().unwrap_or_else(|e| e.into_inner()).clone();
-    let lexer = Lexer::new(&input.as_str());
-    let mut parser = Parser::new(lexer);
-
-    if self
-      .exprs
-      .lock()
-      .unwrap_or_else(|e| e.into_inner())
-      .is_empty()
-    {
-      app.emit("clear", ()).unwrap();
-      self.reset();
-
-      *self.exprs.lock().unwrap_or_else(|e| e.into_inner()) = self.parse_all(&mut parser);
-    }
-
-    let interpreter = self.interpreter.lock().unwrap_or_else(|e| e.into_inner());
-
-    match interpreter.eval(
-      self
-        .exprs
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .clone()
-        .first()
-        .unwrap()
-        .clone(),
-    ) {
-      Ok(_) => {}
-      Err(e) => {
-        logger::error(InterpreterError::ParseError(
-          parser.current_token.line_number,
-          e.to_string(),
-        ));
-      }
-    }
-
-    if self.exprs.lock().unwrap_or_else(|e| e.into_inner()).len() == 1 {
-      let elapsed = self
-        .start
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .elapsed();
-
-      LOG_BUFFER
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .push(Payload {
-          message: format!("Tempo de execução: {:?}", elapsed),
-          level: String::from("info"),
-        });
-
-      emit_logs(&app, true);
-    }
-
-    self
-      .exprs
-      .lock()
-      .unwrap_or_else(|e| e.into_inner())
-      .remove(0);
-
-    self.exprs.lock().unwrap_or_else(|e| e.into_inner()).len()
-  }
-
   pub fn parse<R: Runtime>(&self, app: AppHandle<R>, input: String) {
     self.reset();
     self.update(input.clone());
@@ -149,6 +84,14 @@ impl Context {
         message: format!("Tempo de execução: {:?}", elapsed),
         level: String::from("info"),
       });
+
+    APP_HANDLE
+      .lock()
+      .unwrap()
+      .as_ref()
+      .unwrap()
+      .emit("exec_finished", ())
+      .unwrap();
 
     emit_logs(&app, true);
   }

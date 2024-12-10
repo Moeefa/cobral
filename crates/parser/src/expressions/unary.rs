@@ -14,6 +14,16 @@ impl<'a> Parser<'a> {
           ))?;
         Ok(Some(Expr::UnaryMinus(Box::new(operand))))
       }
+      Token::Increment => {
+        self.eat(Token::Increment)?;
+        let expr = self.parse_primary_expression()?;
+        Ok(Some(Expr::PrefixIncrement(Box::new(expr.unwrap()))))
+      }
+      Token::Decrement => {
+        self.eat(Token::Decrement)?;
+        let expr = self.parse_primary_expression()?;
+        Ok(Some(Expr::PrefixDecrement(Box::new(expr.unwrap()))))
+      }
       Token::Not => {
         self.eat(Token::Not)?; // Move past 'not'
         self.eat(Token::ParenL)?; // Move past '('

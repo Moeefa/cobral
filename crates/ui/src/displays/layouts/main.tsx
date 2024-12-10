@@ -11,7 +11,7 @@ import { Titlebar } from "@/components/titlebar";
 
 export const Layout = () => {
   return (
-    <div className="flex h-full">
+    <div className="flex h-full main-wrapper monaco-editor !bg-transparent">
       <CommandMenu />
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={18} minSize={18}>
@@ -20,7 +20,7 @@ export const Layout = () => {
         <ResizableHandle />
         <ResizablePanel minSize={50}>
           <div
-            className="flex flex-col h-full w-full bg-background"
+            className="flex flex-col h-full w-full bg-[var(--vscode-editor-background)]"
             id="main-layout"
           >
             <Titlebar>

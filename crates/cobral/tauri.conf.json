@@ -1,6 +1,6 @@
 {
   "productName": "cobral",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "identifier": "com.cobral.app",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -17,7 +17,11 @@
         "height": 600,
         "visible": false,
         "center": true,
-        "zoomHotkeysEnabled": true
+        "zoomHotkeysEnabled": true,
+        "transparent": true,
+        "windowEffects": {
+          "effects": ["acrylic", "sidebar"]
+        }
       }
     ],
     "security": {

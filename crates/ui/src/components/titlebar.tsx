@@ -31,6 +31,13 @@ export const Titlebar = ({ children }: { children: React.ReactNode }) => {
     const element = document.querySelector<HTMLElement>(
       "div[data-tauri-decorum-tb]"
     ) as HTMLElement;
+    element.classList.add(
+      "monaco-editor",
+      "!bg-[var(--vscode-editor-background)]",
+      "!text-foreground",
+      '![font-family:"SF_Pro",sans-serif]',
+      "!text-base"
+    );
     const root = document.getElementById("main-layout") as HTMLElement;
 
     root.insertBefore(element, root.firstChild);
@@ -42,6 +49,13 @@ export const Titlebar = ({ children }: { children: React.ReactNode }) => {
     const element = document.querySelector<HTMLElement>(
       "div[data-tauri-decorum-tb] div[data-tauri-drag-region]"
     );
+
+    const btns =
+      document.querySelectorAll<HTMLButtonElement>(".decorum-tb-btn");
+
+    btns.forEach((btn) => {
+      btn.className = "decorum-tb-abtn";
+    });
 
     if (element) {
       element.style.display = "flex";
@@ -61,7 +75,7 @@ export const Titlebar = ({ children }: { children: React.ReactNode }) => {
       <div
         data-tauri-drag-region
         id="titlebar"
-        className="flex h-11 justify-between items-center w-full bg-background"
+        className="flex h-11 justify-between items-center w-full monaco-editor bg-[var(--vscode-editor-background)]"
       >
         <Left />
         <Right />
@@ -82,7 +96,7 @@ const Left = () => {
     >
       <h4
         data-tauri-drag-region
-        className="text-sm select-none font-semibold px-4 p-2.5"
+        className="text-sm ![font-family:'SF_Pro',monospace] select-none font-semibold px-4 p-2.5"
       >
         {file || "arquivo.cl"}
       </h4>

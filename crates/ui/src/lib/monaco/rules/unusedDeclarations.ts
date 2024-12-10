@@ -1,90 +1,90 @@
 import * as monaco from "monaco-editor-core";
 
+import { Token, Tokenizer } from "@/lib/monaco/helpers/tokenizer";
+
 import { reservedKeywords } from "@/lib/monaco/constants";
 
 export const checkUnusedDeclarations = (
-  lines: string[],
+  tokenizer: Tokenizer,
   scopes: {
     [scope: string]: { variables: Set<string>; functions: Set<string> };
   }
 ): monaco.editor.IMarkerData[] => {
+  tokenizer.reset(); // Reset tokenizer to the beginning of the text
   const markers: monaco.editor.IMarkerData[] = [];
-
-  // Preprocess lines to remove comments and strings
-  const sanitizedLines = lines.map(
-    (line) =>
-      line
-        .replace(/\/\/.*/g, "") // Remove line comments
-        .replace(/\/\*[\s\S]*?\*\//g, "") // Remove block comments
-        .replace(/"(?:[^"\\]|\\.)*"/g, "") // Remove strings
-  );
 
   // Collect all used identifiers
   const usedIdentifiers = new Set<string>();
-  sanitizedLines.forEach((line) => {
-    const identifierRegex = /\b([a-zA-Z_][a-zA-Z0-9_]*)\b/g;
-    identifierRegex.lastIndex = 0; // Reset regex state
+  let token: Token | null;
+  let previousToken: Token | null = null;
 
-    let match;
-    while ((match = identifierRegex.exec(line)) !== null) {
-      const name = match[1];
+  while ((token = tokenizer.next())) {
+    // Check if the current token is an identifier and not a reserved keyword
+    if (token.type === "identifier" && !reservedKeywords.has(token.value)) {
+      // Check if the previous token was a "declare" or "funcao" keyword
       if (
-        !reservedKeywords.has(name) &&
-        !/\b(declare|funcao)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g.test(line)
+        previousToken &&
+        previousToken.type === "keyword" &&
+        (previousToken.value === "declare" ||
+          previousToken.value == "constante" ||
+          previousToken.value === "funcao")
       ) {
-        usedIdentifiers.add(name);
+        // Skip adding this identifier to usedIdentifiers as it is part of a declaration
+        previousToken = token; // Update previousToken to the current token
+        continue;
       }
+
+      // Add the identifier to usedIdentifiers if it is not part of a declaration
+      usedIdentifiers.add(token.value);
     }
-  });
+
+    // Update previousToken to the current token
+    previousToken = token;
+  }
 
   // Identify unused variables and functions
   Object.entries(scopes).forEach(([_currentScope, symbols]) => {
+    // Check unused variables
     symbols.variables.forEach((variable) => {
       if (usedIdentifiers.has(variable)) return;
 
-      // Find where the variable was declared
-      const lineIndex = sanitizedLines.findIndex((line) =>
-        new RegExp(`\\b${variable}\\b`).test(line)
-      );
-
-      if (lineIndex !== -1) {
-        const lineNumber = lineIndex + 1;
-        const columnStart =
-          sanitizedLines[lineIndex]?.indexOf(variable) + 1 || 0;
-
-        markers.push({
-          severity: monaco.MarkerSeverity.Warning,
-          startLineNumber: lineNumber,
-          endLineNumber: lineNumber,
-          startColumn: columnStart,
-          endColumn: columnStart + variable.length,
-          message: `Variável '${variable}' é declarada mas não é usada.`,
-          code: "cobral.unusedVariable",
-        });
+      // Find the token where the variable was declared
+      tokenizer.reset();
+      while ((token = tokenizer.next())) {
+        if (token.type === "identifier" && token.value === variable) {
+          markers.push({
+            severity: monaco.MarkerSeverity.Warning,
+            startLineNumber: token.line,
+            endLineNumber: token.line,
+            startColumn: token.column,
+            endColumn: token.column + variable.length,
+            message: `Variável '${variable}' é declarada mas não é usada.`,
+            code: "cobral.unusedVariable",
+          });
+          break;
+        }
       }
     });
 
+    // Check unused functions
     symbols.functions.forEach((func) => {
       if (usedIdentifiers.has(func)) return;
 
-      // Find where the function was declared
-      const lineIndex = sanitizedLines.findIndex((line) =>
-        new RegExp(`\\b${func}\\b`).test(line)
-      );
-
-      if (lineIndex !== -1) {
-        const lineNumber = lineIndex + 1;
-        const columnStart = sanitizedLines[lineIndex]?.indexOf(func) + 1 || 0;
-
-        markers.push({
-          severity: monaco.MarkerSeverity.Warning,
-          startLineNumber: lineNumber,
-          endLineNumber: lineNumber,
-          startColumn: columnStart,
-          endColumn: columnStart + func.length,
-          message: `Função '${func}' é declarada mas não é usada.`,
-          code: "cobral.unusedFunction",
-        });
+      // Find the token where the function was declared
+      tokenizer.reset();
+      while ((token = tokenizer.next())) {
+        if (token.type === "identifier" && token.value === func) {
+          markers.push({
+            severity: monaco.MarkerSeverity.Warning,
+            startLineNumber: token.line,
+            endLineNumber: token.line,
+            startColumn: token.column,
+            endColumn: token.column + func.length,
+            message: `Função '${func}' é declarada mas não é usada.`,
+            code: "cobral.unusedFunction",
+          });
+          break;
+        }
       }
     });
   });

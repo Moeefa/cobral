@@ -16,7 +16,9 @@ impl<'a> Parser<'a> {
     // First, parse the comparison expression (like ==, !=, <, >)
 
     let lhs = match self.current_token.token {
-      Token::Minus | Token::Not => self.parse_unary_expression()?,
+      Token::Minus | Token::Not | Token::Decrement | Token::Increment => {
+        self.parse_unary_expression()?
+      }
       _ => self.parse_comparison_expression()?,
     };
 
@@ -41,7 +43,7 @@ impl<'a> Parser<'a> {
   }
 
   fn parse_primary_expression(&mut self) -> Result<Option<Expr>, ParseError> {
-    match &self.current_token.token {
+    let expr = match &self.current_token.token {
       Token::Integer(_) | Token::Float(_) | Token::String(_) | Token::True | Token::False => {
         self.parse_expression_data()
       }
@@ -51,6 +53,18 @@ impl<'a> Parser<'a> {
       _ => Err(ParseError::InvalidExpression(
         "Invalid primary expression".to_string(),
       )),
+    }?;
+
+    match self.current_token.token {
+      Token::Increment => {
+        self.eat(Token::Increment)?;
+        Ok(Some(Expr::PostfixIncrement(Box::new(expr.unwrap()))))
+      }
+      Token::Decrement => {
+        self.eat(Token::Decrement)?;
+        Ok(Some(Expr::PostfixDecrement(Box::new(expr.unwrap()))))
+      }
+      _ => Ok(expr), // Return the parsed expression if no postfix operator
     }
   }
 

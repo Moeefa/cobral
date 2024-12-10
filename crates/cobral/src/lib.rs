@@ -12,11 +12,7 @@ pub fn run() {
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_decorum::init())
     .plugin(tauri_plugin_shell::init())
-    .invoke_handler(tauri::generate_handler![
-      commands::parse,
-      commands::step,
-      commands::update
-    ])
+    .invoke_handler(tauri::generate_handler![commands::parse, commands::update])
     .setup(|app| {
       APP_HANDLE.lock().unwrap().replace(app.handle().clone());
 

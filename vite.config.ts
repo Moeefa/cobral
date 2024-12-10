@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import fixReactVirtualized from "esbuild-plugin-react-virtualized";
 import path from "path";
 import react from "@vitejs/plugin-react";
 
@@ -16,6 +17,12 @@ export default defineConfig(async () => ({
       },
     },
   ],
+
+  optimizeDeps: {
+    esbuildOptions: {
+      plugins: [fixReactVirtualized],
+    },
+  },
 
   resolve: {
     alias: {

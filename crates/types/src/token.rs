@@ -57,6 +57,8 @@ pub enum Token {
   Times,
   Divide,
   Rem,
+  Increment, // For `++`
+  Decrement, // For `--`
 
   // Unary
   Unary,
@@ -121,6 +123,8 @@ impl fmt::Display for Token {
       Token::Times => write!(f, "*"),
       Token::Divide => write!(f, "/"),
       Token::Rem => write!(f, "%"),
+      Token::Increment => write!(f, "++"),
+      Token::Decrement => write!(f, "--"),
       Token::Unary => write!(f, "unario"),
       Token::EOF => write!(f, "EOF"),
     }

@@ -66,6 +66,9 @@ export default {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
+      fontWeight: {
+        semibold: "700",
+      },
       keyframes: {
         shine: {
           from: { backgroundPosition: "200% 0" },

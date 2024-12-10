@@ -47,7 +47,7 @@
       "patterns": [
         {
           "name": "storage.modifier.cobral",
-          "match": "\\b(declare|funcao)\\b"
+          "match": "\\b(declare\\bconstante|declare|constante|funcao)\\b"
         }
       ]
     },
@@ -55,7 +55,7 @@
       "patterns": [
         {
           "name": "variable.other.cobral",
-          "match": "\\b[_a-zA-Z][_a-zA-Z0-9]*\\b"
+          "match": "\\b[\\p{L}_][\\p{L}0-9_]*\\b"
         }
       ]
     },

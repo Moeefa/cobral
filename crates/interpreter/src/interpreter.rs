@@ -46,7 +46,10 @@ impl Interpreter {
       Expr::Logical(lhs, op, rhs) => self.eval_logical(lhs, op, rhs, line),
       Expr::Binary(lhs, op, rhs) => self.eval_binary(lhs, op, rhs, line),
       Expr::Import(file_path) => self.eval_import(file_path),
-
+      Expr::PostfixDecrement(expr) => self.eval_postfix_decrement(expr, line),
+      Expr::PostfixIncrement(expr) => self.eval_postfix_increment(expr, line),
+      Expr::PrefixDecrement(expr) => self.eval_prefix_decrement(expr, line),
+      Expr::PrefixIncrement(expr) => self.eval_prefix_increment(expr, line),
       Expr::FunctionDeclaration(name, params, body) => {
         self.functions.lock().unwrap().insert(name, (params, body));
         Ok(Data::None) // No result for function declaration

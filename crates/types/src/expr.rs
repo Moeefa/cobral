@@ -32,8 +32,12 @@ pub enum Expr {
 
   Comparison(Box<Expr>, Token, Box<Expr>),
 
-  UnaryMinus(Box<Expr>),
+  UnaryMinus(Box<Expr>), // `-x`
   UnaryNot(Box<Expr>),
+  PrefixIncrement(Box<Expr>),  // `++x`
+  PostfixIncrement(Box<Expr>), // `x++`
+  PrefixDecrement(Box<Expr>),  // `--x`
+  PostfixDecrement(Box<Expr>), // `x--`
 
   For(Box<Expr>, Box<Expr>, Box<Expr>, Vec<Expr>),
 
@@ -112,6 +116,10 @@ impl std::fmt::Display for Expr {
         }
         Ok(())
       }
+      Expr::PrefixIncrement(expr) => write!(f, "++{}", expr),
+      Expr::PostfixIncrement(expr) => write!(f, "{}++", expr),
+      Expr::PrefixDecrement(expr) => write!(f, "--{}", expr),
+      Expr::PostfixDecrement(expr) => write!(f, "{}--", expr),
       Expr::For(init, condition, update, block) => {
         write!(f, "for {} {} {} {{\n", init, condition, update)?;
         for expr in block {
