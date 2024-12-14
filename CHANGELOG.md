@@ -1,9 +1,5 @@
-# Atualização 0.7.0
-
-- Linter aprimorado para identificar erros de sintaxe
-- Adicionado operadores de incremento e decremento
-- Melhorado a interface do usuário
+# Atualização 0.7.1
 
 Correções:
 
-- Corrigido erro ao finalizar programa com função de escrever após a função de ler
+- Corrigido limite na virtualização da lista de itens no componente de registros.
