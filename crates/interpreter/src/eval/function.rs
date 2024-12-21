@@ -22,6 +22,7 @@ impl Interpreter {
           Some(Data::Undefined)
         }
       };
+
       let result = func(args, &mut eval_fn);
       result.ok_or(InterpreterError::EvalError(
         line,

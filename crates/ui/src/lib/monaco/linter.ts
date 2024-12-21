@@ -11,12 +11,12 @@ import { extractSymbols } from "./helpers/extractSymbols";
 export const linter = async (model: monaco.editor.ITextModel) => {
   const markers: monaco.editor.IMarkerData[] = [];
   const text = model.getValue();
-  const lines = text.split("\n");
   const tokenizer = new Tokenizer(text);
 
   const symbols = extractSymbols(text);
   const imports = await extractImports(text);
 
+  // Merge global symbols with imported symbols
   symbols.global = {
     variables: new Set([
       ...symbols.global.variables,
@@ -28,6 +28,7 @@ export const linter = async (model: monaco.editor.ITextModel) => {
     ]),
   };
 
+  // Check for errors in the code
   markers.push(
     ...(await checkImportError(tokenizer)),
     ...checkUndefinedDeclarations(tokenizer, symbols),

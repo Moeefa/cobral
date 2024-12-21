@@ -8,8 +8,15 @@
         {
           "name": "punctuation.terminator.statement.cobral",
           "match": ";"
+        },
+        {
+          "name": "punctuation.separator.cobral",
+          "match": ","
         }
       ]
+    },
+    {
+      "include": "#booleans"
     },
     {
       "include": "#comments"
@@ -43,11 +50,23 @@
     }
   ],
   "repository": {
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.cobral",
+          "match": "\\b(verdadeiro|falso)\\b"
+        }
+      ]
+    },
     "keywords": {
       "patterns": [
         {
           "name": "storage.modifier.cobral",
           "match": "\\b(declare\\bconstante|declare|constante|funcao)\\b"
+        },
+        {
+          "name": "keyword.return.cobral",
+          "match": "\\b(retorne)\\b"
         }
       ]
     },

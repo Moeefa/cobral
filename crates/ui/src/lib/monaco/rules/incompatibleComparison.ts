@@ -2,6 +2,14 @@ import * as monaco from "monaco-editor-core";
 
 import { Token, Tokenizer } from "@/lib/monaco/helpers/tokenizer";
 
+const builtInFunctions: {
+  [name: string]: { args: string[]; returnType: string };
+} = {
+  ler: { args: ["cadeia"], returnType: "cadeia" }, // Reads input and returns a string
+  int: { args: ["cadeia"], returnType: "inteiro" }, // Converts data to integer
+  real: { args: ["inteiro"], returnType: "real" }, // Converts data to float
+};
+
 // Check for incompatible comparisons
 export const checkIncompatibleComparisons = (
   tokenizer: Tokenizer,
@@ -128,8 +136,6 @@ export const checkIncompatibleComparisons = (
 
       const rightOperand = rightOperandToken.value;
       const leftOperand = leftOperandToken.value;
-      console.log("leftOperand", leftOperand);
-      console.log("rightOperand", rightOperand);
 
       const leftType = resolveType(
         leftOperand,
@@ -188,6 +194,11 @@ const resolveType = (
   if (/^\d+\.\d+$/.test(name)) return "real"; // Matches floats
   if (/^(verdadeiro|falso)$/.test(name)) return "lógico"; // Matches booleans
 
+  // Check if the name is a built-in function
+  if (builtInFunctions[name]) {
+    return builtInFunctions[name].returnType;
+  }
+
   // Resolve variable type from the current or parent scopes
   let currentScope = scope;
   while (currentScope) {
@@ -217,5 +228,11 @@ const inferType = (value: string): string | null => {
   if (/^\d+$/.test(value)) return "inteiro"; // Integer
   if (/^\d+\.\d+$/.test(value)) return "real"; // Float
   if (/^(verdadeiro|falso)$/.test(value)) return "lógico"; // Boolean
+
+  // Check if the name is a built-in function
+  if (builtInFunctions[value]) {
+    return builtInFunctions[value].returnType;
+  }
+
   return null; // Unknown type
 };

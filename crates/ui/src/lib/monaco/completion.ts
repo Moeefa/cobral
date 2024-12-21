@@ -1,6 +1,5 @@
 import * as monaco from "monaco-editor-core";
 
-import { Tokenizer } from "@/lib/monaco/helpers/tokenizer";
 import { extractImports } from "@/lib/monaco/helpers/extractImports";
 
 export const completionItemProvider =
@@ -124,10 +123,9 @@ export const completionItemProvider =
         }
       });
 
-      const tokenizer = new Tokenizer(model.getValue());
-      const importedSymbols = await extractImports(model.getValue());
+      const symbols = await extractImports(model.getValue());
 
-      importedSymbols.global.variables.forEach((variable) => {
+      symbols.global.variables.forEach((variable) => {
         suggestions.push({
           label: variable,
           kind: monaco.languages.CompletionItemKind.Variable,
@@ -137,7 +135,7 @@ export const completionItemProvider =
         });
       });
 
-      importedSymbols.global.functions.forEach((func) => {
+      symbols.global.functions.forEach((func) => {
         suggestions.push({
           label: func,
           kind: monaco.languages.CompletionItemKind.Function,
@@ -151,8 +149,6 @@ export const completionItemProvider =
           },
         });
       });
-
-      suggestions.push();
 
       return { suggestions };
     },

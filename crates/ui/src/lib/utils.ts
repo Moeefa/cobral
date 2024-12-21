@@ -5,6 +5,7 @@ import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkUnlink from "remark-unlink";
 import remarkRehype from "remark-rehype";
+import rehypeShiki from "@shikijs/rehype/core";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { unified } from "unified";
@@ -12,6 +13,8 @@ import { quietlight } from "@uiw/codemirror-theme-quietlight";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { vscodeDark, vscodeLight } from "@uiw/codemirror-theme-vscode";
+import { createHighlighterCore } from "shiki/core";
+import cobral from "./monaco/cobral.json";
 
 export function resolveTheme(theme: string) {
   switch (theme) {
@@ -42,6 +45,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const highlighter = await createHighlighterCore({
+  langs: [import("./monaco/cobral.json"), import("shiki/langs/bash.mjs")],
+  loadWasm: import("shiki/wasm"),
+  themes: [
+    import("shiki/themes/vitesse-light.mjs"),
+    import("shiki/themes/vitesse-dark.mjs"),
+  ],
+});
+
 export async function markdownToHTML(markdown: string) {
   const p = await unified()
     .use(remarkParse)
@@ -49,12 +61,10 @@ export async function markdownToHTML(markdown: string) {
     .use(remarkGfm)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
-    .use(rehypePrettyCode, {
-      theme: {
-        light: "min-light",
-        dark: "min-dark",
-      },
+    .use(rehypeShiki, highlighter, {
+      // or `theme` for a single theme
       keepBackground: false,
+      theme: "vitesse-dark",
     })
     .use(rehypeStringify)
     .process(markdown);

@@ -17,7 +17,7 @@ impl std::fmt::Display for Data {
       Data::Integer(n) => write!(f, "{}", n),
       Data::Float(n) => write!(f, "{}", n),
       Data::Boolean(b) => write!(f, "{}", b),
-      Data::String(s) => write!(f, "{}", s),
+      Data::String(s) => write!(f, "\"{}\"", s),
       Data::Undefined => write!(f, "Indefinido"),
       Data::Return(data) => write!(f, "Retorno: {}", data),
       Data::List(datas) => write!(

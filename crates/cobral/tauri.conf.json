@@ -1,6 +1,6 @@
 {
-  "productName": "cobral",
-  "version": "0.7.1",
+  "productName": "Cobral",
+  "version": "0.8.0",
   "identifier": "com.cobral.app",
   "build": {
     "beforeDevCommand": "bun run dev",

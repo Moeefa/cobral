@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 
 use logger::{emit_logs, Payload, LOG_BUFFER};
 use tauri::{Emitter, Listener};
@@ -64,51 +64,56 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
 }
 
 pub fn read(args: Vec<Expr>, _: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
-  emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), true);
-
-  // Prepare the message to be sent
-  let msg = args.get(0).map_or(String::new(), |arg| arg.to_string());
-
-  // Emit the message to the front end
-  let _ = APP_HANDLE
-    .lock()
-    .unwrap()
-    .as_ref()
-    .unwrap()
-    .emit("read", msg.clone());
-
-  // Use Arc<Mutex<Option<String>>> for input received from the front-end
-  let received_input = Arc::new(Mutex::new(None));
-  let received_input_clone = Arc::clone(&received_input);
-
-  // Use Arc<Mutex<bool>> for break signal
-  let break_signal = Arc::new(Mutex::new(false));
-  let break_signal_clone = Arc::clone(&break_signal);
-
-  // Listener for the "read_input" event
   let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
-  app_handle.listen("read_input", move |msg| {
-    let mut input = received_input_clone.lock().unwrap();
-    *input = Some(msg.payload().trim_matches('"').to_string());
+
+  // Prepare the message to send to the front end
+  let msg = args.get(0).map_or(String::new(), |arg| {
+    let arg_str = arg.to_string();
+    arg_str 
+      .strip_prefix('"')
+      .and_then(|s| s.strip_suffix('"'))
+      .unwrap_or(&arg_str)
+      .to_string()
+  });
+  let _ = app_handle.emit("read", msg.clone());
+
+  // Shared state for input and break signal
+  let shared_state: Arc<(Mutex<Option<Data>>, Condvar)> =
+    Arc::new((Mutex::new(None), Condvar::new()));
+  let shared_state_clone: Arc<(Mutex<Option<Data>>, Condvar)> = Arc::clone(&shared_state);
+
+  // Listener for "read_input" event
+  let read_listener = app_handle.listen("read_input", move |msg| {
+    let (lock, cvar) = &*shared_state_clone;
+    let mut input = lock.lock().unwrap();
+    *input = Some(Data::String(msg.payload().trim_matches('"').to_string()));
+    cvar.notify_one(); // Notify the waiting thread
   });
 
-  // Listener for the "break_read" event
-  let app_handle_break = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
-  app_handle_break.listen("break_read", move |_| {
-    let mut signal = break_signal_clone.lock().unwrap();
-    *signal = true;
+  // Break signal listener
+  let shared_state_clone = Arc::clone(&shared_state);
+  let break_listener = app_handle.listen("break_exec", move |_| {
+    let (lock, cvar) = &*shared_state_clone;
+    let mut input = lock.lock().unwrap();
+    *input = Some(Data::None);
+    cvar.notify_one(); // Notify the waiting thread
   });
 
-  // Wait for either input or break signal
-  loop {
-    if *break_signal.lock().unwrap() {
-      return None; // Break the loop and terminate
-    }
+  // Wait for input or break signal
+  let (lock, cvar) = &*shared_state;
+  let mut input = lock.lock().unwrap();
+  while input.is_none() {
+    input = cvar.wait(input).unwrap(); // Wait for a notification
+  }
 
-    if let Some(input) = received_input.lock().unwrap().clone() {
-      return Some(Data::String(input)); // Return valid input
-    }
+  // Cleanup listeners
+  app_handle.unlisten(read_listener);
+  app_handle.unlisten(break_listener);
 
-    std::thread::sleep(std::time::Duration::from_millis(100)); // Avoid busy waiting
+  // Handle the received input
+  match input.take() {
+    Some(Data::String(value)) => Some(Data::String(value)), // Return the received input
+    Some(Data::None) => Some(Data::None),                   // Return None on break signal
+    _ => None, // Shouldn't happen but included for safety
   }
 }

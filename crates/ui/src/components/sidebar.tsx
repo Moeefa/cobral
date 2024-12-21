@@ -20,8 +20,13 @@ import { basename } from "@tauri-apps/api/path";
 import { useContext } from "react";
 
 export const Sidebar = () => {
+  const isWeb = !("__TAURI_INTERNALS__" in window);
+
   return (
-    <div className="h-full bg-[color-mix(in_srgb,var(--vscode-editor-background)_70%,transparent)]">
+    <div
+      data-web={isWeb}
+      className="h-full data-[web=true]:bg-neutral-900 data-[web=false]:bg-[color-mix(in_srgb,var(--vscode-editor-background)_70%,transparent)]"
+    >
       <div className="flex flex-col h-full">
         <div
           data-tauri-drag-region

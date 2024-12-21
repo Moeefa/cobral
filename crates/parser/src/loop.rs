@@ -21,10 +21,17 @@ impl<'a> Parser<'a> {
     self.next_token(); // Consume variable name
     self.eat(Token::Equals)?; // Consume `=`
     let expr = self.parse_expression().unwrap();
+    self
+      .context
+      .variables
+      .lock()
+      .unwrap()
+      .insert(name.clone(), expr.clone().unwrap());
     let initializer = Some(Expr::Let(name, Box::new(expr.unwrap())));
     self.eat(Token::Semicolon)?; // Consume the first semicolon
     if !matches!(initializer, Some(Expr::Let(_, _) | Expr::Assignment(_, _))) {
       return Err(ParseError::InvalidExpression(
+        self.current_token.line_number,
         "Era esperado a inicialização de uma variável".to_string(),
       ));
     }
@@ -34,6 +41,7 @@ impl<'a> Parser<'a> {
     self.eat(Token::Semicolon)?; // Consume the second semicolon
     if !matches!(condition, Some(Expr::Comparison(_, _, _))) {
       return Err(ParseError::InvalidExpression(
+        self.current_token.line_number,
         "Era esperado uma expressão de comparação".to_string(),
       ));
     }
@@ -45,6 +53,7 @@ impl<'a> Parser<'a> {
         self.parse_expression().map_err(|e| e)
       }
       _ => Err(ParseError::UnexpectedToken(
+        self.current_token.line_number,
         self.current_token.clone().token,
       )),
     }?;
@@ -60,6 +69,7 @@ impl<'a> Parser<'a> {
       )
     ) {
       return Err(ParseError::InvalidExpression(
+        self.current_token.line_number,
         "Era esperado a atualização de uma variável".to_string(),
       ));
     }

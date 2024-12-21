@@ -70,9 +70,9 @@ impl Interpreter {
       (Data::Boolean(l), Data::Boolean(r), Token::NotEqual) => Ok(Data::Boolean(l != r)),
 
       // Catch-all for invalid comparisons
-      _ => Err(InterpreterError::ParseError(
+      _ => Err(InterpreterError::EvalError(
         line,
-        "Comparação inválida entre tipos".to_string(),
+        "Comparação não suportada".to_string(),
       )),
     }
   }

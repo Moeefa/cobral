@@ -20,11 +20,13 @@ impl<'a> Parser<'a> {
           } else if self.current_token.token != Token::BracketR {
             // If we encounter any unexpected token, report error
             return Err(ParseError::UnexpectedToken(
+              self.current_token.line_number,
               self.current_token.token.clone(),
             ));
           }
         } else {
           return Err(ParseError::UnexpectedToken(
+            self.current_token.line_number,
             self.current_token.token.clone(),
           ));
         }
@@ -34,6 +36,7 @@ impl<'a> Parser<'a> {
         self.eat(Token::BracketR)?; // Consume closing bracket `]`
       } else {
         return Err(ParseError::UnexpectedToken(
+          self.current_token.line_number,
           self.current_token.token.clone(),
         ));
       }
@@ -51,11 +54,13 @@ impl<'a> Parser<'a> {
         } else if self.current_token.token != Token::BracketR {
           // If we encounter any unexpected token, report error
           return Err(ParseError::UnexpectedToken(
+            self.current_token.line_number,
             self.current_token.token.clone(),
           ));
         }
       } else {
         return Err(ParseError::UnexpectedToken(
+          self.current_token.line_number,
           self.current_token.token.clone(),
         ));
       }
@@ -65,6 +70,7 @@ impl<'a> Parser<'a> {
       self.next_token(); // Consume closing bracket `]`
     } else {
       return Err(ParseError::UnexpectedToken(
+        self.current_token.line_number,
         self.current_token.token.clone(),
       ));
     }

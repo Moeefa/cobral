@@ -12,7 +12,7 @@ export const InputEntry = React.memo(
     timestamp: string;
     onSubmit: (value: string) => void;
   }) => {
-    const handleKeyUp = useCallback(
+    const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key !== "Enter") return;
 
@@ -36,7 +36,8 @@ export const InputEntry = React.memo(
             key={`input-${message}`}
             className="![font-family:'SF_Pro_Mono',monospace] items-center log-input bg-foreground text-background h-max flex-1 rounded-none p-0 border-0 outline-none ring-0 focus-visible:ring-0 focus:ring-0"
             type="text"
-            onKeyUp={handleKeyUp}
+            autoFocus
+            onKeyDown={handleKeyDown}
           />
         </div>
       </div>

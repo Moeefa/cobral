@@ -20,26 +20,25 @@ pub enum Expr {
   List(Vec<Expr>),
 
   Binary(Box<Expr>, Token, Box<Expr>),
+  Index(String, Box<Expr>),
 
+  For(Box<Expr>, Box<Expr>, Box<Expr>, Vec<Expr>),
   If(
     Box<Option<Expr>>,
     Vec<Expr>,
     Vec<(Box<Option<Expr>>, Vec<Expr>)>,
     Option<Vec<Expr>>,
   ),
-
   Logical(Box<Expr>, Token, Box<Expr>),
-
   Comparison(Box<Expr>, Token, Box<Expr>),
 
   UnaryMinus(Box<Expr>), // `-x`
   UnaryNot(Box<Expr>),
+
   PrefixIncrement(Box<Expr>),  // `++x`
   PostfixIncrement(Box<Expr>), // `x++`
   PrefixDecrement(Box<Expr>),  // `--x`
   PostfixDecrement(Box<Expr>), // `x--`
-
-  For(Box<Expr>, Box<Expr>, Box<Expr>, Vec<Expr>),
 
   Import(String),
 }
@@ -53,6 +52,7 @@ pub struct LabeledExpr {
 impl std::fmt::Display for Expr {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
+      Expr::Index(name, index) => write!(f, "{}[{}]", name, index),
       Expr::Assignment(name, value) => write!(f, "{} = {}", name, value),
       Expr::Let(name, value) => write!(f, "let {} = {}", name, value),
       Expr::Const(name, value) => write!(f, "const {} = {}", name, value),
@@ -82,7 +82,7 @@ impl std::fmt::Display for Expr {
       Expr::Float(n) => write!(f, "{}", n),
       Expr::Integer(n) => write!(f, "{}", n),
       Expr::Boolean(b) => write!(f, "{}", b),
-      Expr::String(s) => write!(f, "{}", s),
+      Expr::String(s) => write!(f, "\"{}\"", s),
       Expr::List(values) => write!(
         f,
         "[{}]",

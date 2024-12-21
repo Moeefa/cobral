@@ -1,7 +1,8 @@
 import { AutoSizer, List } from "react-virtualized";
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 
 import { EditorContext } from "@/contexts/editor-context";
+import { listen } from "@tauri-apps/api/event";
 
 export const Logs = React.memo(() => {
   const { logs } = useContext(EditorContext);
@@ -44,6 +45,18 @@ export const Logs = React.memo(() => {
     [logs, setRowHeight]
   );
 
+  const scrollToBottom = useCallback(() => {
+    const debounce = setTimeout(() => {
+      listRef.current?.scrollToRow(logs.length - 1);
+    }, 10);
+
+    return () => clearTimeout(debounce);
+  }, [logs]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [logs, scrollToBottom]);
+
   return (
     <AutoSizer>
       {({ width, height }) => (
@@ -54,10 +67,8 @@ export const Logs = React.memo(() => {
           rowCount={logs.length}
           rowHeight={({ index }) => rowHeights.current[index] || 26}
           rowRenderer={rowRenderer}
-          scrollToIndex={logs.length - 1}
-          scrollToAlignment="end"
-          overscanRowCount={5}
-          className="border-border px-2 bg-[var(--vscode-editor-background)] ![font-family:'SF_Pro_Mono',monospace]"
+          overscanRowCount={10}
+          className="border-border pl-2 bg-[var(--vscode-editor-background)] ![font-family:'SF_Pro_Mono',monospace]"
         />
       )}
     </AutoSizer>

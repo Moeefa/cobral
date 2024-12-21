@@ -57,6 +57,7 @@ impl<'a> Parser<'a> {
         statements.push(statement);
       } else {
         return Err(ParseError::UnexpectedToken(
+          self.current_token.line_number,
           self.current_token.clone().token,
         ));
       }
@@ -66,6 +67,7 @@ impl<'a> Parser<'a> {
       self.eat(Token::BraceR)?; // Consume `}`
     } else {
       return Err(ParseError::UnexpectedToken(
+        self.current_token.line_number,
         self.current_token.clone().token,
       ));
     }

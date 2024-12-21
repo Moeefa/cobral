@@ -4,6 +4,7 @@ pub mod comparison;
 pub mod r#const;
 pub mod function;
 pub mod import;
+pub mod index;
 pub mod r#let;
 pub mod list;
 pub mod logical;

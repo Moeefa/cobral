@@ -12,14 +12,6 @@ export const extractImports = async (
   };
 }> => {
   const tokenizer = new Tokenizer(text);
-  const declarations: {
-    [scope: string]: {
-      variables: Set<string>;
-      functions: Set<string>;
-    };
-  } = {
-    global: { variables: new Set(), functions: new Set() },
-  };
 
   let token: Token | null;
   while ((token = tokenizer.next())) {
@@ -35,13 +27,7 @@ export const extractImports = async (
           // Extract symbols from imported content
           const symbols = extractSymbols(importedContent);
 
-          // Merge imported global variables and functions
-          symbols["global"].variables.forEach((variable) =>
-            declarations.global.variables.add(variable)
-          );
-          symbols["global"].functions.forEach((func) =>
-            declarations.global.functions.add(func)
-          );
+          return symbols;
         } catch (error) {
           console.error(`Error reading import at line ${token.line}: ${error}`);
         }
@@ -49,5 +35,10 @@ export const extractImports = async (
     }
   }
 
-  return declarations;
+  return {
+    global: {
+      variables: new Set(),
+      functions: new Set(),
+    },
+  };
 };

@@ -16,19 +16,19 @@ export type Token =
     }
   | {
       type: "identifier";
-      value: string; // Any valid identifier
+      value: string;
       line: number;
       column: number;
     }
   | {
       type: "number";
-      value: string; // Numeric value as string (e.g., "42", "3.14")
+      value: string;
       line: number;
       column: number;
     }
   | {
       type: "string";
-      value: string; // Any string literal (e.g., '"hello"')
+      value: string;
       line: number;
       column: number;
     }
@@ -57,7 +57,7 @@ export type Token =
     }
   | {
       type: "comment";
-      value: string; // Comment content (e.g., "// comment" or "/* comment */")
+      value: string;
       line: number;
       column: number;
     };
@@ -71,40 +71,102 @@ export class Tokenizer {
   }
 
   private tokenize(text: string) {
-    const stripped = text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, ""); // Remove comments
-    const lines = stripped.split("\n");
-    const patterns: { type: string; regex: RegExp }[] = [
-      {
-        type: "keyword",
-        regex:
-          /\b(constante|declare|funcao|se|senao|para|enquanto|retorne|importe)\b/g,
-      },
-      { type: "identifier", regex: /[\p{L}_][\p{L}0-9_]*/gu },
-      { type: "number", regex: /\b\d+(\.\d+)?\b/g },
-      { type: "string", regex: /"(?:[^"\\]|\\.)*"/g },
-      { type: "operator", regex: /[+\-*/=<>!]+/g },
-      { type: "delimiter", regex: /[{}()\[\],;]/g },
-      { type: "comment", regex: /\/\/.*|\/\*[\s\S]*?\*\//g },
-    ];
+    const lines = text.split("\n");
+    let inMultilineComment = false;
 
-    lines.forEach((line, lineIndex) => {
+    lines.forEach((originalLine, lineIndex) => {
+      // Handle empty or whitespace-only lines
+      let line = originalLine.trim();
+      if (line === "") return;
+
       let column = 0;
 
+      // Handle multiline comment state
+      if (inMultilineComment) {
+        const endCommentIndex = line.indexOf("*/");
+        if (endCommentIndex !== -1) {
+          this.tokens.push({
+            type: "comment",
+            value: line.slice(0, endCommentIndex + 2),
+            line: lineIndex + 1,
+            column: 1,
+          });
+          line = line.slice(endCommentIndex + 2).trim();
+          column = 0;
+          inMultilineComment = false;
+        } else {
+          this.tokens.push({
+            type: "comment",
+            value: line,
+            line: lineIndex + 1,
+            column: 1,
+          });
+          return;
+        }
+      }
+
       while (column < line.length) {
+        // Check for single-line comment
+        if (line.slice(column).startsWith("//")) {
+          this.tokens.push({
+            type: "comment",
+            value: line.slice(column),
+            line: lineIndex + 1,
+            column: column + 1,
+          });
+          break;
+        }
+
+        // Check for multiline comment start
+        if (line.slice(column).startsWith("/*")) {
+          const endCommentIndex = line.indexOf("*/", column);
+          if (endCommentIndex !== -1) {
+            // Complete multiline comment on the same line
+            this.tokens.push({
+              type: "comment",
+              value: line.slice(column, endCommentIndex + 2),
+              line: lineIndex + 1,
+              column: column + 1,
+            });
+            line = line.slice(endCommentIndex + 2).trim();
+            column = 0;
+          } else {
+            // Multiline comment continues on next lines
+            this.tokens.push({
+              type: "comment",
+              value: line.slice(column),
+              line: lineIndex + 1,
+              column: column + 1,
+            });
+            inMultilineComment = true;
+            break;
+          }
+        }
+
+        // Match other token types
+        const patterns = [
+          {
+            type: "keyword",
+            regex:
+              /\b(constante|declare|funcao|se|senao|para|enquanto|retorne|importe)\b/,
+          },
+          { type: "identifier", regex: /[\p{L}_][\p{L}0-9_]*/u },
+          { type: "number", regex: /\d+(\.\d+)?/ },
+          { type: "string", regex: /"(?:[^"\\]|\\.)*"/ },
+          { type: "operator", regex: /[+\-*/=<>!]+/ },
+          { type: "delimiter", regex: /[{}()\[\],;]/ },
+        ];
+
         let matched = false;
-
         for (const { type, regex } of patterns) {
-          regex.lastIndex = column; // Set regex starting position
-          const match = regex.exec(line);
-
-          if (match && match.index === column) {
+          const match = regex.exec(line.slice(column));
+          if (match && match.index === 0) {
             this.tokens.push({
               type,
               value: match[0],
               line: lineIndex + 1,
-              column: column + 1,
+              column: originalLine.indexOf(match[0]) + 1,
             } as Token);
-
             column += match[0].length;
             matched = true;
             break;
@@ -112,20 +174,14 @@ export class Tokenizer {
         }
 
         if (!matched) {
-          if (line[column].trim()) {
-            throw new Error(
-              `Unexpected character '${line[column]}' at line ${
-                lineIndex + 1
-              }, column ${column + 1}`
-            );
-          }
-          column++; // Skip whitespace
+          // Skip any remaining whitespace or unrecognized characters
+          column++;
         }
       }
     });
   }
 
-  // Traversal methods
+  // Existing traversal methods remain the same
   next(): Token | null {
     return this.position < this.tokens.length
       ? this.tokens[this.position++]

@@ -24,6 +24,7 @@ impl<'a> Parser<'a> {
 
     if lhs.is_none() {
       return Err(ParseError::InvalidExpression(
+        self.current_token.line_number,
         "Missing comparison expression".to_string(),
       ));
     }
@@ -51,6 +52,7 @@ impl<'a> Parser<'a> {
       Token::BracketL => self.parse_delimiter(),
       Token::ParenL => self.parse_parenthesized_expression(),
       _ => Err(ParseError::InvalidExpression(
+        self.current_token.line_number,
         "Invalid primary expression".to_string(),
       )),
     }?;
@@ -78,6 +80,7 @@ impl<'a> Parser<'a> {
       Ok(expr)
     } else {
       Err(ParseError::InvalidExpression(
+        self.current_token.line_number,
         "Unmatched parenthesis".to_string(),
       ))
     }

@@ -45,6 +45,7 @@ impl Interpreter {
       Expr::Comparison(lhs, op, rhs) => self.eval_comparison(lhs, op, rhs, line),
       Expr::Logical(lhs, op, rhs) => self.eval_logical(lhs, op, rhs, line),
       Expr::Binary(lhs, op, rhs) => self.eval_binary(lhs, op, rhs, line),
+      Expr::Index(name, value) => self.eval_index(name, value, line),
       Expr::Import(file_path) => self.eval_import(file_path),
       Expr::PostfixDecrement(expr) => self.eval_postfix_decrement(expr, line),
       Expr::PostfixIncrement(expr) => self.eval_postfix_increment(expr, line),

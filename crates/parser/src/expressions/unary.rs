@@ -10,7 +10,8 @@ impl<'a> Parser<'a> {
         let operand = self
           .parse_primary_expression()?
           .ok_or(ParseError::InvalidExpression(
-            "Missing operand after unary '-'".to_string(),
+            self.current_token.line_number,
+            "Operando ausente após unário '-'".to_string(),
           ))?;
         Ok(Some(Expr::UnaryMinus(Box::new(operand))))
       }
@@ -26,11 +27,26 @@ impl<'a> Parser<'a> {
       }
       Token::Not => {
         self.eat(Token::Not)?; // Move past 'not'
-        self.eat(Token::ParenL)?; // Move past '('
         let right_expr = self.parse_expression().unwrap(); // Parse the expression after 'not'
-        self.eat(Token::ParenR)?; // Move past ')'
 
-        Ok(Some(Expr::UnaryNot(Box::new(right_expr.unwrap())))) // Return a Not expression with the right operand
+        if let Some(right_expr) = right_expr {
+          match right_expr {
+            Expr::Boolean(_) => {
+              return Ok(Some(Expr::UnaryNot(Box::new(right_expr))));
+            }
+            _ => {
+              return Err(ParseError::InvalidExpression(
+                self.current_token.line_number,
+                "Operador 'não' deve ser aplicado a um valor booleano".to_string(),
+              ));
+            }
+          };
+        };
+
+        return Err(ParseError::InvalidExpression(
+          self.current_token.line_number,
+          "Operador 'não' deve ser aplicado a um valor booleano".to_string(),
+        ));
       }
       _ => self.parse_primary_expression(),
     }

@@ -1,14 +1,26 @@
 # Portugol CobraL
 
 CobraL é uma linguagem extremamente rápida baseada no [Portugol (Português estruturado)](https://pt.wikipedia.org/wiki/Portugol) com o objetivo de ensinar conceitos básicos de programação de forma simples e intuitiva. O código é interpretado e executado em Rust, mas com algumas restrições e adições.
+Vale ressaltar de que este projeto não tem nenhuma correlação com o Portugol Studio, cujo o mesmo é uma IDE para Portugol, e são projetos totalmente distintos.
 
 O projeto ainda está em desenvolvimento e novas funcionalidades serão adicionadas em breve. Se você quiser contribuir, fique à vontade para abrir uma issue ou um pull request.
+
+## Benchmarks
+
+Os benchmarks a seguir foram realizados em um computador com as seguintes especificações (usado a média de tempo de 3 execuções):
+
+- **Sistema operacional**: Windows 11 Pro
+- **Processador**: Ryzen 5 5600G
+- **Memória RAM**: 16 GB
+
+| Programa          | CobraL (ms) | Portugol (ms) | Diferença              |
+| ----------------- | ----------- | ------------- | ---------------------- |
+| Iteração até 1000 | 1.6         | 4293          | 2683 vezes mais rápido |
 
 ## Índice
 
 - [Como funciona?](#como-funciona)
-- [Como rodar?](#como-rodar)
-- [Exemplo](#exemplo)
+- [Como instalar?](#como-instalar)
 - [Documentação](#documentação)
   - [Sintaxe](#sintaxe)
   - [Tipos de dados](#tipos-de-dados)
@@ -45,7 +57,8 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 - [x] Implementar operadores de comparação
 - [x] Ajustar o Textmate para a sintaxe de CobraL
 - [x] Implementar análise de código
-- [ ] Destacar linha durante a execução passo a passo
+- [ ] Implementar execução de código passo a passo
+  - [ ] Destacar linha durante a execução passo a passo
 - [ ] Incluir testes unitários
 - [x] Leitura e escrita de arquivos
 - [x] Console interativo para execução de código
@@ -57,24 +70,38 @@ O projeto ainda está em desenvolvimento e novas funcionalidades serão adiciona
 
 CobraL é um pseudocódigo baseado em Rust, com algumas simplificações e adições. O código é interpretado e executado em Rust, mas com algumas restrições e adições.
 
-## Como rodar?
+## Como instalar?
 
-Para rodar um código em CobraL, você precisa ter o Rust instalado. Depois, basta rodar o comando `npm tauri dev` no diretório do projeto.
+Para instalar o CobraL, você pode baixar o binário da última versão disponível no [repositório de releases](https://github.com/Moeefa/cobral/releases/latest) de acordo com o seu sistema operacional e arquitetura, ou compilar o código-fonte manualmente.
+Para compilar o código-fonte, você precisa ter o [Rust](https://www.rust-lang.org/tools/install) instalado na sua máquina.
+
+```bash
+git clone https://github.com/Moeefa/cobral.git
+```
+
+E então, execute o comando abaixo para compilar o código-fonte:
+
+```bash
+npm run tauri build
+```
+
+## Documentação
 
 ### Sintaxe
 
 A sintaxe de CobraL é simples e intuitiva. Cada instrução é separada por uma quebra de linha e um bloco de código é delimitado por chaves `{}`.
-O uso de ponto e vírgula `;` é opcional.
+
+**O uso de ponto e vírgula `;` é totalmente opcional.**
 
 ```cobral
-declare x = 10
-escrever(x)
+declare x = 10;
+escrever(x);
 
 se (x == 10) {
-  escrever("x é igual a 10")
+  escrever("x é igual a 10");
 } senao {
-  escrever("x é diferente de 10")
-}
+  escrever("x é diferente de 10");
+};
 ```
 
 ### Tipos de dados
@@ -85,15 +112,16 @@ se (x == 10) {
 - `booleano`: verdadeiro ou falso
 - `vetor`: conjunto de valores
 
-Eles são inferidos automaticamente, então não é necessário declarar o tipo de uma variável.
+**Eles são inferidos automaticamente**, então não é necessário declarar o tipo de uma variável.
 
 ```cobral
-declare variavel = 10
-declare variavel = 10.5
-declare variavel = "texto"
-declare variavel = verdadeiro
-declare variavel = falso
-declare variavel = [1, 2, 3]
+declare variavel = 10; // inteiro
+declare variavel = 10.5; // real
+declare variavel = "texto"; // texto
+declare variavel = verdadeiro; // lógico
+declare variavel = falso; // lógico
+declare variavel = [1, 2, 3]; // vetor
+declare variavel = [[1, 2], [3, 4]]; // matriz
 ```
 
 ### Operadores de comparação
@@ -106,7 +134,7 @@ declare variavel = [1, 2, 3]
 - `<=`: menor ou igual a
 
 ```cobral
-declare x = 10 == 10
+declare x = 10 == 10; // verdadeiro
 ```
 
 ### Operadores lógicos
@@ -116,12 +144,12 @@ declare x = 10 == 10
 - `ou`: disjunção
 
 ```cobral
-declare x = verdadeiro
-declare y = falso
+declare x = verdadeiro;
+declare y = falso;
 
-declare z = nao x
-declare w = x e y
-declare v = x ou y
+declare z = nao x; // z é falso
+declare w = x e y; // w é falso
+declare v = x ou y; // v é verdadeiro
 ```
 
 ### Operadores aritméticos
@@ -130,14 +158,14 @@ declare v = x ou y
 - `-`: subtração
 - `*`: multiplicação
 - `/`: divisão
-- `%`: módulo
+- `%`: resto da divisão
 
 ```cobral
-declare x = 10 + 10
-declare y = 20 - 10
-declare z = 10 * 10
-declare w = 10 / 2
-declare v = 10 % 2
+declare x = 10 + 10; // x é 20
+declare y = 20 - 10; // y é 10
+declare z = 10 * 10; // z é 100
+declare w = 10 / 2; // w é 5
+declare v = 10 % 2; // v é 0
 ```
 
 ### Estruturas de controle
@@ -146,14 +174,14 @@ declare v = 10 % 2
 - `senao`: executa um bloco de código se a condição do `se` for falsa
 
 ```cobral
-declare x = 10 + 10
-declare y = 20
+declare x = 10 + 10;
+declare y = 20;
 
-se (x == y) {
-  escrever("x é igual a y")
+se (x == y) { // x é igual a y
+  escrever("x é igual a y");
 } senao {
-  escrever("x é diferente de y")
-}
+  escrever("x é diferente de y");
+};
 ```
 
 ### Estruturas de repetição
@@ -161,14 +189,19 @@ se (x == y) {
 - `para`: executa um bloco de código um número específico de vezes
 
 ```cobral
-para (declare i = 0; i < 10; i = i + 1) {
-  escrever(i)
-}
+/*
+  i começa com 0 e continua até 9,
+  incrementando 1 a cada iteração
+*/
+
+para (declare i = 0; i < 10; i++) {
+  escrever(i);
+};
 ```
 
 ### Bibliotecas
 
-- [IO](#entrada-e-saída): para entrada e saída de dados
+- [Entrada e saída](#entrada-e-saída): para entrada e saída de dados
 - [Matemática](#matemática): para operações matemáticas
 - [Conversão de tipos de dados](#conversão-de-tipos-de-dados): para conversão de tipos de dados
 
@@ -179,8 +212,8 @@ Você não precisa importar nenhuma biblioteca, elas estão disponíveis por pad
 Para entrada e saída de dados, você pode usar a biblioteca de entrada e saída de dados.
 
 ```cobral
-declare x = ler("Digite seu nome:")
-escrever("Você digitou: ", x)
+declare x = ler("Digite seu nome:");
+escrever("Você digitou: ", x);
 ```
 
 #### Matemática
@@ -188,8 +221,8 @@ escrever("Você digitou: ", x)
 Para operações matemáticas, você pode usar a biblioteca de matemática.
 
 ```cobral
-declare x = raiz(50)
-escrever(x)
+declare x = raiz(9);
+escrever(x); // 3
 ```
 
 #### Conversão de tipos de dados
@@ -197,9 +230,11 @@ escrever(x)
 Para fazer conversão de tipos de dados, você pode usar a biblioteca de conversão.
 
 ```cobral
-declare x = int(10)
-escrever(x)
+declare x = real(10)
+escrever(x) // 10.0
+```
 
-declare y = real(10.5)
-escrever(y)
+```cobral
+declare y = int(10.5)
+escrever(y) // 10
 ```

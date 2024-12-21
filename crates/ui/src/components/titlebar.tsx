@@ -25,6 +25,18 @@ import { open } from "@tauri-apps/plugin-shell";
 
 // Trick to render custom titlebar in Decorum plugin for Tauri
 export const Titlebar = ({ children }: { children: React.ReactNode }) => {
+  const isWeb = !("__TAURI_INTERNALS__" in window);
+  if (isWeb)
+    return (
+      <>
+        <div className="flex h-11 justify-between items-center w-full monaco-editor bg-[var(--vscode-editor-background)]">
+          <Left />
+          <Right />
+        </div>
+        <div className="w-full overflow-auto h-full">{children}</div>
+      </>
+    );
+
   const [running, setRunning] = useState(true);
 
   useEffect(() => {
@@ -118,7 +130,10 @@ const Right = () => {
         <DropdownMenuTrigger className="outline-none group size-6 flex items-center justify-center">
           <SettingsIcon className="group-hover:rotate-[55deg] ease-in-out transition-transform size-[1.05rem]" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="[&_*[role=menuitem]]:h-10">
+        <DropdownMenuContent
+          collisionPadding={2}
+          className="[&_*[role=menuitem]]:h-10"
+        >
           <Link to="/docs">
             <DropdownMenuItem>Documentação</DropdownMenuItem>
           </Link>

@@ -20,6 +20,7 @@ impl<'a> Parser<'a> {
         expr = Some(Expr::Logical(Box::new(expr.unwrap()), op, Box::new(rhs)));
       } else {
         return Err(ParseError::InvalidExpression(
+          self.current_token.line_number,
           "Missing right-hand side of logical expression".to_string(),
         ));
       }

@@ -14,12 +14,12 @@ export const LogEntry = React.memo(
       <span className="text-muted-foreground select-none ![font-family:'SF_Pro_Mono',monospace]">
         {timestamp}
       </span>
-      <pre
+      <p
         data-level={level}
-        className="![font-family:'SF_Pro_Mono',monospace] log-entry dark:data-[level=error]:bg-red-500 data-[level=error]:bg-red-400"
+        className="break-words whitespace-pre-wrap ![font-family:'SF_Pro_Mono',monospace] log-entry dark:data-[level=error]:bg-red-500 data-[level=error]:bg-red-400"
       >
         {message}
-      </pre>
+      </p>
     </div>
   )
 );

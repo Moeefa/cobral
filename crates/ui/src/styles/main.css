@@ -109,7 +109,7 @@
   @font-face {
     font-family: "SF Pro";
     font-style: normal;
-    font-weight: 100 900;
+    font-weight: 100 500;
     font-display: swap;
     src: url("/SF-Regular.ttf") format("truetype");
   }
@@ -127,148 +127,19 @@
   }
 
   * {
-    scrollbar-color: hsl(var(--foreground)) transparent;
-    scrollbar-width: 20px;
     @apply border-border;
+    @apply [&::-webkit-scrollbar]:w-[14px]
+    [&::-webkit-scrollbar-track]:bg-gray-100/10
+    [&::-webkit-scrollbar-thumb]:bg-gray-300
+    [&::-webkit-scrollbar-thumb]:h-24
+    dark:[&::-webkit-scrollbar-track]:bg-transparent
+    dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500/20;
   }
 }
 
 * {
   font-feature-settings: "calt" 0, "zero", "liga" 0, "ss01" !important;
 }
-
-/* .cm-editor,
-.cm-editor .cm-gutters,
-.cm-editor .cm-gutters {
-  @apply !bg-background;
-}
-
-.cm-activeLineGutter,
-.cm-activeLine {
-  @apply !bg-secondary/50;
-}
-
-.cm-gutters {
-  @apply select-none;
-}
-
-.cm-line *,
-.cm-line {
-  font-family: "JetBrains Mono", monospace;
-}
-
-.cm-editor.cm-focused {
-  @apply !outline-none;
-}
-
-.cm-tooltip {
-  @apply rounded-lg !bg-background/20 backdrop-blur border border-border;
-}
-
-.cm-tooltip ul li {
-  @apply !py-1 !px-5;
-}
-
-.cm-diagnostic {
-  @apply rounded-sm;
-}
-
-.cm-tooltip-lint {
-  @apply space-y-0.5;
-}
-
-.cm-editor .cm-tooltip.cm-tooltip-autocomplete > ul > completion-section {
-  @apply border-border;
-}
-
-.cm-button {
-  background-image: none !important;
-  @apply !rounded-full !bg-background !border-border !border;
-}
-
-.cm-textfield {
-  background-image: none !important;
-  @apply !rounded-full !bg-background !border-border !border;
-}
-
-.cm-panels-bottom {
-  @apply !bg-secondary !border-border !border-t;
-}
-
-.cm-gutters {
-  @apply !border-r-0;
-}
-
-div[data-tauri-decorum-tb] {
-  @apply !items-center;
-}
-
-h3 code {
-  @apply !text-lg md:!text-xl;
-}
-
-pre {
-  @apply !px-0 rounded-lg overflow-x-auto py-4;
-}
-
-pre [data-line] {
-  @apply px-4;
-}
-
-code {
-  font-family: "JetBrains Mono", monospace !important;
-  @apply text-sm md:text-base !leading-loose;
-}
-
-pre > code {
-  counter-reset: line;
-}
-
-code[data-theme*=" "],
-code[data-theme*=" "] span {
-  font-family: "JetBrains Mono", monospace !important;
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  code[data-theme*=" "],
-  code[data-theme*=" "] span {
-    color: var(--shiki-dark);
-    background-color: var(--shiki-dark-bg);
-  }
-}
-
-code[data-line-numbers] {
-  counter-reset: line;
-}
-
-code[data-line-numbers] > [data-line]::before {
-  counter-increment: line;
-  content: counter(line);
-  @apply inline-block w-4 mr-4 text-right text-gray-500;
-}
-
-code {
-  counter-reset: line;
-}
-
-code > [data-line]::before {
-  counter-increment: line;
-  content: counter(line);
-
-  /* Tailwind classes */
-/* @apply inline-block w-4 mr-8 text-right text-gray-500;
-}
-
-code[data-line-numbers-max-digits="2"] > [data-line]::before {
-  @apply w-8;
-}
-
-code[data-line-numbers-max-digits="3"] > [data-line]::before {
-  @apply w-12;
-}
-*/
 
 input[type="checkbox"][disabled][checked] {
   filter: invert(100%) hue-rotate(18deg) brightness(5);
@@ -299,16 +170,10 @@ div[data-tauri-decorum-tb] {
   color: #555;
 }
 
-.blinking-cursor {
-  display: inline-block;
-  width: 1px;
-  height: 1.2em;
-  background-color: #dcdcdc;
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  50% {
-    background-color: transparent;
-  }
+.prose
+  :where(thead th):not(:where([class~="not-prose"], [class~="not-prose"] *)),
+.prose :where(strong):not(:where([class~="not-prose"], [class~="not-prose"] *)),
+.prose :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)),
+.prose :where(h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  @apply font-medium;
 }

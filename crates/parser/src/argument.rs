@@ -13,6 +13,7 @@ impl<'a> Parser<'a> {
           self.eat(Token::Comma)?;
         } else {
           return Err(ParseError::UnexpectedToken(
+            self.current_token.line_number,
             self.current_token.clone().token,
           ));
         }
@@ -22,10 +23,12 @@ impl<'a> Parser<'a> {
         Ok(Some(expr)) => {
           args.push(expr);
         }
-        Ok(None) =>
+        Ok(None) => {
           return Err(ParseError::UnexpectedToken(
+            self.current_token.line_number,
             self.current_token.clone().token,
-          )),
+          ))
+        }
         Err(e) => return Err(e),
       }
 
@@ -36,6 +39,7 @@ impl<'a> Parser<'a> {
       self.eat(Token::ParenR)?;
     } else {
       return Err(ParseError::UnexpectedToken(
+        self.current_token.line_number,
         self.current_token.clone().token,
       ));
     }

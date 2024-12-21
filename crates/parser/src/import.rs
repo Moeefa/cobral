@@ -10,6 +10,7 @@ impl<'a> Parser<'a> {
       Token::String(path) => path.clone(),
       _ => {
         return Err(ParseError::UnexpectedToken(
+          self.current_token.line_number,
           self.current_token.token.clone(),
         ));
       }

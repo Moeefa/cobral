@@ -36,6 +36,16 @@ impl Context {
     self.reset();
     self.update(input.clone());
 
+    let has_received_event = Arc::new(Mutex::new(false));
+    let has_received_event_clone = Arc::clone(&has_received_event);
+
+    // Listen for the "break_exec" event before starting the execution loop
+    let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
+    app_handle.listen("break_exec", move |_| {
+      let mut should_break = has_received_event_clone.lock().unwrap();
+      *should_break = true;
+    });
+
     let start = self.start.lock().unwrap_or_else(|e| e.into_inner()).clone();
     let lexer = Lexer::new(&input.as_str());
     let mut parser = Parser::new(lexer);
@@ -44,23 +54,10 @@ impl Context {
 
     let interpreter = self.interpreter.lock().unwrap_or_else(|e| e.into_inner());
 
-    let has_received_event = Arc::new(Mutex::new(false));
-    let has_received_event_clone = Arc::clone(&has_received_event);
-
-    // Listen for the "break_exec" event before starting the execution loop
-    APP_HANDLE
-      .lock()
-      .unwrap()
-      .as_ref()
-      .unwrap()
-      .listen("break_exec", move |_| {
-        let mut should_break = has_received_event_clone.lock().unwrap();
-        *should_break = true;
-      });
-
+    // Execution loop
     for expr in self.exprs.lock().unwrap_or_else(|e| e.into_inner()).clone() {
+      // Check the break condition before processing each expression
       if *has_received_event.lock().unwrap() {
-        self.reset();
         break;
       }
 
@@ -71,6 +68,7 @@ impl Context {
             parser.current_token.line_number,
             e.to_string(),
           ));
+
           break;
         }
       }
@@ -111,6 +109,15 @@ impl Context {
             parser.current_token.line_number,
             e.to_string(),
           ));
+
+          APP_HANDLE
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .emit("break_exec", ())
+            .unwrap();
+
           break;
         }
       }

@@ -4,7 +4,6 @@ import { useContext, useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EditorContext } from "@/contexts/editor-context";
-import { Logs } from "@/components/logs";
 import { invoke } from "@tauri-apps/api/core";
 
 export const Terminal = () => {
@@ -13,10 +12,20 @@ export const Terminal = () => {
   const runButton = useRef<HTMLButtonElement>(null);
   const breakButton = useRef<HTMLButtonElement>(null);
 
-  const handleParse = async () => {
+  const handleRun = async () => {
     runButton.current!.disabled = true;
     breakButton.current!.disabled = false;
+
+    const inputs =
+      document.querySelectorAll<HTMLInputElement>("input.log-input");
+    inputs.forEach((input) => {
+      input.disabled = true;
+    });
+
     clearLogs();
+
+    await emit("break_exec");
+
     await invoke("parse", { input: value });
   };
 
@@ -31,17 +40,15 @@ export const Terminal = () => {
       input.disabled = true;
     });
 
-    await emit("break_read");
     await emit("break_exec");
   };
 
   useEffect(() => {
-    const finish = listen("exec_finished", () => {
+    const finish = listen("exec_finished", async () => {
       runButton.current!.disabled = false;
       breakButton.current!.disabled = true;
 
-      emit("break_read");
-      emit("break_exec");
+      await emit("break_exec");
     });
 
     return () => {
@@ -58,7 +65,7 @@ export const Terminal = () => {
             variant="expandIcon"
             Icon={SparklesIcon}
             iconPlacement="left"
-            onClick={handleParse}
+            onClick={handleRun}
           >
             Executar
           </Button>

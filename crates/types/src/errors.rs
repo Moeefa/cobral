@@ -10,13 +10,13 @@ use std::{
  */
 #[derive(Debug)]
 pub enum ParseError {
-  UnexpectedToken(Token),
-  UnknownFunction(String),
+  UnexpectedToken(usize, Token),
+  UnknownFunction(usize, String),
   ExpectedToken(usize, Token, Token),
   ExpectedVariableName(usize, Token),
   ExpectedConstantName(usize, Token),
   ExpectedFunctionName(usize, Token),
-  InvalidExpression(String),
+  InvalidExpression(usize, String),
 }
 
 #[rustfmt::skip]
@@ -27,9 +27,9 @@ impl fmt::Display for ParseError {
       ParseError::ExpectedConstantName(line, name) => write!(f, "Linha {}: Esperava-se nome de constante, econtrou: '{}'", line, name),
       ParseError::ExpectedVariableName(line, name) => write!(f, "Linha {}: Esperava-se nome de variável, econtrou: '{}'", line, name),
       ParseError::ExpectedFunctionName(line, name) => write!(f, "Linha {}: Esperava-se nome de função, econtrou: '{}'", line, name),
-      ParseError::UnknownFunction(name) => write!(f, "Função desconhecida: '{}'", name),
-      ParseError::UnexpectedToken(token) => write!(f, "Token inesperado: '{}'", token),
-      ParseError::InvalidExpression(name) => write!(f, "Expressão inválida: '{}'", name),
+      ParseError::UnknownFunction(line, name) => write!(f, "Linha {}: Função desconhecida: '{}'", line, name),
+      ParseError::UnexpectedToken(line, token) => write!(f, "Linha {}: Token inesperado: '{}'", line, token),
+      ParseError::InvalidExpression(line, name) => write!(f, "Linha {}: Expressão inválida: '{}'", line, name),
     }
   }
 }
