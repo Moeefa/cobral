@@ -47,7 +47,10 @@ jobs:
 
       - name: Read CHANGELOG file
         id: changelog
-        run: echo "content=$(cat ./CHANGELOG.md)" >> $GITHUB_OUTPUT
+        run: |
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat ./CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - uses: tauri-apps/tauri-action@v0
         env:

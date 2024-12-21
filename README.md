@@ -13,9 +13,9 @@ Os benchmarks a seguir foram realizados em um computador com as seguintes especi
 - **Processador**: Ryzen 5 5600G
 - **Memória RAM**: 16 GB
 
-| Programa          | CobraL (ms) | Portugol (ms) | Diferença              |
-| ----------------- | ----------- | ------------- | ---------------------- |
-| Iteração até 1000 | 1.6         | 4293          | 2683 vezes mais rápido |
+| Programa          | CobraL (ms) | Portugol Studio (ms) | Diferença              |
+| ----------------- | ----------- | -------------------- | ---------------------- |
+| Iteração até 1000 | 1.6         | 4293                 | 2683 vezes mais rápido |
 
 ## Índice
 
