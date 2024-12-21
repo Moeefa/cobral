@@ -7,6 +7,8 @@ impl<'a> Parser<'a> {
     match (self.expr_type(&lhs), self.expr_type(&rhs)) {
       (Some("inteiro"), Some("real")) => true,
       (Some("real"), Some("inteiro")) => true,
+      (Some("desconhecido"), Some(_t2)) => true,
+      (Some(_t1), Some("desconhecido")) => true,
       (Some(t1), Some(t2)) if t1 == t2 => true,
       _ => false, // Incompatible or unknown
     }

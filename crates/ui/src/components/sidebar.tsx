@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { readFile, writeFile } from "@tauri-apps/plugin-fs";
 
 import { EditorContext } from "@/contexts/editor-context";
 import { EllipsisIcon } from "lucide-react";
@@ -45,7 +45,7 @@ export const Sidebar = () => {
 
 const Actions = () => {
   const { value, setValue, setFile } = useContext(EditorContext);
-  const downloadFile = async () => {
+  const saveFile = async () => {
     const file = await save({
       filters: [
         {
@@ -55,10 +55,13 @@ const Actions = () => {
       ],
     });
 
-    await writeTextFile(file || "", value);
+    let encoder = new TextEncoder();
+    let data = encoder.encode(value);
+
+    await writeFile(file || "", data, { create: true });
   };
 
-  const readFile = async () => {
+  const openFile = async () => {
     const file = await open({
       multiple: false,
       directory: false,
@@ -71,10 +74,11 @@ const Actions = () => {
       ],
     });
 
-    const content = await readTextFile(file || "");
+    const content = await readFile(file || "");
+    const decoder = new TextDecoder();
 
-    setValue(content || "");
-    setFile((await basename(file!)) || "");
+    setValue(decoder.decode(content));
+    setFile(await basename(file || ""));
   };
 
   return (
@@ -92,10 +96,10 @@ const Actions = () => {
                 <TooltipContent>Ações</TooltipContent>
               </Tooltip>
               <DropdownMenuContent className="w-24">
-                <DropdownMenuItem onClick={downloadFile}>
+                <DropdownMenuItem onClick={saveFile}>
                   Salvar arquivo
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={readFile}>
+                <DropdownMenuItem onClick={openFile}>
                   Abrir arquivo
                 </DropdownMenuItem>
                 <DropdownMenuItem>Abrir pasta</DropdownMenuItem>
