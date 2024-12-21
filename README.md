@@ -72,7 +72,7 @@ CobraL é um pseudocódigo baseado em Rust, com algumas simplificações e adiç
 
 ## Como instalar?
 
-Para instalar o CobraL, você pode baixar o binário da última versão disponível no [repositório de releases](https://github.com/Moeefa/cobral/releases/latest) de acordo com o seu sistema operacional e arquitetura, ou compilar o código-fonte manualmente.
+Para instalar o CobraL, você pode baixar a última versão disponível em [releases](https://github.com/Moeefa/cobral/releases/latest) de acordo com o seu sistema operacional e arquitetura, ou compilar o código-fonte manualmente.
 Para compilar o código-fonte, você precisa ter o [Rust](https://www.rust-lang.org/tools/install) instalado na sua máquina.
 
 ```bash

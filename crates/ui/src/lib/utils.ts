@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import rehypePrettyCode from "rehype-pretty-code";
 import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkUnlink from "remark-unlink";
@@ -14,7 +13,6 @@ import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { vscodeDark, vscodeLight } from "@uiw/codemirror-theme-vscode";
 import { createHighlighterCore } from "shiki/core";
-import cobral from "./monaco/cobral.json";
 
 export function resolveTheme(theme: string) {
   switch (theme) {
@@ -45,16 +43,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const highlighter = await createHighlighterCore({
-  langs: [import("./monaco/cobral.json"), import("shiki/langs/bash.mjs")],
-  loadWasm: import("shiki/wasm"),
-  themes: [
-    import("shiki/themes/vitesse-light.mjs"),
-    import("shiki/themes/vitesse-dark.mjs"),
-  ],
-});
-
 export async function markdownToHTML(markdown: string) {
+  const highlighter = await createHighlighterCore({
+    langs: [import("./monaco/cobral.json"), import("shiki/langs/bash.mjs")],
+    loadWasm: import("shiki/wasm"),
+    themes: [
+      import("shiki/themes/vitesse-light.mjs"),
+      import("shiki/themes/vitesse-dark.mjs"),
+    ],
+  });
+
   const p = await unified()
     .use(remarkParse)
     .use(remarkUnlink)
@@ -62,7 +60,6 @@ export async function markdownToHTML(markdown: string) {
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
     .use(rehypeShiki, highlighter, {
-      // or `theme` for a single theme
       keepBackground: false,
       theme: "vitesse-dark",
     })
