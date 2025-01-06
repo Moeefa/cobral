@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
+  use ::enums::Token;
   use lexer::Lexer;
-  use types::Token;
 
   #[test]
   fn declare_int() {

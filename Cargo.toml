@@ -6,7 +6,7 @@ members = [
   "crates/libs",
   "crates/logger",
   "crates/parser",
-  "crates/types",
+  "crates/enums",
 ]
 default-members = ["crates/cobral"]
 resolver = "2"
@@ -14,7 +14,7 @@ resolver = "2"
 package.edition = "2021"
 package.authors = ["Luiz Henrique Xinaider"]
 package.repository = "https://github.com/Moeefa/cobral.git"
-package.version = "0.8.1"
+package.version = "0.8.2"
 
 [workspace.dependencies]
 cobral = { path = "crates/cobral" }
@@ -23,7 +23,7 @@ lexer = { path = "crates/lexer" }
 libs = { path = "crates/libs" }
 logger = { path = "crates/logger" }
 parser = { path = "crates/parser" }
-types = { path = "crates/types" }
+enums = { path = "crates/enums" }
 
 tokio = { version = "1.40.0", features = ["full"] }
 tauri-build = { version = "2.0.0-rc", features = [] }

@@ -1,9 +1,9 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_for(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_for(&mut self) -> Result<Option<Expr>, ParserError> {
     self.eat(Token::For)?; // Consume "para"
     self.eat(Token::ParenL)?; // Consume the left parenthesis
 
@@ -12,7 +12,7 @@ impl<'a> Parser<'a> {
     let name = match &self.current_token.token {
       Token::Symbol(ref name) => name.clone(),
       _ => {
-        return Err(ParseError::ExpectedVariableName(
+        return Err(ParserError::ExpectedVariableName(
           self.current_token.line_number,
           self.current_token.token.clone(),
         ))
@@ -26,11 +26,11 @@ impl<'a> Parser<'a> {
       .variables
       .lock()
       .unwrap()
-      .insert(name.clone(), expr.clone().unwrap());
+      .insert(name.clone(), Some(expr.clone().unwrap()));
     let initializer = Some(Expr::Let(name, Box::new(expr.unwrap())));
     self.eat(Token::Semicolon)?; // Consume the first semicolon
     if !matches!(initializer, Some(Expr::Let(_, _) | Expr::Assignment(_, _))) {
-      return Err(ParseError::InvalidExpression(
+      return Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Era esperado a inicialização de uma variável".to_string(),
       ));
@@ -40,7 +40,7 @@ impl<'a> Parser<'a> {
     let condition = self.parse_comparison_expression()?;
     self.eat(Token::Semicolon)?; // Consume the second semicolon
     if !matches!(condition, Some(Expr::Comparison(_, _, _))) {
-      return Err(ParseError::InvalidExpression(
+      return Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Era esperado uma expressão de comparação".to_string(),
       ));
@@ -52,7 +52,7 @@ impl<'a> Parser<'a> {
       Token::Increment | Token::Decrement | Token::Symbol(_) => {
         self.parse_expression().map_err(|e| e)
       }
-      _ => Err(ParseError::UnexpectedToken(
+      _ => Err(ParserError::UnexpectedToken(
         self.current_token.line_number,
         self.current_token.clone().token,
       )),
@@ -68,7 +68,7 @@ impl<'a> Parser<'a> {
           | Expr::Let(_, _)
       )
     ) {
-      return Err(ParseError::InvalidExpression(
+      return Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Era esperado a atualização de uma variável".to_string(),
       ));

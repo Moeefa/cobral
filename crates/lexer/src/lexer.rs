@@ -1,9 +1,11 @@
-use types::{InterpreterError, LabeledToken, Token};
-
+mod enums;
 mod identifier;
 mod lists;
 mod numbers;
 mod string;
+
+use ::enums::{LabeledToken, Token};
+use enums::errors::LexerError;
 
 #[derive(Clone)]
 pub struct Lexer<'a> {
@@ -174,7 +176,7 @@ impl<'a> Lexer<'a> {
           }
         }
         _ => {
-          logger::error(InterpreterError::UnexpectedCharacter(
+          logger::error(LexerError::UnexpectedCharacter(
             self.line,
             format!("Caracter inesperado: {}", c),
           ));

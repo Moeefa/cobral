@@ -1,4 +1,4 @@
-use types::{LabeledToken, Token};
+use ::enums::{LabeledToken, Token};
 
 use crate::Lexer;
 

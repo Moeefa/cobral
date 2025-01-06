@@ -1,15 +1,15 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_unary_expression(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_unary_expression(&mut self) -> Result<Option<Expr>, ParserError> {
     match &self.current_token.token {
       Token::Minus => {
         self.eat(Token::Minus)?; // Consume the `-` token
         let operand = self
           .parse_primary_expression()?
-          .ok_or(ParseError::InvalidExpression(
+          .ok_or(ParserError::InvalidExpression(
             self.current_token.line_number,
             "Operando ausente após unário '-'".to_string(),
           ))?;
@@ -35,7 +35,7 @@ impl<'a> Parser<'a> {
               return Ok(Some(Expr::UnaryNot(Box::new(right_expr))));
             }
             _ => {
-              return Err(ParseError::InvalidExpression(
+              return Err(ParserError::InvalidExpression(
                 self.current_token.line_number,
                 "Operador 'não' deve ser aplicado a um valor booleano".to_string(),
               ));
@@ -43,7 +43,7 @@ impl<'a> Parser<'a> {
           };
         };
 
-        return Err(ParseError::InvalidExpression(
+        return Err(ParserError::InvalidExpression(
           self.current_token.line_number,
           "Operador 'não' deve ser aplicado a um valor booleano".to_string(),
         ));

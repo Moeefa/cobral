@@ -1,10 +1,10 @@
 use std::{fs, path::Path};
 
+use ::enums::{Data, LabeledExpr};
 use lexer::Lexer;
 use parser::Parser;
-use types::{Data, InterpreterError, LabeledExpr};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_import(&self, file: String) -> Result<Data, InterpreterError> {

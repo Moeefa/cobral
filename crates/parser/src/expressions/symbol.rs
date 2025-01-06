@@ -1,9 +1,9 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_expression_symbol(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_expression_symbol(&mut self) -> Result<Option<Expr>, ParserError> {
     match self.current_token.token {
       Token::Symbol(ref s) => {
         let symbol_name = s.clone();
@@ -34,9 +34,9 @@ impl<'a> Parser<'a> {
                 .get(&symbol_name)
                 .or_else(|| constants.get(&symbol_name))
               {
-                if let Expr::List(ref list) = expr {
+                if let Some(Expr::List(ref list)) = expr {
                   if idx < 0 || idx as usize >= list.len() {
-                    return Err(ParseError::InvalidExpression(
+                    return Err(ParserError::InvalidExpression(
                       self.current_token.line_number,
                       format!(
                         "Índice {} está fora do alcance do vetor {}",
@@ -51,19 +51,19 @@ impl<'a> Parser<'a> {
                   self.eat(Token::BracketR)?; // Consume ']'
                   return Ok(Some(Expr::Index(symbol_name, Box::new(Expr::Integer(idx)))));
                 } else {
-                  return Err(ParseError::InvalidExpression(
+                  return Err(ParserError::InvalidExpression(
                     self.current_token.line_number,
                     format!("{} não é um vetor", symbol_name),
                   ));
                 }
               } else {
-                return Err(ParseError::InvalidExpression(
+                return Err(ParserError::InvalidExpression(
                   self.current_token.line_number,
                   format!("{} não foi definido", symbol_name),
                 ));
               }
             } else {
-              return Err(ParseError::InvalidExpression(
+              return Err(ParserError::InvalidExpression(
                 self.current_token.line_number,
                 "Era esperado um índice do tipo inteiro".to_string(),
               ));
@@ -73,7 +73,7 @@ impl<'a> Parser<'a> {
         }
       }
       // Handle unexpected tokens
-      _ => Err(ParseError::InvalidExpression(
+      _ => Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Era esperado um símbolo".to_string(),
       )),

@@ -14,9 +14,9 @@ pub mod prefix;
 pub mod statement;
 pub mod unary;
 
-use types::{Data, Expr, InterpreterError, LabeledExpr};
+use ::enums::{Data, Expr, LabeledExpr};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_block(&self, block: Vec<Expr>) -> Result<Data, InterpreterError> {

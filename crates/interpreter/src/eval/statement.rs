@@ -1,6 +1,6 @@
-use types::{Data, Expr, InterpreterError, LabeledExpr};
+use ::enums::{Data, Expr, LabeledExpr};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_statement(
@@ -20,7 +20,7 @@ impl Interpreter {
     let condition = match condition {
       Data::Boolean(b) => b,
       _ => {
-        return Err(InterpreterError::ParseError(
+        return Err(InterpreterError::ParserError(
           line,
           "Condição deve ser verdadeiro ou falso".to_string(),
         ))
@@ -41,7 +41,7 @@ impl Interpreter {
         let else_if_condition = match else_if_condition {
           Data::Boolean(b) => b,
           _ => {
-            return Err(InterpreterError::ParseError(
+            return Err(InterpreterError::ParserError(
               line,
               "Condição em um 'senao se' deve ser verdadeiro ou falso".to_string(),
             ))

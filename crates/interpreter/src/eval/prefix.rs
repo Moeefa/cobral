@@ -1,6 +1,6 @@
-use types::{Data, Expr, InterpreterError};
+use ::enums::{Data, Expr};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_prefix_decrement(
@@ -14,7 +14,7 @@ impl Interpreter {
         Data::Integer(n) => Data::Integer(n - 1),
         Data::Float(n) => Data::Float(n - 1.0),
         _ => {
-          return Err(InterpreterError::ParseError(
+          return Err(InterpreterError::ParserError(
             line,
             "Operador '--' deve ser aplicado a um valor numérico".to_string(),
           ))
@@ -27,7 +27,7 @@ impl Interpreter {
         .insert(name, new_value.clone());
       Ok(new_value)
     } else {
-      Err(InterpreterError::ParseError(
+      Err(InterpreterError::ParserError(
         line,
         "Operador '--' deve ser aplicado a um símbolo".to_string(),
       ))
@@ -45,7 +45,7 @@ impl Interpreter {
         Data::Integer(n) => Data::Integer(n + 1),
         Data::Float(n) => Data::Float(n + 1.0),
         _ => {
-          return Err(InterpreterError::ParseError(
+          return Err(InterpreterError::ParserError(
             line,
             "Operador '++' deve ser aplicado a um valor numérico".to_string(),
           ))
@@ -58,7 +58,7 @@ impl Interpreter {
         .insert(name, new_value.clone());
       Ok(new_value)
     } else {
-      Err(InterpreterError::ParseError(
+      Err(InterpreterError::ParserError(
         line,
         "Operador '++' deve ser aplicado a um símbolo".to_string(),
       ))

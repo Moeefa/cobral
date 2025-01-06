@@ -1,15 +1,15 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_let(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_let(&mut self) -> Result<Option<Expr>, ParserError> {
     self.eat(Token::Let)?; // Consume `let`
 
     let name = match &self.current_token.token {
       Token::Symbol(ref name) => name.clone(),
       _ => {
-        return Err(ParseError::ExpectedVariableName(
+        return Err(ParserError::ExpectedVariableName(
           self.current_token.line_number,
           self.current_token.token.clone(),
         ))
@@ -26,7 +26,7 @@ impl<'a> Parser<'a> {
       .variables
       .lock()
       .unwrap()
-      .insert(name.clone(), expr.clone().unwrap());
+      .insert(name.clone(), Some(expr.clone().unwrap()));
 
     Ok(Some(Expr::Let(name, Box::new(expr.unwrap()))))
   }

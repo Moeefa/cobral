@@ -1,0 +1,9 @@
+[package]
+name = "enums"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "enums"
+path = "src/enums.rs"

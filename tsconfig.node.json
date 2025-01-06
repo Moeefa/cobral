@@ -9,7 +9,7 @@
     "baseUrl": ".",
 
     "paths": {
-      "@/*": ["./crates/ui/src/*"]
+      "@/*": ["./packages/ui/src/*"]
     }
   },
   "include": ["vite.config.ts"]

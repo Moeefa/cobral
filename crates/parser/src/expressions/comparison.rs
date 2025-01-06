@@ -1,6 +1,6 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
   fn valid_comparison(&self, lhs: Expr, _op: Token, rhs: Expr) -> bool {
@@ -14,9 +14,8 @@ impl<'a> Parser<'a> {
     }
   }
 
-  pub fn parse_comparison_expression(&mut self) -> Result<Option<Expr>, ParseError> {
-    // Parse the left-hand side of the comparison
-    let lhs = self.parse_primary_expression()?;
+  pub fn parse_comparison_expression(&mut self) -> Result<Option<Expr>, ParserError> {
+    let lhs = self.parse_primary_expression()?; // Parse the left-hand side
 
     if !matches!(
       self.current_token.token,
@@ -27,52 +26,34 @@ impl<'a> Parser<'a> {
         | Token::LessThanEqual
         | Token::GreaterThanEqual
     ) {
-      return Ok(lhs);
+      return Ok(lhs); // Return if there's no comparison operator
     }
 
     let op = self.current_token.token.clone();
     self.eat(op.clone())?; // Consume the operator
 
-    // Parse the right-hand side (RHS) of the comparison
-    let rhs = self.parse_primary_expression()?;
+    let rhs = self.parse_primary_expression()?; // Parse the right-hand side
 
-    if let Some(lhs) = lhs {
-      if let Some(rhs) = rhs {
-        if !self.valid_comparison(lhs.clone(), op.clone(), rhs.clone()) {
-          return Err(ParseError::InvalidExpression(
-            self.current_token.line_number,
-            format!(
-              "Comparação incompatível: '{}' ({}) e '{}' ({}) não podem ser comparados.",
-              lhs,
-              self
-                .expr_type(&lhs)
-                .or_else(|| Some("desconhecido"))
-                .unwrap(),
-              rhs,
-              self
-                .expr_type(&rhs)
-                .or_else(|| Some("desconhecido"))
-                .unwrap(),
-            ),
-          ));
-        }
-
-        return Ok(Some(Expr::Comparison(
-          Box::new(lhs),
-          op.clone(),
-          Box::new(rhs),
-        )));
-      } else {
-        return Err(ParseError::InvalidExpression(
+    if let (Some(lhs), Some(rhs)) = (lhs, rhs) {
+      if !self.valid_comparison(lhs.clone(), op.clone(), rhs.clone()) {
+        return Err(ParserError::InvalidExpression(
           self.current_token.line_number,
-          "Falta o lado direito da expressão de comparação".to_string(),
+          format!(
+            "Comparação incompatível: '{}' ({}) e '{}' ({}) não podem ser comparados.",
+            lhs,
+            self.expr_type(&lhs).unwrap_or("desconhecido"),
+            rhs,
+            self.expr_type(&rhs).unwrap_or("desconhecido"),
+          ),
         ));
       }
-    } else {
-      return Err(ParseError::InvalidExpression(
-        self.current_token.line_number,
-        "Falta o lado esquerdo da expressão de comparação".to_string(),
-      ));
+
+      return Ok(Some(Expr::Comparison(Box::new(lhs), op, Box::new(rhs))));
     }
+
+    Err(ParserError::InvalidExpression(
+      self.current_token.line_number,
+      "Faltam operandos para a expressão de comparação".to_string(),
+    ))
   }
 }

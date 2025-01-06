@@ -26,13 +26,14 @@
     "baseUrl": ".",
 
     "paths": {
-      "@/*": ["./crates/ui/src/*"]
+      "@/*": ["./packages/ui/src/*"],
+      "@packages/*": ["./packages/*"]
     }
   },
   "include": [
     "crates",
     "vite-env.d.ts",
-    "crates/ui/src/**/*.tsx",
+    "packages/ui/src/**/*.tsx",
     "rollup.config.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]

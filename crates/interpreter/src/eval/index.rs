@@ -1,6 +1,6 @@
-use types::{Data, Expr, InterpreterError, LabeledExpr};
+use ::enums::{Data, Expr, LabeledExpr};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_index(

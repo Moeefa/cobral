@@ -1,4 +1,4 @@
-use types::{Data, Expr};
+use ::enums::{Data, Expr};
 
 pub fn square_root(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
   if let Some(arg) = args.get(0) {

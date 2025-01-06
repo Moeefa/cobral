@@ -1,5 +1,5 @@
-use crate::Interpreter;
-use types::{Data, Expr, InterpreterError, LabeledExpr};
+use crate::{enums::errors::InterpreterError, Interpreter};
+use ::enums::{Data, Expr, LabeledExpr};
 
 impl Interpreter {
   pub fn eval_function_call(

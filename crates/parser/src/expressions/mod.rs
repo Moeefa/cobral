@@ -7,12 +7,12 @@ mod operator;
 mod symbol;
 mod unary;
 
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_expression(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_expression(&mut self) -> Result<Option<Expr>, ParserError> {
     // First, parse the comparison expression (like ==, !=, <, >)
 
     let lhs = match self.current_token.token {
@@ -23,7 +23,7 @@ impl<'a> Parser<'a> {
     };
 
     if lhs.is_none() {
-      return Err(ParseError::InvalidExpression(
+      return Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Missing comparison expression".to_string(),
       ));
@@ -43,7 +43,7 @@ impl<'a> Parser<'a> {
     expr
   }
 
-  fn parse_primary_expression(&mut self) -> Result<Option<Expr>, ParseError> {
+  fn parse_primary_expression(&mut self) -> Result<Option<Expr>, ParserError> {
     let expr = match &self.current_token.token {
       Token::Integer(_) | Token::Float(_) | Token::String(_) | Token::True | Token::False => {
         self.parse_expression_data()
@@ -51,7 +51,7 @@ impl<'a> Parser<'a> {
       Token::Symbol(_) => self.parse_expression_symbol(),
       Token::BracketL => self.parse_delimiter(),
       Token::ParenL => self.parse_parenthesized_expression(),
-      _ => Err(ParseError::InvalidExpression(
+      _ => Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Invalid primary expression".to_string(),
       )),
@@ -70,7 +70,7 @@ impl<'a> Parser<'a> {
     }
   }
 
-  fn parse_parenthesized_expression(&mut self) -> Result<Option<Expr>, ParseError> {
+  fn parse_parenthesized_expression(&mut self) -> Result<Option<Expr>, ParserError> {
     self.eat(Token::ParenL)?; // Consume '('
 
     let expr = self.parse_expression()?; // Parse the inner expression recursively
@@ -79,7 +79,7 @@ impl<'a> Parser<'a> {
       self.eat(Token::ParenR)?; // Consume ')'
       Ok(expr)
     } else {
-      Err(ParseError::InvalidExpression(
+      Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Unmatched parenthesis".to_string(),
       ))

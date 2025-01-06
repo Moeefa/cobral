@@ -1,15 +1,15 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_function(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_function(&mut self) -> Result<Option<Expr>, ParserError> {
     self.eat(Token::Function)?;
 
     let name = match &self.current_token.token {
       Token::Symbol(name) => name.clone(),
       _ => {
-        return Err(ParseError::ExpectedFunctionName(
+        return Err(ParserError::ExpectedFunctionName(
           self.current_token.line_number,
           self.current_token.token.clone(),
         ))
@@ -22,6 +22,13 @@ impl<'a> Parser<'a> {
     let mut params = Vec::new();
     while let Token::Symbol(param) = &self.current_token.token {
       params.push(param.clone());
+      self
+        .context
+        .variables
+        .lock()
+        .unwrap()
+        .insert(param.clone(), None);
+
       self.next_token();
       if self.current_token.token != Token::Comma {
         break;

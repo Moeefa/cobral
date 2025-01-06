@@ -11,7 +11,7 @@ path = "src/logger.rs"
 [dependencies]
 colored.workspace = true
 tauri.workspace = true
-types.workspace = true
+enums.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true

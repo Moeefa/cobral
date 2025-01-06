@@ -1,12 +1,12 @@
 use std::sync::{Arc, Mutex};
 
+use ::enums::LabeledExpr;
 use interpreter::Interpreter;
 use lexer::Lexer;
 use libs::APP_HANDLE;
 use logger::{emit_logs, Payload, LOG_BUFFER};
 use parser::Parser;
 use tauri::{AppHandle, Emitter, Listener, Runtime};
-use types::{InterpreterError, LabeledExpr};
 
 pub struct Context {
   pub input: Arc<Mutex<String>>,
@@ -32,7 +32,7 @@ impl Context {
     *self.start.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
   }
 
-  pub fn parse<R: Runtime>(&self, app: AppHandle<R>, input: String) {
+  pub fn eval<R: Runtime>(&self, app: AppHandle<R>, input: String) {
     self.reset();
     self.update(input.clone());
 
@@ -50,51 +50,40 @@ impl Context {
     let lexer = Lexer::new(&input.as_str());
     let mut parser = Parser::new(lexer);
 
-    *self.exprs.lock().unwrap_or_else(|e| e.into_inner()) = self.parse_all(&mut parser);
+    let exprs = self.parse(&mut parser);
 
     let interpreter = self.interpreter.lock().unwrap_or_else(|e| e.into_inner());
 
     // Execution loop
-    for expr in self.exprs.lock().unwrap_or_else(|e| e.into_inner()).clone() {
+    for expr in &exprs {
       // Check the break condition before processing each expression
       if *has_received_event.lock().unwrap() {
         break;
       }
 
-      match interpreter.eval(expr) {
-        Ok(_) => {}
-        Err(e) => {
-          logger::error(InterpreterError::ParseError(
-            parser.current_token.line_number,
-            e.to_string(),
-          ));
-
-          break;
-        }
+      if let Err(e) = interpreter.eval(expr.clone()) {
+        logger::error(e);
+        app_handle.emit("break_exec", ()).unwrap();
+        break;
       }
     }
 
-    let elapsed = start.elapsed();
-    LOG_BUFFER
-      .lock()
-      .unwrap_or_else(|e| e.into_inner())
-      .push(Payload {
-        message: format!("Tempo de execução: {:?}", elapsed),
-        level: String::from("info"),
-      });
+    drop(interpreter);
+    drop(exprs);
 
-    APP_HANDLE
-      .lock()
-      .unwrap()
-      .as_ref()
-      .unwrap()
-      .emit("exec_finished", ())
-      .unwrap();
+    let mut buffer = LOG_BUFFER.lock().unwrap();
+    buffer.push(Payload {
+      message: format!("Tempo de execução: {:?}", start.elapsed()),
+      level: String::from("info"),
+    });
+    drop(buffer);
 
+    app_handle.emit("exec_finished", ()).unwrap();
     emit_logs(&app, true);
+    drop(app_handle);
   }
 
-  fn parse_all(&self, parser: &mut Parser) -> Vec<LabeledExpr> {
+  fn parse(&self, parser: &mut Parser) -> Vec<LabeledExpr> {
     let mut exprs = Vec::new();
 
     loop {
@@ -103,21 +92,14 @@ impl Context {
           expr: expr,
           line_number: parser.current_token.line_number,
         }),
+
         Ok(None) => break,
+
         Err(e) => {
-          logger::error(InterpreterError::ParseError(
-            parser.current_token.line_number,
-            e.to_string(),
-          ));
-
-          APP_HANDLE
-            .lock()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-            .emit("break_exec", ())
-            .unwrap();
-
+          logger::error(e);
+          let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
+          app_handle.emit("break_exec", ()).unwrap();
+          drop(app_handle);
           break;
         }
       }

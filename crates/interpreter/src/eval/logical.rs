@@ -1,6 +1,6 @@
-use types::{Data, Expr, InterpreterError, LabeledExpr, Token};
+use ::enums::{Data, Expr, LabeledExpr, Token};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_logical(
@@ -20,7 +20,7 @@ impl Interpreter {
     let lhs_bool = match lhs_value {
       Data::Boolean(b) => b,
       _ => {
-        return Err(InterpreterError::ParseError(
+        return Err(InterpreterError::ParserError(
           line,
           format!(
             "Operação lógica deve ser booleana, mas encontrou: {:?}",
@@ -40,7 +40,7 @@ impl Interpreter {
     let rhs_bool = match rhs_value {
       Data::Boolean(b) => b,
       _ => {
-        return Err(InterpreterError::ParseError(
+        return Err(InterpreterError::ParserError(
           line,
           format!(
             "Operação lógica deve ser booleana, mas encontrou: {:?}",
@@ -54,7 +54,7 @@ impl Interpreter {
     match op {
       Token::And => Ok(Data::Boolean(lhs_bool && rhs_bool)),
       Token::Or => Ok(Data::Boolean(lhs_bool || rhs_bool)),
-      _ => Err(InterpreterError::ParseError(
+      _ => Err(InterpreterError::ParserError(
         line,
         "Operação lógica inválida".to_string(),
       )),

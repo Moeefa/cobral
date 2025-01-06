@@ -11,8 +11,8 @@ use io::*;
 use math::*;
 use parse::*;
 
+use ::enums::{Data, Expr};
 use tauri::AppHandle;
-use types::{Data, Expr};
 
 pub static APP_HANDLE: LazyLock<Arc<Mutex<Option<AppHandle>>>> =
   LazyLock::new(|| Arc::new(Mutex::new(None)));

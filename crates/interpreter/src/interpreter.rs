@@ -1,11 +1,13 @@
+mod enums;
 mod eval;
 
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use ::enums::{Data, Expr, LabeledExpr};
+use enums::errors::InterpreterError;
 use libs::load_libs;
-use types::{Data, Expr, InterpreterError, LabeledExpr};
 
 pub struct Interpreter {
   variables: Arc<Mutex<HashMap<String, Data>>>,
@@ -73,17 +75,22 @@ impl Interpreter {
         self.eval_statement(condition, true_block, else_if_block, else_block, line)
       }
 
-      Expr::Symbol(value) => self
-        .variables
-        .lock()
-        .unwrap()
-        .get(&value)
-        .cloned()
-        .or_else(|| self.constants.lock().unwrap().get(&value).cloned())
-        .ok_or(InterpreterError::EvalError(
-          line,
-          format!("Variável desconhecida: {}", value),
-        )),
+      Expr::Symbol(value) => {
+        let variables = self.variables.lock().unwrap();
+        let constants = self.constants.lock().unwrap();
+        if let Some(data) = variables
+          .get(&value)
+          .cloned()
+          .or_else(|| constants.get(&value).cloned())
+        {
+          Ok(data)
+        } else {
+          Err(InterpreterError::EvalError(
+            line,
+            format!("Variável desconhecida: {}", value),
+          ))
+        }
+      }
 
       #[allow(unreachable_patterns)]
       _ => Err(InterpreterError::EvalError(

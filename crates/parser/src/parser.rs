@@ -1,6 +1,7 @@
 mod argument;
 mod r#const;
 mod context;
+mod enums;
 mod expressions;
 mod function;
 mod import;
@@ -10,9 +11,10 @@ mod r#loop;
 mod r#return;
 mod statement;
 
+use ::enums::{Expr, LabeledToken, Token};
 use context::Context;
+use enums::errors::ParserError;
 use lexer::Lexer;
-use types::{Expr, LabeledToken, ParseError, Token};
 
 #[allow(dead_code)]
 pub struct Parser<'a> {
@@ -36,9 +38,23 @@ impl<'a> Parser<'a> {
 
   pub fn expr_type(&self, expr: &Expr) -> Option<&'static str> {
     match expr {
-      Expr::Symbol(s) => self
-        .expr_type(self.context.variables.lock().unwrap().get(s)?)
-        .or_else(|| self.expr_type(self.context.constants.lock().unwrap().get(s)?)),
+      Expr::Symbol(s) => {
+        let variables = self.context.variables.lock().unwrap();
+        let constants = self.context.constants.lock().unwrap();
+        if let Some(data) = variables
+          .get(s)
+          .cloned()
+          .or_else(|| constants.get(s).cloned())
+        {
+          if let Some(expr) = data.as_ref() {
+            self.expr_type(expr)
+          } else {
+            Some("desconhecido")
+          }
+        } else {
+          Some("indefinido")
+        }
+      }
       Expr::Integer(_) => Some("inteiro"),
       Expr::List(_) => Some("lista"),
       Expr::Float(_) => Some("real"),
@@ -48,13 +64,13 @@ impl<'a> Parser<'a> {
         "escrever" | "ler" => Some("cadeia"),
         "raiz" | "potencia" | "real" => Some("real"),
         "int" => Some("real"),
-        _ => None, // Unknown or user-defined function TODO: Add user-defined function support
+        _ => Some("desconhecido"), // Unknown or user-defined function TODO: Add user-defined function support
       },
-      _ => None, // Unknown or unsupported expression
+      _ => Some("desconhecido"), // Unknown or unsupported expression
     }
   }
 
-  pub fn parse(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse(&mut self) -> Result<Option<Expr>, ParserError> {
     let expr = match &self.current_token.token {
       Token::EOF => Ok(None),
       Token::Let => self.parse_let(),
@@ -65,7 +81,7 @@ impl<'a> Parser<'a> {
       Token::Import => self.parse_import(),
       Token::Return => self.parse_return(),
       Token::Symbol(_) => self.parse_expression().map_err(|e| e),
-      _ => Err(ParseError::UnexpectedToken(
+      _ => Err(ParserError::UnexpectedToken(
         self.current_token.line_number,
         self.current_token.clone().token,
       )),
@@ -76,12 +92,40 @@ impl<'a> Parser<'a> {
     expr
   }
 
-  fn eat(&mut self, token: Token) -> Result<(), ParseError> {
+  pub fn parse_block(&mut self) -> Result<Vec<Expr>, ParserError> {
+    self.eat(Token::BraceL)?; // Consume `{`
+
+    let mut exprs = Vec::new();
+
+    while self.current_token.token != Token::BraceR && self.current_token.token != Token::EOF {
+      if let Some(expr) = self.parse()? {
+        exprs.push(expr);
+      } else {
+        return Err(ParserError::UnexpectedToken(
+          self.current_token.line_number,
+          self.current_token.clone().token,
+        ));
+      }
+    }
+
+    if self.current_token.token == Token::BraceR {
+      self.eat(Token::BraceR)?; // Consume `}`
+    } else {
+      return Err(ParserError::UnexpectedToken(
+        self.current_token.line_number,
+        self.current_token.clone().token,
+      ));
+    }
+
+    Ok(exprs)
+  }
+
+  fn eat(&mut self, token: Token) -> Result<(), ParserError> {
     if &self.current_token.token == &token {
       self.next_token(); // Move to the next token
       Ok(())
     } else {
-      Err(ParseError::ExpectedToken(
+      Err(ParserError::ExpectedToken(
         self.current_token.line_number,
         self.current_token.token.clone(),
         token,
@@ -89,7 +133,7 @@ impl<'a> Parser<'a> {
     }
   }
 
-  pub fn try_eat(&mut self, token: Token) -> Result<(), ParseError> {
+  pub fn try_eat(&mut self, token: Token) -> Result<(), ParserError> {
     if &self.current_token.token == &token {
       self.next_token(); // Consume semicolon
     }

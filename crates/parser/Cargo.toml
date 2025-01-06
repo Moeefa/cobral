@@ -10,7 +10,7 @@ path = "src/parser.rs"
 
 [dependencies]
 libs.workspace = true
-types.workspace = true
+enums.workspace = true
 lexer.workspace = true
 
 # Only for tests

@@ -1,9 +1,9 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_arguments(&mut self) -> Result<Vec<Expr>, ParseError> {
+  pub fn parse_arguments(&mut self) -> Result<Vec<Expr>, ParserError> {
     let mut args = Vec::new();
     let mut first_argument = true;
 
@@ -12,7 +12,7 @@ impl<'a> Parser<'a> {
         if self.current_token.token == Token::Comma {
           self.eat(Token::Comma)?;
         } else {
-          return Err(ParseError::UnexpectedToken(
+          return Err(ParserError::UnexpectedToken(
             self.current_token.line_number,
             self.current_token.clone().token,
           ));
@@ -24,7 +24,7 @@ impl<'a> Parser<'a> {
           args.push(expr);
         }
         Ok(None) => {
-          return Err(ParseError::UnexpectedToken(
+          return Err(ParserError::UnexpectedToken(
             self.current_token.line_number,
             self.current_token.clone().token,
           ))
@@ -38,7 +38,7 @@ impl<'a> Parser<'a> {
     if self.current_token.token == Token::ParenR {
       self.eat(Token::ParenR)?;
     } else {
-      return Err(ParseError::UnexpectedToken(
+      return Err(ParserError::UnexpectedToken(
         self.current_token.line_number,
         self.current_token.clone().token,
       ));

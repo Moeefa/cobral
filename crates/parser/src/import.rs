@@ -1,15 +1,15 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_import(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_import(&mut self) -> Result<Option<Expr>, ParserError> {
     self.eat(Token::Import)?; // Consume `importar`
 
     let file_path = match &self.current_token.token {
       Token::String(path) => path.clone(),
       _ => {
-        return Err(ParseError::UnexpectedToken(
+        return Err(ParserError::UnexpectedToken(
           self.current_token.line_number,
           self.current_token.token.clone(),
         ));

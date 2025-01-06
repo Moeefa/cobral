@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
+  use ::enums::Data;
+  use ::enums::Expr;
   use libs::math::*;
-  use types::Data;
-  use types::Expr;
 
   #[test]
   fn test_power_integer() {

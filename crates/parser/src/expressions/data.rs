@@ -1,9 +1,9 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_expression_data(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_expression_data(&mut self) -> Result<Option<Expr>, ParserError> {
     match self.current_token.token.clone() {
       Token::Integer(ref number) => {
         self.eat(Token::Integer(number.clone()))?;

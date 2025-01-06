@@ -1,12 +1,12 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
   pub fn parse_logical_expression(
     &mut self,
     lhs: Option<Expr>,
-  ) -> Result<Option<Expr>, ParseError> {
+  ) -> Result<Option<Expr>, ParserError> {
     let mut expr = lhs;
 
     // Handle logical operators (and, or)
@@ -19,7 +19,7 @@ impl<'a> Parser<'a> {
       if let Some(rhs) = rhs {
         expr = Some(Expr::Logical(Box::new(expr.unwrap()), op, Box::new(rhs)));
       } else {
-        return Err(ParseError::InvalidExpression(
+        return Err(ParserError::InvalidExpression(
           self.current_token.line_number,
           "Missing right-hand side of logical expression".to_string(),
         ));

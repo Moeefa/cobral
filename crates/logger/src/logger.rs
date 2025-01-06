@@ -3,7 +3,6 @@ use std::sync::{Arc, LazyLock, Mutex};
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Runtime};
-use types::InterpreterError;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Payload {
@@ -26,13 +25,13 @@ pub fn emit_logs<R: Runtime>(app: &AppHandle<R>, force_emit: bool) {
   drop(buffer);
 }
 
-pub fn error(msg: InterpreterError) {
+pub fn error(msg: impl ToString) {
   eprintln!("{}", "🐛 Ocorreu um erro:".on_red());
 
   eprintln!("{}", msg.to_string().on_red());
   eprintln!("{}", "\t🔍 Detalhes:");
 
-  eprintln!("\t{:?}\n", msg);
+  eprintln!("\t{}\n", msg.to_string());
 
   let mut buffer = LOG_BUFFER.lock().unwrap();
   buffer.push(Payload {
@@ -43,10 +42,10 @@ pub fn error(msg: InterpreterError) {
   drop(buffer);
 }
 
-pub fn info(msg: &str) {
+pub fn info(msg: impl ToString) {
   eprintln!("{}", "\t🗒️ Info:");
 
-  eprintln!("\t{:?}\n", msg);
+  eprintln!("\t{}\n", msg.to_string());
 
   let msg_clone = msg.to_string();
   let mut buffer = LOG_BUFFER.lock().unwrap();

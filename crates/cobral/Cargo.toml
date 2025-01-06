@@ -16,7 +16,7 @@ tauri-build.workspace = true
 lexer.workspace = true
 parser.workspace = true
 interpreter.workspace = true
-types.workspace = true
+enums.workspace = true
 logger.workspace = true
 libs.workspace = true
 

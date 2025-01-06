@@ -1,9 +1,9 @@
-use types::{Expr, ParseError};
+use ::enums::Expr;
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_expression_operator(&mut self, lhs: Expr) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_expression_operator(&mut self, lhs: Expr) -> Result<Option<Expr>, ParserError> {
     // Handle comparison operators
     let op = self.current_token.token.clone();
     self.eat(op.clone())?; // Consume the operator (e.g., '>', '<', '==', etc.)

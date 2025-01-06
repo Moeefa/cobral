@@ -9,5 +9,5 @@ name = "lexer"
 path = "src/lexer.rs"
 
 [dependencies]
-types.workspace = true
+enums.workspace = true
 logger.workspace = true

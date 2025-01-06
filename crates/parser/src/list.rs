@@ -1,9 +1,9 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_list(&mut self) -> Result<Vec<Expr>, ParseError> {
+  pub fn parse_list(&mut self) -> Result<Vec<Expr>, ParserError> {
     let mut elements = Vec::new();
 
     if self.current_token.token == Token::List(vec![]) {
@@ -19,13 +19,13 @@ impl<'a> Parser<'a> {
             self.eat(Token::Comma)?; // Consume comma
           } else if self.current_token.token != Token::BracketR {
             // If we encounter any unexpected token, report error
-            return Err(ParseError::UnexpectedToken(
+            return Err(ParserError::UnexpectedToken(
               self.current_token.line_number,
               self.current_token.token.clone(),
             ));
           }
         } else {
-          return Err(ParseError::UnexpectedToken(
+          return Err(ParserError::UnexpectedToken(
             self.current_token.line_number,
             self.current_token.token.clone(),
           ));
@@ -35,7 +35,7 @@ impl<'a> Parser<'a> {
       if self.current_token.token == Token::BracketR {
         self.eat(Token::BracketR)?; // Consume closing bracket `]`
       } else {
-        return Err(ParseError::UnexpectedToken(
+        return Err(ParserError::UnexpectedToken(
           self.current_token.line_number,
           self.current_token.token.clone(),
         ));
@@ -53,13 +53,13 @@ impl<'a> Parser<'a> {
           self.next_token(); // Consume comma
         } else if self.current_token.token != Token::BracketR {
           // If we encounter any unexpected token, report error
-          return Err(ParseError::UnexpectedToken(
+          return Err(ParserError::UnexpectedToken(
             self.current_token.line_number,
             self.current_token.token.clone(),
           ));
         }
       } else {
-        return Err(ParseError::UnexpectedToken(
+        return Err(ParserError::UnexpectedToken(
           self.current_token.line_number,
           self.current_token.token.clone(),
         ));
@@ -69,7 +69,7 @@ impl<'a> Parser<'a> {
     if self.current_token.token == Token::BracketR {
       self.next_token(); // Consume closing bracket `]`
     } else {
-      return Err(ParseError::UnexpectedToken(
+      return Err(ParserError::UnexpectedToken(
         self.current_token.line_number,
         self.current_token.token.clone(),
       ));

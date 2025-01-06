@@ -1,6 +1,6 @@
-use types::{Data, Expr, InterpreterError, LabeledExpr, Token};
+use ::enums::{Data, Expr, LabeledExpr, Token};
 
-use crate::Interpreter;
+use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
   pub fn eval_comparison(

@@ -1,9 +1,9 @@
-use types::{Expr, ParseError, Token};
+use ::enums::{Expr, Token};
 
-use crate::Parser;
+use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
-  pub fn parse_statement(&mut self) -> Result<Option<Expr>, ParseError> {
+  pub fn parse_statement(&mut self) -> Result<Option<Expr>, ParserError> {
     self.eat(Token::If)?; // Consume 'if'
     self.eat(Token::ParenL)?; // Consume '('
 
@@ -45,33 +45,5 @@ impl<'a> Parser<'a> {
       else_if_blocks,
       else_block,
     )))
-  }
-
-  pub fn parse_block(&mut self) -> Result<Vec<Expr>, ParseError> {
-    self.eat(Token::BraceL)?; // Consume `{`
-
-    let mut statements = Vec::new();
-
-    while self.current_token.token != Token::BraceR && self.current_token.token != Token::EOF {
-      if let Some(statement) = self.parse()? {
-        statements.push(statement);
-      } else {
-        return Err(ParseError::UnexpectedToken(
-          self.current_token.line_number,
-          self.current_token.clone().token,
-        ));
-      }
-    }
-
-    if self.current_token.token == Token::BraceR {
-      self.eat(Token::BraceR)?; // Consume `}`
-    } else {
-      return Err(ParseError::UnexpectedToken(
-        self.current_token.line_number,
-        self.current_token.clone().token,
-      ));
-    }
-
-    Ok(statements)
   }
 }

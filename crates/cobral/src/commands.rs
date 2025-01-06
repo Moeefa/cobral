@@ -16,9 +16,9 @@ pub async fn update<R: Runtime>(_app: AppHandle<R>, _window: Window<R>, input: S
 }
 
 #[command]
-pub async fn parse<R: Runtime>(app: AppHandle<R>, _window: Window<R>, input: String) {
+pub async fn eval<R: Runtime>(app: AppHandle<R>, _window: Window<R>, input: String) {
   CONTEXT
     .lock()
     .unwrap_or_else(|e| e.into_inner())
-    .parse(app, input);
+    .eval(app, input);
 }

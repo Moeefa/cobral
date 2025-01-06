@@ -3,12 +3,12 @@ use std::{
   sync::{Arc, Mutex},
 };
 
-use types::Expr;
+use ::enums::Expr;
 
 pub struct Context {
-  pub constants: Arc<Mutex<HashMap<String, Expr>>>,
-  pub variables: Arc<Mutex<HashMap<String, Expr>>>,
-  pub functions: Arc<Mutex<HashMap<String, (Vec<String>, Vec<Expr>)>>>,
+  pub constants: Arc<Mutex<HashMap<String, Option<Expr>>>>,
+  pub variables: Arc<Mutex<HashMap<String, Option<Expr>>>>,
+  pub functions: Arc<Mutex<HashMap<String, Option<(Vec<String>, Vec<Expr>)>>>>,
 }
 
 impl Context {
