@@ -45,12 +45,13 @@ jobs:
       - name: Install Bun dependencies
         run: bun i
 
-      - name: Read CHANGELOG file
+      - name: Read CHANGELOG.md
         id: changelog
         run: |
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          cat ./CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "content<<EOF"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
       - name: Discord Webhook
         uses: tsickert/discord-webhook@v6.0.0
