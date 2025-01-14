@@ -9,7 +9,7 @@ impl<'a> Lexer<'a> {
       "declare" => {
         self.skip_whitespace(); // Skip any whitespace
 
-        match self.peek().as_str() {
+        match self.peek_identifier().as_str() {
           "constante" => {
             self.next_token(); // Move past "constante"
             self.token(Token::Const)
@@ -18,9 +18,14 @@ impl<'a> Lexer<'a> {
         }
       }
 
-      "se" => self.token(Token::If),      // Keyword "if"
-      "senao" => self.token(Token::Else), // Keyword "else"
-      "para" => self.token(Token::For),   // Keyword "for"
+      "se" => self.token(Token::If),          // Keyword "if"
+      "senao" => self.token(Token::Else),     // Keyword "else"
+      "escolha" => self.token(Token::Switch), // Keyword "switch"
+      "caso" => self.token(Token::Case),      // Keyword "case"
+      "padrao" => self.token(Token::Default), // Keyword "default"
+
+      "para" => self.token(Token::For),       // Keyword "for"
+      "enquanto" => self.token(Token::While), // Keyword "while"
 
       "nao" => self.token(Token::Not), // Logical NOT operator
       "ou" => self.token(Token::Or),   // Logical OR operator
@@ -28,6 +33,7 @@ impl<'a> Lexer<'a> {
 
       "funcao" => self.token(Token::Function), // Keyword "function"
       "retorne" => self.token(Token::Return),  // Keyword "return"
+      "pare" => self.token(Token::Break),      // Keyword "break"
       "importe" => self.token(Token::Import),  // Keyword "import"
 
       "verdadeiro" => self.token(Token::True), // Boolean literal
@@ -53,7 +59,7 @@ impl<'a> Lexer<'a> {
     id
   }
 
-  fn peek(&mut self) -> String {
+  fn peek_identifier(&mut self) -> String {
     // Save current state of lexer
     let saved_position = self.pos;
     let saved_char = self.current_char;

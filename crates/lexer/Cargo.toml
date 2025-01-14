@@ -11,3 +11,5 @@ path = "src/lexer.rs"
 [dependencies]
 enums.workspace = true
 logger.workspace = true
+libs.workspace = true
+tauri.workspace = true

@@ -5,18 +5,18 @@ use crate::{enums::errors::InterpreterError, Interpreter};
 impl Interpreter {
   pub fn eval_binary(
     &self,
-    lhs: Box<Expr>,
+    lhs: Expr,
     op: Token,
-    rhs: Box<Expr>,
+    rhs: Expr,
     line: usize,
   ) -> Result<Data, InterpreterError> {
     let lhs_value = self.eval(LabeledExpr {
-      expr: *lhs,
+      expr: lhs,
       line_number: line,
     })?;
 
     let rhs_value = self.eval(LabeledExpr {
-      expr: *rhs,
+      expr: rhs,
       line_number: line,
     })?;
 

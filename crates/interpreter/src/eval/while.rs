@@ -5,26 +5,12 @@ use tauri::Listener;
 use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
-  pub fn eval_for_loop(
+  pub fn eval_while_loop(
     &self,
-    initializer: Expr,
     condition: Expr,
-    update: Expr,
     body: Vec<Expr>,
     line: usize,
   ) -> Result<Data, InterpreterError> {
-    // Extract initialization variable name upfront if it's a Let expression
-    let cleanup_var = match initializer {
-      Expr::Let(ref name, _) => Some(name.clone()),
-      _ => None,
-    };
-
-    // Initialize
-    self.eval(LabeledExpr {
-      expr: initializer,
-      line_number: line,
-    })?;
-
     // Set up break detection
     let should_break = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
     let should_break_clone = should_break.clone();
@@ -43,11 +29,6 @@ impl Interpreter {
       line_number: line,
     };
 
-    let labeled_update = LabeledExpr {
-      expr: update,
-      line_number: line,
-    };
-
     // Main loop
     while !should_break.load(std::sync::atomic::Ordering::SeqCst) {
       match self.eval(labeled_condition.clone())? {
@@ -62,12 +43,6 @@ impl Interpreter {
       }
 
       self.eval_block(body.clone())?;
-      self.eval(labeled_update.clone())?;
-    }
-
-    // Cleanup
-    if let Some(name) = cleanup_var {
-      self.variables.lock().unwrap().remove(&name);
     }
 
     Ok(Data::None)

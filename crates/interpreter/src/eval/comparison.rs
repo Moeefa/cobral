@@ -5,20 +5,20 @@ use crate::{enums::errors::InterpreterError, Interpreter};
 impl Interpreter {
   pub fn eval_comparison(
     &self,
-    lhs: Box<Expr>,
+    lhs: Expr,
     op: Token,
-    rhs: Box<Expr>,
+    rhs: Expr,
     line: usize,
   ) -> Result<Data, InterpreterError> {
     // Evaluate left-hand side expression
     let lhs_value = self.eval(LabeledExpr {
-      expr: *lhs,
+      expr: lhs,
       line_number: line,
     })?;
 
     // Evaluate right-hand side expression
     let rhs_value = self.eval(LabeledExpr {
-      expr: *rhs,
+      expr: rhs,
       line_number: line,
     })?;
 

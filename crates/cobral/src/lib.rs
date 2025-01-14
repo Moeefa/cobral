@@ -1,20 +1,49 @@
-mod commands;
 mod context;
 
+use context::ExecutionContext;
 use libs::APP_HANDLE;
-use tauri::Manager;
+use tauri::{
+  window::{Effect, EffectsBuilder},
+  Manager,
+};
 use tauri_plugin_decorum::WebviewWindowExt;
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[tauri::command]
+async fn eval(context: tauri::State<'_, ExecutionContext>, input: String) -> Result<(), String> {
+  context.eval(input).await;
+  Ok(())
+}
+
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_decorum::init())
     .plugin(tauri_plugin_shell::init())
-    .invoke_handler(tauri::generate_handler![commands::eval, commands::update])
+    .manage(ExecutionContext::new())
+    .invoke_handler(tauri::generate_handler![eval])
     .setup(|app| {
       APP_HANDLE.lock().unwrap().replace(app.handle().clone());
+
+      let main_window_builder =
+        tauri::WebviewWindowBuilder::new(app.handle(), "main", tauri::WebviewUrl::App("/".into()))
+          .title("Cobral")
+          .resizable(true)
+          .decorations(false)
+          .inner_size(1000.0, 562.0)
+          .min_inner_size(500.0, 300.0)
+          .center()
+          .effects(
+            EffectsBuilder::new()
+              .effects([Effect::Acrylic, Effect::FullScreenUI])
+              .build(),
+          );
+
+      #[cfg(target_os = "windows")]
+      let main_window_builder = main_window_builder.transparent(true);
+
+      main_window_builder.build().unwrap();
 
       // Create a custom titlebar for main window
       // On Windows this hides decoration and creates custom window controls

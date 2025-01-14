@@ -8,26 +8,20 @@ impl Interpreter {
     args: Vec<Expr>,
     line: usize,
   ) -> Result<Data, InterpreterError> {
-    if let Some(func) = self.libs.get(&name) {
-      let mut eval_fn = |expr: Expr| match self.eval(LabeledExpr {
-        expr,
-        line_number: line,
-      }) {
-        Ok(value) => Some(value),
-        Err(e) => {
-          logger::error(InterpreterError::ExpressionEvaluationFailure(
-            line,
-            e.to_string(),
-          ));
-          Some(Data::Undefined)
+    if let Some(func) = self.libs.lock().unwrap().get(&name) {
+      let mut eval_fn = |expr: Expr| -> Option<Data> {
+        match self.eval(LabeledExpr {
+          expr,
+          line_number: line,
+        }) {
+          Ok(data) => Some(data),
+          Err(_) => None,
         }
       };
 
-      let result = func(args, &mut eval_fn);
-      result.ok_or(InterpreterError::EvalError(
-        line,
-        format!("Erro ao executar a função: {}", name),
-      ))
+      func(args.clone(), &mut eval_fn).ok_or_else(|| {
+        InterpreterError::EvalError(line, format!("Erro ao executar função: {}", name))
+      })
     } else if let Some((params, body)) = {
       // Limit the lock scope to this line
       let functions_lock = self.functions.lock().unwrap();

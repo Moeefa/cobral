@@ -5,6 +5,7 @@ use std::{
 
 use ::enums::Expr;
 
+#[derive(Debug)]
 pub struct Context {
   pub constants: Arc<Mutex<HashMap<String, Option<Expr>>>>,
   pub variables: Arc<Mutex<HashMap<String, Option<Expr>>>>,

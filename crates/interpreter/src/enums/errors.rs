@@ -29,7 +29,7 @@ impl fmt::Display for InterpreterError {
     write!(f, "InterpreterError: ").unwrap();
 
     match self {
-      InterpreterError::ConstantRedeclarationError(line, message) => write!(f, "Linha {}: Erro de redeclaração de constante: '{}'", line, message),
+      InterpreterError::ConstantRedeclarationError(line, message) => write!(f, "Linha {}: Constante não pode ser redeclarada: '{}'", line, message),
       InterpreterError::ExpressionEvaluationFailure(line, message) => write!(f, "Linha {}: Falha na avaliação da expressão: '{}'", line, message),
       InterpreterError::ExpectedSymbolError(line, found, expected) => write!(f, "Linha {}: Esperava um símbolo '{:?}', mas encontrou '{:?}'", line, expected, found),
       InterpreterError::ExpectedVariableError(line, token) => write!(f, "Linha {}: Esperava uma variável, mas encontrou '{:?}'", line, token),
@@ -38,7 +38,7 @@ impl fmt::Display for InterpreterError {
       InterpreterError::ParserError(_line, message) => write!(f, "{}", message),
       InterpreterError::ParseInt(_err) => write!(f, "Dígito inválido encontrado"),
       InterpreterError::ParseFloat(_err) => write!(f, "Dígito inválido encontrado"),
-      InterpreterError::UnexpectedCharacter(line, character) => write!(f, "Linha {}: Caracter inesperado: '{}'", line, character),
+      InterpreterError::UnexpectedCharacter(line, character) => write!(f, "Linha {}: Caractere inesperado: '{}'", line, character),
       InterpreterError::RuntimeError(line, message) => write!(f, "Linha {}: Erro em tempo de execução: '{}'", line, message),
       InterpreterError::FileNotFound(file) => write!(f, "Arquivo não encontrado: '{}'", file),
       InterpreterError::FileReadError(file, message) => write!(f, "Erro ao ler arquivo '{}': '{}'", file, message),

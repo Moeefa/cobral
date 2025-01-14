@@ -12,7 +12,9 @@ pub mod r#loop;
 pub mod postfix;
 pub mod prefix;
 pub mod statement;
+pub mod switch;
 pub mod unary;
+pub mod r#while;
 
 use ::enums::{Data, Expr, LabeledExpr};
 

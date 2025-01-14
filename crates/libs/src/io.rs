@@ -11,38 +11,10 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .iter()
     .map(|arg| {
       let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      match data {
-        Some(Data::Float(f)) => Some(f.to_string()),
-        Some(Data::Integer(i)) => Some(i.to_string()),
-        Some(Data::String(s)) => Some(s),
-        Some(Data::Boolean(b)) => Some({
-          if b {
-            String::from("verdadeiro")
-          } else {
-            String::from("falso")
-          }
-        }),
-        Some(Data::List(l)) => Some({
-          let mut output = String::from("");
-          for (i, item) in l.iter().enumerate() {
-            output.push_str(&match item {
-              Data::Float(f) => f.to_string(),
-              Data::Integer(i) => i.to_string(),
-              Data::String(s) => s.to_string(),
-              Data::Boolean(b) => b.to_string(),
-              Data::Undefined => String::from("Indefinido"),
-              Data::List(_) => String::from("Lista"),
-
-              #[allow(unreachable_patterns)]
-              _ => String::from("Tipo desconhecido"),
-            });
-            if i < l.len() - 1 {
-              output.push_str(", ");
-            }
-          }
-          output
-        }),
-        _ => None,
+      if let Some(data) = data {
+        Some(data.to_string())
+      } else {
+        None
       }
     })
     .collect();
@@ -63,7 +35,42 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     level: String::from("info"),
   });
   drop(buffer);
-  
+
+  emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), false);
+
+  Some(Data::String(output))
+}
+
+pub fn error(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
+  let output: Vec<Option<String>> = args
+    .iter()
+    .map(|arg| {
+      let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
+      if let Some(data) = data {
+        Some(data.to_string())
+      } else {
+        None
+      }
+    })
+    .collect();
+
+  if output.iter().any(|o| o.is_none()) {
+    return Some(Data::None);
+  }
+
+  let output: String = output
+    .into_iter()
+    .map(|o| o.unwrap())
+    .collect::<Vec<String>>()
+    .join(" ");
+
+  let mut buffer = LOG_BUFFER.lock().unwrap();
+  buffer.push(Payload {
+    message: output.clone(),
+    level: String::from("error"),
+  });
+  drop(buffer);
+
   emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), false);
 
   Some(Data::String(output))
@@ -76,38 +83,10 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
     .iter()
     .map(|arg| {
       let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      match data {
-        Some(Data::Float(f)) => Some(f.to_string()),
-        Some(Data::Integer(i)) => Some(i.to_string()),
-        Some(Data::String(s)) => Some(s),
-        Some(Data::Boolean(b)) => Some({
-          if b {
-            String::from("verdadeiro")
-          } else {
-            String::from("falso")
-          }
-        }),
-        Some(Data::List(l)) => Some({
-          let mut output = String::from("");
-          for (i, item) in l.iter().enumerate() {
-            output.push_str(&match item {
-              Data::Float(f) => f.to_string(),
-              Data::Integer(i) => i.to_string(),
-              Data::String(s) => s.to_string(),
-              Data::Boolean(b) => b.to_string(),
-              Data::Undefined => String::from("Indefinido"),
-              Data::List(_) => String::from("Lista"),
-
-              #[allow(unreachable_patterns)]
-              _ => String::from("Tipo desconhecido"),
-            });
-            if i < l.len() - 1 {
-              output.push_str(", ");
-            }
-          }
-          output
-        }),
-        _ => None,
+      if let Some(data) = data {
+        Some(data.to_string())
+      } else {
+        None
       }
     })
     .collect();
@@ -146,7 +125,7 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
   let (lock, cvar) = &*shared_state;
   let mut input = lock.lock().unwrap();
   while input.is_none() {
-    input = cvar.wait(input).unwrap(); // Wait for a notification
+    input = cvar.wait(input).unwrap();
   }
 
   // Cleanup listeners

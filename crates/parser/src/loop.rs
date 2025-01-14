@@ -13,8 +13,7 @@ impl<'a> Parser<'a> {
       Token::Symbol(ref name) => name.clone(),
       _ => {
         return Err(ParserError::ExpectedVariableName(
-          self.current_token.line_number,
-          self.current_token.token.clone(),
+          self.current_token.clone(),
         ))
       }
     };
@@ -52,10 +51,7 @@ impl<'a> Parser<'a> {
       Token::Increment | Token::Decrement | Token::Symbol(_) => {
         self.parse_expression().map_err(|e| e)
       }
-      _ => Err(ParserError::UnexpectedToken(
-        self.current_token.line_number,
-        self.current_token.clone().token,
-      )),
+      _ => Err(ParserError::UnexpectedToken(self.current_token.clone())),
     }?;
     if !matches!(
       update,

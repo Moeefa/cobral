@@ -19,26 +19,17 @@ impl<'a> Parser<'a> {
             self.eat(Token::Comma)?; // Consume comma
           } else if self.current_token.token != Token::BracketR {
             // If we encounter any unexpected token, report error
-            return Err(ParserError::UnexpectedToken(
-              self.current_token.line_number,
-              self.current_token.token.clone(),
-            ));
+            return Err(ParserError::UnexpectedToken(self.current_token.clone()));
           }
         } else {
-          return Err(ParserError::UnexpectedToken(
-            self.current_token.line_number,
-            self.current_token.token.clone(),
-          ));
+          return Err(ParserError::UnexpectedToken(self.current_token.clone()));
         }
       }
 
       if self.current_token.token == Token::BracketR {
         self.eat(Token::BracketR)?; // Consume closing bracket `]`
       } else {
-        return Err(ParserError::UnexpectedToken(
-          self.current_token.line_number,
-          self.current_token.token.clone(),
-        ));
+        return Err(ParserError::UnexpectedToken(self.current_token.clone()));
       }
     }
     self.next_token(); // Consume the opening bracket `[`
@@ -53,26 +44,17 @@ impl<'a> Parser<'a> {
           self.next_token(); // Consume comma
         } else if self.current_token.token != Token::BracketR {
           // If we encounter any unexpected token, report error
-          return Err(ParserError::UnexpectedToken(
-            self.current_token.line_number,
-            self.current_token.token.clone(),
-          ));
+          return Err(ParserError::UnexpectedToken(self.current_token.clone()));
         }
       } else {
-        return Err(ParserError::UnexpectedToken(
-          self.current_token.line_number,
-          self.current_token.token.clone(),
-        ));
+        return Err(ParserError::UnexpectedToken(self.current_token.clone()));
       }
     }
 
     if self.current_token.token == Token::BracketR {
       self.next_token(); // Consume closing bracket `]`
     } else {
-      return Err(ParserError::UnexpectedToken(
-        self.current_token.line_number,
-        self.current_token.token.clone(),
-      ));
+      return Err(ParserError::UnexpectedToken(self.current_token.clone()));
     }
 
     Ok(elements) // Return Vec<Expr> here

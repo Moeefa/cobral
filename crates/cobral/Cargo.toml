@@ -25,9 +25,13 @@ tauri.workspace = true
 tauri-plugin-shell.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+colored.workspace = true
+crossbeam.workspace = true
+crossbeam-channel.workspace = true
+num_cpus = "1.0"
 
 tauri-plugin-decorum = "1.1.1"
-colored = "2.1.0"
-tauri-plugin-fs = "2"
+tauri-plugin-fs = { version = "2", features = ["watch"] }
 tauri-plugin-dialog = "2"
-
+tauri-plugin-os = "2"
+tauri-plugin-devtools = "2.0.0"

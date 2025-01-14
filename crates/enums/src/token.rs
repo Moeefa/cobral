@@ -7,9 +7,14 @@ pub enum Token {
   Const,
   If,
   Else,
+  Switch,
+  Case,
+  Default,
   For,
+  While,
   Function,
   Return,
+  Break,
   Import,
 
   // Symbols
@@ -17,6 +22,7 @@ pub enum Token {
 
   // Punctuation
   Semicolon,
+  Colon,
 
   // Delimiters
   ParenL,
@@ -89,12 +95,18 @@ impl fmt::Display for Token {
       Token::Const => write!(f, "declare constante"),
       Token::If => write!(f, "se"),
       Token::Else => write!(f, "senao"),
+      Token::Switch => write!(f, "escolha"),
+      Token::Case => write!(f, "caso"),
+      Token::Default => write!(f, "padrao"),
       Token::For => write!(f, "para"),
+      Token::While => write!(f, "enquanto"),
       Token::Function => write!(f, "funcao"),
       Token::Return => write!(f, "retorne"),
+      Token::Break => write!(f, "pare"),
       Token::Import => write!(f, "importar"),
       Token::Equals => write!(f, "="),
       Token::Semicolon => write!(f, ";"),
+      Token::Colon => write!(f, ":"),
       Token::ParenL => write!(f, "("),
       Token::ParenR => write!(f, ")"),
       Token::BracketL => write!(f, "["),

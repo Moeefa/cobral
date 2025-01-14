@@ -5,11 +5,11 @@ use crate::{enums::errors::ParserError, Parser};
 impl<'a> Parser<'a> {
   fn valid_comparison(&self, lhs: Expr, _op: Token, rhs: Expr) -> bool {
     match (self.expr_type(&lhs), self.expr_type(&rhs)) {
-      (Some("inteiro"), Some("real")) => true,
-      (Some("real"), Some("inteiro")) => true,
-      (Some("desconhecido"), Some(_t2)) => true,
-      (Some(_t1), Some("desconhecido")) => true,
-      (Some(t1), Some(t2)) if t1 == t2 => true,
+      ("inteiro", "real") => true,
+      ("real", "inteiro") => true,
+      ("desconhecido", _t2) => true,
+      (_t1, "desconhecido") => true,
+      (t1, t2) if t1 == t2 => true,
       _ => false, // Incompatible or unknown
     }
   }
@@ -41,9 +41,9 @@ impl<'a> Parser<'a> {
           format!(
             "Comparação incompatível: '{}' ({}) e '{}' ({}) não podem ser comparados.",
             lhs,
-            self.expr_type(&lhs).unwrap_or("desconhecido"),
+            self.expr_type(&lhs),
             rhs,
-            self.expr_type(&rhs).unwrap_or("desconhecido"),
+            self.expr_type(&rhs),
           ),
         ));
       }

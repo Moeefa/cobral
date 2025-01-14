@@ -16,3 +16,4 @@ colored.workspace = true
 tauri.workspace = true
 parser.workspace = true
 lexer.workspace = true
+tokio.workspace = true

@@ -13,7 +13,7 @@ impl<'a> Lexer<'a> {
         self.advance();
       } else if c == '.' {
         if has_dot {
-          panic!("Caracter '.' inesperado: {}", num_str);
+          panic!("Caractere '.' inesperado: {}", num_str);
         }
         has_dot = true;
         num_str.push(c);

@@ -1,68 +1,62 @@
 import * as monaco from "monaco-editor-core";
 
+import type { Token, Tokenizer } from "@packages/monaco/helpers/tokenizer";
+
 import type { Scope } from "@packages/monaco/helpers/scope";
-import type { Tokenizer } from "@packages/monaco/helpers/tokenizer";
 import { exists } from "@tauri-apps/plugin-fs";
+
+const createImportError = (
+	path: string,
+	pathToken: Token,
+	token: Token,
+): monaco.editor.IMarkerData => {
+	return {
+		severity: monaco.MarkerSeverity.Error,
+		startLineNumber: token.line,
+		endLineNumber: token.line,
+		startColumn: pathToken.column + 1,
+		endColumn: pathToken.column + pathToken.value.length - 1,
+		message: `Erro ao carregar o arquivo: "${path}". Verifique o caminho ou as permissões.`,
+		code: "cobral.importError",
+	};
+};
 
 export const checkImportError = async (
 	tokenizer: Tokenizer,
-	rootScope: Scope, // Added rootScope parameter for consistency
+	_rootScope: Scope,
 ): Promise<monaco.editor.IMarkerData[]> => {
 	tokenizer.reset();
-	const markers: monaco.editor.IMarkerData[] = [];
-	let currentScope: Scope = rootScope;
+	const importChecks: Promise<monaco.editor.IMarkerData[]>[] = [];
 
+	// First pass: collect all import statements
 	while (true) {
 		const token = tokenizer.next();
 		if (!token) break;
 
-		switch (token.type) {
-			case "keyword":
-				if (token.value === "importe") {
-					const pathToken = tokenizer.next();
-					if (pathToken?.type === "string") {
-						const importPath = pathToken.value.slice(1, -1); // Remove quotes
-						try {
-							if (await exists(importPath)) continue;
+		if (token.type === "keyword" && token.value === "importe") {
+			const pathToken = tokenizer.peek();
+			if (pathToken?.type === "string") {
+				tokenizer.next(); // consume the string token
+				const importPath = pathToken.value.slice(1, -1);
 
-							markers.push({
-								severity: monaco.MarkerSeverity.Error,
-								startLineNumber: token.line,
-								endLineNumber: token.line,
-								startColumn: pathToken.column + 1,
-								endColumn: pathToken.column + pathToken.value.length - 1,
-								message: `Erro ao carregar o arquivo: "${importPath}". Verifique o caminho ou as permissões.`,
-								code: "cobral.importError",
-							});
-						} catch (error) {
-							markers.push({
-								severity: monaco.MarkerSeverity.Error,
-								startLineNumber: token.line,
-								endLineNumber: token.line,
-								startColumn: pathToken.column + 1,
-								endColumn: pathToken.column + pathToken.value.length - 1,
-								message: `Erro ao carregar o arquivo: "${importPath}". Verifique o caminho ou as permissões.`,
-								code: "cobral.importError",
-							});
+				// Create a Promise for checking this import
+				const checkPromise = exists(importPath)
+					.then((fileExists) => {
+						if (!fileExists) {
+							return [createImportError(importPath, pathToken, token)];
 						}
-					}
-				}
-				break;
+						return [];
+					})
+					.catch(() => {
+						return [createImportError(importPath, pathToken, token)];
+					});
 
-			case "delimiter":
-				if (token.value === "{") {
-					const blockScope = currentScope.getInnerScopeByName(
-						`block:${token.line}:${token.column}`,
-					);
-					if (blockScope) {
-						currentScope = blockScope;
-					}
-				} else if (token.value === "}") {
-					currentScope = currentScope.parentScope || rootScope;
-				}
-				break;
+				importChecks.push(checkPromise);
+			}
 		}
 	}
 
-	return markers;
+	// Wait for all import checks to complete
+	const results = await Promise.all(importChecks);
+	return results.flat();
 };

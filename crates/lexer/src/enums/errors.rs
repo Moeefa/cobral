@@ -11,7 +11,7 @@ impl fmt::Display for LexerError {
     write!(f, "LexerError: ").unwrap();
 
     match self {
-      LexerError::UnexpectedCharacter(line, name) => write!(f, "Linha {}: Caracter inesperado: '{}'", line, name),
+      LexerError::UnexpectedCharacter(line, name) => write!(f, "Linha {}: Caractere inesperado: '{}'", line, name),
     }
   }
 }

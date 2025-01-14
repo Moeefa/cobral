@@ -11,97 +11,107 @@ import { linter } from "@packages/monaco/linter";
 import { resolveTheme } from "@/lib/utils";
 
 export function MonacoEditor() {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const completionItemProviderRef = useRef<monaco.IDisposable>();
+	const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+	const completionItemProviderRef = useRef<monaco.IDisposable>();
 
-  const { value, setValue, editor, theme } = useContext(EditorContext);
+	const { value, setValue, editor, theme } = useContext(EditorContext);
 
-  const updateMarkers = async () => {
-    const model = editorRef.current?.getModel();
-    if (!model) return;
+	const updateMarkers = async () => {
+		const model = editorRef.current?.getModel();
+		if (!model) return;
 
-    const markers = await linter(model);
-    monaco.editor.setModelMarkers(model, "cobral", markers);
-    setValue(model.getValue() || "");
-  };
+		const markers = await linter(model);
+		monaco.editor.setModelMarkers(model, "cobral", markers);
+		setValue(model.getValue() || "");
+	};
 
-  useEffect(() => {
-    editor.current?.updateOptions({
-      theme: resolveTheme(theme),
-    });
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		editor.current?.updateOptions({
+			theme: resolveTheme(theme),
+		});
 
-    resolveTheme(theme);
-  }, [theme]);
+		resolveTheme(theme);
+	}, [theme]);
 
-  useLayoutEffect(() => {
-    completionItemProviderRef.current?.dispose();
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useLayoutEffect(() => {
+		completionItemProviderRef.current?.dispose();
 
-    completionItemProviderRef.current = completionItemProvider;
-    editorRef.current = monaco.editor.create(
-      document.getElementById("container") as HTMLElement,
-      {
-        value: value,
-        language: "cobral",
-        theme: "vitesse-dark",
-        hover: {
-          above: false,
-        },
+		completionItemProviderRef.current = completionItemProvider;
+		editorRef.current = monaco.editor.create(
+			document.getElementById("container") as HTMLElement,
+			{
+				value: value,
+				language: "cobral",
+				theme: "vitesse-dark",
 
-        showUnused: true,
-        showDeprecated: true,
-        showFoldingControls: "always",
+				showUnused: true,
+				showDeprecated: true,
+				showFoldingControls: "always",
 
-        contextmenu: false,
-        automaticLayout: true,
-        smoothScrolling: true,
-        cursorSmoothCaretAnimation: "on",
+				fixedOverflowWidgets: true,
+				contextmenu: false,
+				automaticLayout: true,
+				smoothScrolling: true,
+				cursorSmoothCaretAnimation: "on",
 
-        autoClosingBrackets: "always",
-        autoClosingQuotes: "always",
-        autoClosingComments: "always",
-        autoIndent: "full",
+				autoClosingBrackets: "always",
+				autoClosingQuotes: "always",
+				autoClosingComments: "always",
+				autoIndent: "full",
 
-        fontFamily: "SF Pro Mono",
-        tabSize: 4,
-        fontSize: 16,
-        lineHeight: 24,
+				fontFamily: "SF Pro Mono",
+				tabSize: 4,
+				fontSize: 16,
+				lineHeight: 24,
+				stickyScroll: {
+					enabled: false,
+				},
 
-        minimap: {
-          enabled: true,
-          autohide: true,
-          renderCharacters: false,
-        },
-      }
-    );
+				quickSuggestions: {
+					other: "inline",
+					comments: true,
+					strings: true,
+				},
 
-    editor.current = editorRef.current;
+				minimap: {
+					enabled: true,
+					autohide: true,
+					renderCharacters: false,
+				},
+			},
+		);
 
-    document.fonts.ready.then(() => {
-      monaco.editor.remeasureFonts();
-    });
+		editor.current = editorRef.current;
 
-    editorRef.current?.getModel()?.onDidChangeContent(() => {
-      updateMarkers();
-    });
+		document.fonts.ready.then(() => {
+			monaco.editor.remeasureFonts();
+		});
 
-    updateMarkers();
+		editorRef.current?.getModel()?.onDidChangeContent(() => {
+			updateMarkers();
+		});
 
-    return () => {
-      editorRef.current?.dispose();
-    };
-  }, []);
+		updateMarkers();
 
-  useEffect(() => {
-    updateMarkers();
-    editorRef.current?.getModel()?.applyEdits([
-      {
-        range:
-          editorRef.current.getModel()?.getFullModelRange() ||
-          new monaco.Range(1, 1, 1, 1),
-        text: value,
-      },
-    ]);
-  }, [value]);
+		return () => {
+			editorRef.current?.dispose();
+		};
+	}, []);
 
-  return <div id="container" className="h-full w-full" />;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		updateMarkers();
+		editorRef.current?.getModel()?.applyEdits([
+			{
+				range:
+					editorRef.current.getModel()?.getFullModelRange() ||
+					new monaco.Range(1, 1, 1, 1),
+				text: value,
+			},
+		]);
+	}, [value]);
+
+	return <div id="container" className="h-full w-full" />;
 }

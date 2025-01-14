@@ -9,11 +9,10 @@ mod tests {
       escrever("Olá, mundo!");
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -22,11 +21,10 @@ mod tests {
       escrever(1);
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -35,11 +33,10 @@ mod tests {
       escrever(1.5);
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -48,11 +45,10 @@ mod tests {
       escrever(verdadeiro, falso);
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -61,11 +57,10 @@ mod tests {
       escrever([1, 2, 3]);
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -74,10 +69,9 @@ mod tests {
       escrever([[1, 2], [3, 4]]);
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 }

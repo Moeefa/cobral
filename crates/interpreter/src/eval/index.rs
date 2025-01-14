@@ -6,11 +6,11 @@ impl Interpreter {
   pub fn eval_index(
     &self,
     name: String,
-    value: Box<Expr>,
+    value: Expr,
     line: usize,
   ) -> Result<Data, InterpreterError> {
     let index = self.eval(LabeledExpr {
-      expr: *value,
+      expr: value,
       line_number: line,
     })?;
 

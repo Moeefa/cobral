@@ -10,8 +10,7 @@ impl<'a> Parser<'a> {
       Token::Symbol(ref name) => name.clone(),
       _ => {
         return Err(ParserError::ExpectedVariableName(
-          self.current_token.line_number,
-          self.current_token.token.clone(),
+          self.current_token.clone(),
         ))
       }
     };

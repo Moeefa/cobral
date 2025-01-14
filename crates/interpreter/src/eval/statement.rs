@@ -5,7 +5,7 @@ use crate::{enums::errors::InterpreterError, Interpreter};
 impl Interpreter {
   pub fn eval_statement(
     &self,
-    condition: Box<Option<Expr>>,
+    condition: Option<Expr>,
     true_block: Vec<Expr>,
     else_if_block: Vec<(Box<Option<Expr>>, Vec<Expr>)>,
     else_block: Option<Vec<Expr>>,

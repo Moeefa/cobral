@@ -73,12 +73,4 @@ export class Scope {
 	getInnerScopeByName(name: string): Scope | null {
 		return this.innerScopes.find((scope) => scope.name === name) || null;
 	}
-
-	// Traverses and prints the tree structure for debugging
-	print(indent = 0): void {
-		console.log(`${" ".repeat(indent)}Scope: ${this.name}`);
-		for (const childScope of this.innerScopes) {
-			childScope.print(indent + 2);
-		}
-	}
 }

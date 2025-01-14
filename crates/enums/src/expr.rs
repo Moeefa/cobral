@@ -23,17 +23,22 @@ pub enum Expr {
   Index(String, Box<Expr>),
 
   For(Box<Expr>, Box<Expr>, Box<Expr>, Vec<Expr>),
+  While(Box<Expr>, Vec<Expr>),
   If(
     Box<Option<Expr>>,
     Vec<Expr>,
     Vec<(Box<Option<Expr>>, Vec<Expr>)>,
     Option<Vec<Expr>>,
   ),
+  Switch(
+    Box<Option<Expr>>,
+    Vec<(Box<Option<Expr>>, Vec<Expr>, bool)>,
+    Option<(Vec<Expr>, bool)>,
+  ),
   Logical(Box<Expr>, Token, Box<Expr>),
   Comparison(Box<Expr>, Token, Box<Expr>),
 
-  UnaryMinus(Box<Expr>), // `-x`
-  UnaryNot(Box<Expr>),
+  Unary(Token, Box<Expr>), // `-x` `nao(x)`
 
   PrefixIncrement(Box<Expr>),  // `++x`
   PostfixIncrement(Box<Expr>), // `x++`
@@ -116,6 +121,24 @@ impl std::fmt::Display for Expr {
         }
         Ok(())
       }
+      Expr::Switch(condition, cases, default) => {
+        write!(f, "switch {} {{\n", condition.as_ref().as_ref().unwrap())?;
+        for (case, block, _) in cases {
+          write!(f, "case {} {{\n", case.as_ref().as_ref().unwrap())?;
+          for expr in block {
+            write!(f, "  {}\n", expr)?;
+          }
+          write!(f, "}}")?;
+        }
+        if let Some((block, _)) = default {
+          write!(f, "default {{\n")?;
+          for expr in block {
+            write!(f, "  {}\n", expr)?;
+          }
+          write!(f, "}}")?;
+        }
+        write!(f, "}}")
+      }
       Expr::PrefixIncrement(expr) => write!(f, "++{}", expr),
       Expr::PostfixIncrement(expr) => write!(f, "{}++", expr),
       Expr::PrefixDecrement(expr) => write!(f, "--{}", expr),
@@ -127,11 +150,17 @@ impl std::fmt::Display for Expr {
         }
         write!(f, "}}")
       }
+      Expr::While(condition, block) => {
+        write!(f, "while {} {{\n", condition)?;
+        for expr in block {
+          write!(f, "  {}\n", expr)?;
+        }
+        write!(f, "}}")
+      }
       Expr::Comparison(left, op, right) => {
         write!(f, "{} {} {}", left, op, right)
       }
-      Expr::UnaryMinus(expr) => write!(f, "-{}", expr),
-      Expr::UnaryNot(expr) => write!(f, "nao {}", expr),
+      Expr::Unary(token, expr) => write!(f, "{}{}", token, expr),
       Expr::Import(path) => write!(f, "import '{}'", path),
     }
   }

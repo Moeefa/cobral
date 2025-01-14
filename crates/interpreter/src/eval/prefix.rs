@@ -3,12 +3,8 @@ use ::enums::{Data, Expr};
 use crate::{enums::errors::InterpreterError, Interpreter};
 
 impl Interpreter {
-  pub fn eval_prefix_decrement(
-    &self,
-    expr: Box<Expr>,
-    line: usize,
-  ) -> Result<Data, InterpreterError> {
-    if let Expr::Symbol(name) = *expr {
+  pub fn eval_prefix_decrement(&self, expr: Expr, line: usize) -> Result<Data, InterpreterError> {
+    if let Expr::Symbol(name) = expr {
       let value = self.variables.lock().unwrap().get(&name).unwrap().clone();
       let new_value = match value {
         Data::Integer(n) => Data::Integer(n - 1),
@@ -34,12 +30,8 @@ impl Interpreter {
     }
   }
 
-  pub fn eval_prefix_increment(
-    &self,
-    expr: Box<Expr>,
-    line: usize,
-  ) -> Result<Data, InterpreterError> {
-    if let Expr::Symbol(name) = *expr {
+  pub fn eval_prefix_increment(&self, expr: Expr, line: usize) -> Result<Data, InterpreterError> {
+    if let Expr::Symbol(name) = expr {
       let value = self.variables.lock().unwrap().get(&name).unwrap().clone();
       let new_value = match value {
         Data::Integer(n) => Data::Integer(n + 1),

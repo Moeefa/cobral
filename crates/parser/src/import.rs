@@ -1,4 +1,7 @@
+use std::path::Path;
+
 use ::enums::{Expr, Token};
+use libs;
 
 use crate::{enums::errors::ParserError, Parser};
 
@@ -9,12 +12,21 @@ impl<'a> Parser<'a> {
     let file_path = match &self.current_token.token {
       Token::String(path) => path.clone(),
       _ => {
-        return Err(ParserError::UnexpectedToken(
-          self.current_token.line_number,
-          self.current_token.token.clone(),
-        ));
+        return Err(ParserError::UnexpectedToken(self.current_token.clone()));
       }
     };
+
+    let path = Path::new(&file_path);
+
+    if !path.exists() && libs::load(&file_path).is_none() {
+      return Err(ParserError::InvalidExpression(
+        self.current_token.line_number,
+        format!(
+          "Erro ao carregar o arquivo: \"{}\". Verifique o caminho ou as permissões.",
+          file_path
+        ),
+      ));
+    }
 
     self.next_token(); // Move past the string token
 

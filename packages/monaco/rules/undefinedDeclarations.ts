@@ -3,12 +3,12 @@ import * as monaco from "monaco-editor-core";
 import type { Scope } from "@packages/monaco/helpers/scope";
 import type { Tokenizer } from "@packages/monaco/helpers/tokenizer";
 
-export const checkUndefinedDeclarations = (
+export const checkUndefinedDeclarations = async (
 	tokenizer: Tokenizer,
 	rootScope: Scope,
-): monaco.editor.IMarkerData[] => {
+): Promise<monaco.editor.IMarkerData[]> => {
 	tokenizer.reset();
-	const markers: monaco.editor.IMarkerData[] = [];
+	const undefinedChecks: Promise<monaco.editor.IMarkerData[]>[] = [];
 	let currentScope: Scope = rootScope;
 	let skipNextIdentifier = false;
 
@@ -19,53 +19,52 @@ export const checkUndefinedDeclarations = (
 		switch (token.type) {
 			case "keyword":
 				if (token.value === "funcao") {
-					skipNextIdentifier = true; // Skip the function name itself
+					skipNextIdentifier = true;
 					const nextToken = tokenizer.next();
 					if (nextToken?.type === "identifier") {
 						const functionName = nextToken.value;
 						const functionScope = currentScope.getInnerScopeByName(
 							`function:${functionName}:${token.line}:${token.column}`,
 						);
+						if (functionScope) currentScope = functionScope;
 
-						if (functionScope) {
-							currentScope = functionScope;
-						}
-
-						// Skip function parameters parsing since they are already defined
 						const openParen = tokenizer.next();
 						if (openParen?.type === "delimiter" && openParen.value === "(") {
-							while (tokenizer.next()?.value !== ")") {
-								// Skip tokens until closing parenthesis
-							}
+							while (tokenizer.next()?.value !== ")") {}
 						}
 					}
 				} else if (token.value === "para") {
-					// Handle loop scope
 					const loopScope = currentScope.getInnerScopeByName(
 						`loop:${token.line}:${token.column}`,
 					);
-					if (loopScope) {
-						currentScope = loopScope;
-					}
+					if (loopScope) currentScope = loopScope;
 				} else if (token.value === "declare" || token.value === "constante") {
-					skipNextIdentifier = true; // Skip the variable being declared
+					skipNextIdentifier = true;
 				}
 				break;
 
 			case "identifier":
 				if (!skipNextIdentifier) {
-					// Only check identifiers that aren't being declared
-					if (!currentScope.isDefined(token.value)) {
-						markers.push({
-							severity: monaco.MarkerSeverity.Error,
-							startLineNumber: token.line,
-							endLineNumber: token.line,
-							startColumn: token.column,
-							endColumn: token.column + token.value.length,
-							message: `Identificador '${token.value}' é usado mas não é declarado.`,
-							code: "cobral.undefinedIdentifier",
-						});
-					}
+					const identifierCheck = new Promise<monaco.editor.IMarkerData[]>(
+						(resolve) => {
+							if (!currentScope.isDefined(token.value)) {
+								resolve([
+									{
+										severity: monaco.MarkerSeverity.Error,
+										startLineNumber: token.line,
+										endLineNumber: token.line,
+										startColumn: token.column,
+										endColumn: token.column + token.value.length,
+										message: `Identificador '${token.value}' é usado mas não é declarado.`,
+										code: "cobral.undefinedIdentifier",
+									},
+								]);
+							} else {
+								resolve([]);
+							}
+						},
+					);
+					undefinedChecks.push(identifierCheck);
 				} else {
 					skipNextIdentifier = false;
 				}
@@ -73,7 +72,6 @@ export const checkUndefinedDeclarations = (
 
 			case "delimiter":
 				if (token.value === "}") {
-					// Only pop scope if we're in a function or loop scope
 					if (
 						currentScope.name.startsWith("function:") ||
 						currentScope.name.startsWith("loop:")
@@ -85,5 +83,6 @@ export const checkUndefinedDeclarations = (
 		}
 	}
 
-	return markers;
+	const results = await Promise.all(undefinedChecks);
+	return results.flat();
 };

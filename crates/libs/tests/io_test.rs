@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
   use ::enums::Data;
-  use libs::io::write;
   use ::enums::Expr;
+  use libs::io::*;
 
   #[test]
   fn test_write_integer() {

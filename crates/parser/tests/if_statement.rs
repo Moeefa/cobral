@@ -14,11 +14,10 @@ mod tests {
       };
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -42,11 +41,10 @@ mod tests {
       }
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -70,11 +68,10 @@ mod tests {
       }
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 
   #[test]
@@ -92,10 +89,9 @@ mod tests {
       };
     "#;
 
-    let mut parser = Parser::new(Lexer::new(input));
-    let result = parser.parse();
+    let parser = Parser::new(Lexer::new(input));
 
-    assert!(result.is_ok());
-    result.unwrap();
+    assert!(parser.is_ok());
+    parser.unwrap();
   }
 }

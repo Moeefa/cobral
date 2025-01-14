@@ -37,6 +37,7 @@ Os benchmarks a seguir foram realizados em um computador com as seguintes especi
 ## Roadmap
 
 - [x] Implementar tipos de dados
+  - [ ] Adicionar tipos de dados explicitamente de maneira opcional
 - [x] Implementar estruturas de controle
 - [x] Implementar biblioteca de entrada e saída
 - [x] Implementar biblioteca de matemática
@@ -64,7 +65,7 @@ Os benchmarks a seguir foram realizados em um computador com as seguintes especi
 - [x] Console interativo para execução de código
 - [x] Incluir exemplos de código e documentação
 - [x] Implementar tipo de dados/dicas ao passar o mouse sobre uma variável, constante ou função
-- [ ] Implementar condições escolha-caso (switch-case)
+- [x] Implementar condições escolha-caso (switch-case)
 
 ## Como funciona?
 
@@ -82,7 +83,7 @@ git clone https://github.com/Moeefa/cobral.git
 E então, execute o comando abaixo para compilar o código-fonte:
 
 ```bash
-npm run tauri build
+bun tauri build
 ```
 
 ## Documentação
@@ -172,6 +173,7 @@ declare v = 10 % 2; // v é 0
 
 - `se`: executa um bloco de código se uma condição for verdadeira
 - `senao`: executa um bloco de código se a condição do `se` for falsa
+- `escolha-caso`: executa um bloco de código com base em uma condição
 
 ```cobral
 declare x = 10 + 10;
@@ -184,30 +186,51 @@ se (x == y) { // x é igual a y
 };
 ```
 
+```cobral
+declare x = 3;
+
+escolha x {
+  caso 1:
+    escrever("x é igual a 1");
+    pare;
+  caso 2:
+    escrever("x é igual a 2");
+    pare;
+  caso 3:
+    escrever("x é igual a 3");
+    pare;
+  padrao:
+    escrever("x é diferente de 1 a 10");
+    pare;
+};
+```
+
 ### Estruturas de repetição
 
 - `para`: executa um bloco de código um número específico de vezes
+- `enquanto`: executa um bloco de código enquanto uma condição for verdadeira
 
 ```cobral
 /*
-  i começa com 0 e continua até 9,
-  incrementando 1 a cada iteração
-*/
+ * i começa com 0 e continua até 9,
+ * incrementando 1 a cada iteração
+ */
 
 para (declare i = 0; i < 10; i++) {
   escrever(i);
 };
 ```
 
-### Bibliotecas
+```cobral
+declare x = 0;
 
-- [Entrada e saída](#entrada-e-saída): para entrada e saída de dados
-- [Matemática](#matemática): para operações matemáticas
-- [Conversão de tipos de dados](#conversão-de-tipos-de-dados): para conversão de tipos de dados
+enquanto (x < 10) {
+  escrever(x);
+  x++;
+};
+```
 
-Você não precisa importar nenhuma biblioteca, elas estão disponíveis por padrão durante a execução do código.
-
-#### Entrada e saída
+### Entrada e saída
 
 Para entrada e saída de dados, você pode usar a biblioteca de entrada e saída de dados.
 
@@ -216,11 +239,21 @@ declare x = ler("Digite seu nome:");
 escrever("Você digitou: ", x);
 ```
 
+### Bibliotecas
+
+- [Entrada e saída](#entrada-e-saída): para entrada e saída de dados
+- [Matemática](#matemática): para operações matemáticas
+- [Conversão de tipos de dados](#conversão-de-tipos-de-dados): para conversão de tipos de dados
+
+Você precisa importar as bibliotecas no início do seu código.
+
 #### Matemática
 
 Para operações matemáticas, você pode usar a biblioteca de matemática.
 
 ```cobral
+importe "matematica";
+
 declare x = raiz(9);
 escrever(x); // 3
 ```
@@ -230,11 +263,15 @@ escrever(x); // 3
 Para fazer conversão de tipos de dados, você pode usar a biblioteca de conversão.
 
 ```cobral
+importe "conversao";
+
 declare x = real(10)
 escrever(x) // 10.0
 ```
 
 ```cobral
+importe "conversao";
+
 declare y = int(10.5)
 escrever(y) // 10
 ```

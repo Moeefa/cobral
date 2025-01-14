@@ -1,4 +1,5 @@
 use ::enums::{Expr, Token};
+use enums::LabeledToken;
 
 use crate::{enums::errors::ParserError, Parser};
 
@@ -8,10 +9,21 @@ impl<'a> Parser<'a> {
       Token::Symbol(ref s) => {
         let symbol_name = s.clone();
 
-        self.eat(Token::Symbol(symbol_name.clone()))?; // Consume the symbol
+        let labeled_token = LabeledToken {
+          token: Token::Symbol(symbol_name.clone()),
+          line_number: self.current_token.line_number,
+        };
+
+        self.eat(labeled_token.token.clone())?; // Consume the symbol
 
         match self.current_token.token {
           Token::Equals => {
+            if (self.context.constants.lock().unwrap()).contains_key(&symbol_name) {
+              return Err(ParserError::ConstantRedeclarationError(
+                labeled_token.clone(),
+              ));
+            }
+
             self.eat(Token::Equals)?; // Consume the '=' token
             let expr = self.parse_expression()?; // Parse the right-hand side of the assignment
             Ok(Some(Expr::Assignment(symbol_name, Box::new(expr.unwrap())))) // Return assignment expression

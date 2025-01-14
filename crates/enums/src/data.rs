@@ -16,16 +16,22 @@ impl std::fmt::Display for Data {
       Data::None => write!(f, "None"),
       Data::Integer(n) => write!(f, "{}", n),
       Data::Float(n) => write!(f, "{}", n),
-      Data::Boolean(b) => write!(f, "{}", b),
-      Data::String(s) => write!(f, "\"{}\"", s),
+      Data::Boolean(b) => write!(f, "{}", if *b { "verdadeiro" } else { "falso" }),
+      Data::String(s) => write!(f, "{}", s),
       Data::Undefined => write!(f, "Indefinido"),
-      Data::Return(data) => write!(f, "Retorno: {}", data),
+      Data::Return(data) => write!(f, "{}", data),
       Data::List(datas) => write!(
         f,
         "[{}]",
         datas
           .iter()
-          .map(|data| data.to_string())
+          .map(|data| {
+            if let Data::String(s) = data {
+              format!("\"{}\"", s)
+            } else {
+              data.to_string()
+            }
+          })
           .collect::<Vec<_>>()
           .join(", ")
       ),

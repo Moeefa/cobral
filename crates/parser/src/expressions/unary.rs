@@ -13,7 +13,7 @@ impl<'a> Parser<'a> {
             self.current_token.line_number,
             "Operando ausente após unário '-'".to_string(),
           ))?;
-        Ok(Some(Expr::UnaryMinus(Box::new(operand))))
+        Ok(Some(Expr::Unary(Token::Minus, Box::new(operand))))
       }
       Token::Increment => {
         self.eat(Token::Increment)?;
@@ -32,7 +32,7 @@ impl<'a> Parser<'a> {
         if let Some(right_expr) = right_expr {
           match right_expr {
             Expr::Boolean(_) => {
-              return Ok(Some(Expr::UnaryNot(Box::new(right_expr))));
+              return Ok(Some(Expr::Unary(Token::Not, Box::new(right_expr))));
             }
             _ => {
               return Err(ParserError::InvalidExpression(

@@ -2,15 +2,22 @@ export type Token =
 	| {
 			type: "keyword";
 			value:
+				| "nao"
+				| "verdadeiro"
+				| "falso"
 				| "constante"
 				| "declare"
 				| "funcao"
 				| "se"
 				| "senao"
 				| "para"
+				| "pare"
 				| "enquanto"
 				| "retorne"
 				| "importe"
+				| "escolha"
+				| "caso"
+				| "padrao"
 				| "e"
 				| "ou";
 			line: number;
@@ -157,7 +164,7 @@ export class Tokenizer {
 					{
 						type: "keyword",
 						regex:
-							/^(constante|declare|funcao|se|senao|para|enquanto|retorne|importe|e|ou)\b/,
+							/^(nao|verdadeiro|falso|constante|pare|declare|funcao|se|senao|para|enquanto|retorne|importe|escolha|caso|padrao|e|ou)\b/,
 					},
 					{ type: "number", regex: /^\d+(\.\d+)?/ },
 					{ type: "string", regex: /^"(?:[^"\\]|\\.)*"/ },
@@ -186,14 +193,12 @@ export class Tokenizer {
 				}
 
 				if (!matched) {
-					// Skip any unrecognized characters
 					column++;
 				}
 			}
 		});
 	}
 
-	// Rest of the class implementation remains the same
 	next(): Token | null {
 		return this.position < this.tokens.length
 			? this.tokens[this.position++]

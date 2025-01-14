@@ -1,116 +1,79 @@
-use std::sync::{Arc, Mutex};
-
-use ::enums::LabeledExpr;
 use interpreter::Interpreter;
 use lexer::Lexer;
 use libs::APP_HANDLE;
 use logger::{emit_logs, Payload, LOG_BUFFER};
 use parser::Parser;
-use tauri::{AppHandle, Emitter, Listener, Runtime};
+use std::sync::Arc;
+use tauri::{AppHandle, Emitter, Listener, Manager, UserAttentionType};
+use tokio::{sync::Notify, task};
 
-pub struct Context {
-  pub input: Arc<Mutex<String>>,
-  pub exprs: Arc<Mutex<Vec<LabeledExpr>>>,
-  pub interpreter: Arc<Mutex<Interpreter>>,
-  pub start: Arc<Mutex<std::time::Instant>>,
-}
+pub struct ExecutionContext {}
 
-impl Context {
+impl ExecutionContext {
   pub fn new() -> Self {
-    Context {
-      input: Arc::new(Mutex::new(String::new())),
-      exprs: Arc::new(Mutex::new(Vec::new())),
-      interpreter: Arc::new(Mutex::new(Interpreter::new())),
-      start: Arc::new(Mutex::new(std::time::Instant::now())),
-    }
+    ExecutionContext {}
   }
 
-  pub fn update(&self, input: String) {
-    *self.input.lock().unwrap_or_else(|e| e.into_inner()) = input;
-    *self.exprs.lock().unwrap_or_else(|e| e.into_inner()) = Vec::new();
-    *self.interpreter.lock().unwrap_or_else(|e| e.into_inner()) = Interpreter::new();
-    *self.start.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
-  }
-
-  pub fn eval<R: Runtime>(&self, app: AppHandle<R>, input: String) {
-    self.reset();
-    self.update(input.clone());
-
-    let has_received_event = Arc::new(Mutex::new(false));
-    let has_received_event_clone = Arc::clone(&has_received_event);
-
-    // Listen for the "break_exec" event before starting the execution loop
+  pub async fn eval(&self, input: String) {
+    let has_received_event = Arc::new(Notify::new());
     let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
-    app_handle.listen("break_exec", move |_| {
-      let mut should_break = has_received_event_clone.lock().unwrap();
-      *should_break = true;
-    });
 
-    let start = self.start.lock().unwrap_or_else(|e| e.into_inner()).clone();
-    let lexer = Lexer::new(&input.as_str());
-    let mut parser = Parser::new(lexer);
+    // Listen for the "break_exec" event
+    {
+      let notify_clone = Arc::clone(&has_received_event);
+      let app_handle_clone = app_handle.clone();
+      app_handle.listen("break_exec", move |_| {
+        notify_clone.notify_one();
+        app_handle_clone
+          .get_webview_window("main")
+          .unwrap()
+          .request_user_attention(Some(UserAttentionType::Informational))
+          .unwrap();
+        emit_logs(&app_handle_clone, true);
+      });
+    }
 
-    let exprs = self.parse(&mut parser);
+    // Offload the evaluation task to a background thread
+    let input_clone = input.clone();
+    task::spawn(async move {
+      fn finish_exec(app_handle: AppHandle, start: std::time::Instant) {
+        let mut buffer = LOG_BUFFER.lock().unwrap();
+        buffer.push(Payload {
+          message: format!("Tempo de execução: {:?}", start.elapsed()),
+          level: String::from("info"),
+        });
+        drop(buffer);
 
-    let interpreter = self.interpreter.lock().unwrap_or_else(|e| e.into_inner());
-
-    // Execution loop
-    for expr in &exprs {
-      // Check the break condition before processing each expression
-      if *has_received_event.lock().unwrap() {
-        break;
+        app_handle.emit("exec_finished", ()).unwrap();
+        emit_logs(&app_handle, true);
       }
 
-      if let Err(e) = interpreter.eval(expr.clone()) {
+      let start = std::time::Instant::now();
+      let lexer = Lexer::new(&input_clone);
+      let parser = Parser::new(lexer);
+      let exprs = parser.unwrap_or_else(|e| {
+        logger::error(e);
+        Vec::new()
+      });
+      let interpreter = Interpreter::new(exprs.clone());
+
+      drop(exprs);
+
+      // Wait for the `break_exec` notification or continue normally
+      tokio::select! {
+        _ = has_received_event.notified() => {
+          finish_exec(app_handle, start);
+          return;
+        }
+        _ = async {} => { /* Continue execution */ }
+      }
+
+      if let Err(e) = interpreter {
         logger::error(e);
         app_handle.emit("break_exec", ()).unwrap();
-        break;
       }
-    }
 
-    drop(interpreter);
-    drop(exprs);
-
-    let mut buffer = LOG_BUFFER.lock().unwrap();
-    buffer.push(Payload {
-      message: format!("Tempo de execução: {:?}", start.elapsed()),
-      level: String::from("info"),
+      finish_exec(app_handle, start);
     });
-    drop(buffer);
-
-    app_handle.emit("exec_finished", ()).unwrap();
-    emit_logs(&app, true);
-    drop(app_handle);
-  }
-
-  fn parse(&self, parser: &mut Parser) -> Vec<LabeledExpr> {
-    let mut exprs = Vec::new();
-
-    loop {
-      match parser.parse() {
-        Ok(Some(expr)) => exprs.push(LabeledExpr {
-          expr: expr,
-          line_number: parser.current_token.line_number,
-        }),
-
-        Ok(None) => break,
-
-        Err(e) => {
-          logger::error(e);
-          let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
-          app_handle.emit("break_exec", ()).unwrap();
-          drop(app_handle);
-          break;
-        }
-      }
-    }
-
-    exprs
-  }
-
-  pub fn reset(&self) {
-    *self.exprs.lock().unwrap_or_else(|e| e.into_inner()) = Vec::new();
-    *self.interpreter.lock().unwrap_or_else(|e| e.into_inner()) = Interpreter::new();
-    *self.start.lock().unwrap_or_else(|e| e.into_inner()) = std::time::Instant::now();
   }
 }

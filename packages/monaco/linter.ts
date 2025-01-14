@@ -23,7 +23,6 @@ export const linter = async (
 		checkUndefined: true,
 	},
 ) => {
-	const markers: monaco.editor.IMarkerData[] = [];
 	const text = model.getValue();
 	const tokenizer = new Tokenizer(text);
 
@@ -33,29 +32,15 @@ export const linter = async (
 	// Run enabled linter checks
 	const linterChecks = [];
 
-	if (options.checkImports) {
+	options.checkImports &&
 		linterChecks.push(checkImportError(tokenizer, scopes));
-	}
-
-	if (options.checkUndefined) {
+	options.checkUndefined &&
 		linterChecks.push(checkUndefinedDeclarations(tokenizer, scopes));
-	}
+	options.checkUnused &&
+		linterChecks.push(checkUnusedDeclarations(tokenizer, scopes));
+	options.checkTypes &&
+		linterChecks.push(checkIncompatibleComparisons(tokenizer, scopes));
 
-	if (options.checkUnused) {
-		const unusedMarkers = checkUnusedDeclarations(tokenizer, scopes);
-		linterChecks.push(unusedMarkers);
-	}
-
-	if (options.checkTypes) {
-		const typeMarkers = checkIncompatibleComparisons(tokenizer, scopes);
-		linterChecks.push(typeMarkers);
-	}
-
-	// Wait for all checks to complete and merge markers
 	const results = await Promise.all(linterChecks);
-	for (const result of results) {
-		if (Array.isArray(result)) markers.push(...result);
-	}
-
-	return markers;
+	return results.flat();
 };

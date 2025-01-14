@@ -1,13 +1,26 @@
 use std::{fs, path::Path};
 
-use ::enums::{Data, LabeledExpr};
+use ::enums::Data;
 use lexer::Lexer;
 use parser::Parser;
 
-use crate::{enums::errors::InterpreterError, Interpreter};
+use crate::{enums::errors::InterpreterError, Interpreter, LibFn};
 
 impl Interpreter {
   pub fn eval_import(&self, file: String) -> Result<Data, InterpreterError> {
+    if let Some(lib) = libs::load(&file) {
+      // Add functions from the library to the interpreter's library map
+      for (name, func) in lib {
+        self
+          .libs
+          .lock()
+          .unwrap()
+          .insert(name.to_string(), Box::new(func) as LibFn);
+      }
+
+      return Ok(Data::None);
+    }
+
     let path = Path::new(&file);
 
     if !path.exists() {
@@ -19,13 +32,14 @@ impl Interpreter {
 
     // Evaluate the imported file
     let lexer = Lexer::new(&code);
-    let mut parser = Parser::new(lexer);
+    let parser = Parser::new(lexer);
+    let exprs = parser.unwrap_or_else(|e| {
+      eprintln!("{}", e);
+      Vec::new()
+    });
 
-    while let Some(expr) = parser.parse().unwrap() {
-      self.eval(LabeledExpr {
-        expr,
-        line_number: 0,
-      })?;
+    for expr in exprs {
+      self.eval(expr)?;
     }
 
     Ok(Data::None)
