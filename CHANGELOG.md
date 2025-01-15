@@ -1,5 +1,5 @@
-# Atualização 0.9.1
+# Atualização 0.9.2
 
 Correções:
 
-- Corrigido erro de PoisonError ao usar funções de bibliotecas.
+- Corrigido erro onde logs não eram exibidos corretamente após uma segunda execução.
