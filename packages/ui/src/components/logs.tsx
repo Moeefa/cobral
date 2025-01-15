@@ -5,13 +5,7 @@ import {
 	List,
 	type ListRowProps,
 } from "react-virtualized";
-import React, {
-	MutableRefObject,
-	useCallback,
-	useContext,
-	useEffect,
-	useRef,
-} from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 
 import { EditorContext } from "@/contexts/editor-context";
 
@@ -24,9 +18,10 @@ export const Logs = React.memo(() => {
 	const { logs } = useContext(EditorContext);
 	const listRef = useRef<List>(null);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		cache.clearAll();
-	}, []);
+	}, [logs]);
 
 	useEffect(() => {
 		window.addEventListener("resize", () => {
@@ -76,10 +71,9 @@ export const Logs = React.memo(() => {
 		return () => clearTimeout(debounce);
 	}, [logs]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		scrollToBottom();
-	}, [logs, scrollToBottom]);
+	}, [scrollToBottom]);
 
 	return (
 		<AutoSizer>

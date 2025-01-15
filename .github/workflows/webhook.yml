@@ -1,0 +1,32 @@
+name: Webhook
+on:
+  release:
+    types: [published]
+
+jobs:
+  read-changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      content: ${{ steps.read.outputs.content }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read CHANGELOG file
+        id: read
+        run: |
+          delimiter='$(openssl rand -hex 8)'
+          echo 'content<<EOF' >> '${GITHUB_OUTPUT}'
+          cat README.md >> '${GITHUB_OUTPUT}'
+          echo 'EOF' >> '${GITHUB_OUTPUT}'
+
+  webhook-request:
+    runs-on: ubuntu-latest
+    needs: read-changelog
+    steps:
+    - name: Send a request to webhook
+      run: |
+        RESPONSE=$(curl -H "Content-Type: application/json" -X POST -d '{
+        "content": "${{ needs.read-changelog.outputs.content }}"
+        }' ${{ secrets.WEBHOOK_URL }})
+        echo "Webhook server response: $RESPONSE"
