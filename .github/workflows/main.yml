@@ -47,7 +47,7 @@ jobs:
 
       - name: Read CHANGELOG file
         id: changelog
-        run: echo "::set-output name=content::$(cat README.md)"
+        run: echo "content=$(cat CHANGELOG.md)" >> $GITHUB_OUTPUT
 
       - uses: tauri-apps/tauri-action@v0
         env:
