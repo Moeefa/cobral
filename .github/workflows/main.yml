@@ -5,6 +5,22 @@ on:
       - main
 
 jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      content: ${{ steps.read.outputs.content }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read CHANGELOG file
+        id: read
+        run: |
+          delimiter='$(openssl rand -hex 8)'
+          echo 'content<<EOF' >> '${GITHUB_OUTPUT}'
+          cat README.md >> '${GITHUB_OUTPUT}'
+          echo 'EOF' >> '${GITHUB_OUTPUT}'
+
   publish-tauri:
     permissions:
       contents: write
@@ -45,21 +61,13 @@ jobs:
       - name: Install Bun dependencies
         run: bun i
 
-      - name: Read CHANGELOG file
-        id: changelog
-        run: |
-          delimiter="$(openssl rand -hex 8)"
-          echo "content<<${delimiter}" >> "${GITHUB_OUTPUT}"
-          echo "$(cat README.md)" >> "${GITHUB_OUTPUT}"
-          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
-
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: v__VERSION__
           releaseName: v__VERSION__
-          releaseBody: ${{ steps.changelog.outputs.content }}
+          releaseBody: ${{ needs.changelog.outputs.content }}
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
