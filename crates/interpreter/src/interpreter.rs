@@ -1,9 +1,7 @@
 pub mod enums;
 mod eval;
 
-use libs::io::error;
-use libs::io::read;
-use libs::io::write;
+use libs::io::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -12,7 +10,7 @@ use ::enums::{Data, Expr, LabeledExpr};
 use enums::errors::InterpreterError;
 
 pub type LibFn =
-  Box<dyn Fn(Vec<Expr>, &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> + Send + Sync>;
+  Arc<dyn Fn(Vec<Expr>, &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> + Send + Sync>;
 
 pub struct Interpreter {
   variables: Arc<Mutex<HashMap<String, Data>>>,
@@ -28,9 +26,9 @@ impl Interpreter {
       constants: Arc::new(Mutex::new(HashMap::new())),
       functions: Arc::new(Mutex::new(HashMap::new())),
       libs: Arc::new(Mutex::new(HashMap::from([
-        ("escrever".to_string(), Box::new(write) as LibFn),
-        ("erro".to_string(), Box::new(error) as LibFn),
-        ("ler".to_string(), Box::new(read) as LibFn),
+        ("escrever".to_string(), Arc::new(write) as LibFn),
+        ("erro".to_string(), Arc::new(error) as LibFn),
+        ("ler".to_string(), Arc::new(read) as LibFn),
       ]))),
     };
 

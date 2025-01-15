@@ -1,10 +1,5 @@
-# Atualização 0.9.0
-
-- Funcionalidade de abrir pastas.
-- Estrutura de repetição `enquanto`.
-- Estrutura de controle `escolha-caso`.
+# Atualização 0.9.1
 
 Correções:
 
-- Melhorado o tratamento de erros.
-- Linter melhorado.
+- Corrigido erro de PoisonError ao usar funções de bibliotecas.

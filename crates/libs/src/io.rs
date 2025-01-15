@@ -11,10 +11,9 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .iter()
     .map(|arg| {
       let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      if let Some(data) = data {
-        Some(data.to_string())
-      } else {
-        None
+      match data {
+        Some(d) => Some(d.to_string()),
+        _ => None,
       }
     })
     .collect();
@@ -29,12 +28,13 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .collect::<Vec<String>>()
     .join(" ");
 
-  let mut buffer = LOG_BUFFER.lock().unwrap();
-  buffer.push(Payload {
-    message: output.clone(),
-    level: String::from("info"),
-  });
-  drop(buffer);
+  {
+    let mut buffer = LOG_BUFFER.lock().unwrap();
+    buffer.push(Payload {
+      message: output.clone(),
+      level: String::from("info"),
+    });
+  }
 
   emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), false);
 
@@ -46,10 +46,9 @@ pub fn error(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .iter()
     .map(|arg| {
       let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      if let Some(data) = data {
-        Some(data.to_string())
-      } else {
-        None
+      match data {
+        Some(d) => Some(d.to_string()),
+        _ => None,
       }
     })
     .collect();
@@ -64,12 +63,13 @@ pub fn error(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .collect::<Vec<String>>()
     .join(" ");
 
-  let mut buffer = LOG_BUFFER.lock().unwrap();
-  buffer.push(Payload {
-    message: output.clone(),
-    level: String::from("error"),
-  });
-  drop(buffer);
+  {
+    let mut buffer = LOG_BUFFER.lock().unwrap();
+    buffer.push(Payload {
+      message: output.clone(),
+      level: String::from("info"),
+    });
+  }
 
   emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), false);
 
@@ -83,10 +83,9 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
     .iter()
     .map(|arg| {
       let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      if let Some(data) = data {
-        Some(data.to_string())
-      } else {
-        None
+      match data {
+        Some(d) => Some(d.to_string()),
+        _ => None,
       }
     })
     .collect();

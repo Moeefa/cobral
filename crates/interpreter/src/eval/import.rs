@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{fs, path::Path, sync::Arc};
 
 use ::enums::Data;
 use lexer::Lexer;
@@ -15,7 +15,7 @@ impl Interpreter {
           .libs
           .lock()
           .unwrap()
-          .insert(name.to_string(), Box::new(func) as LibFn);
+          .insert(name.to_string(), Arc::new(func) as LibFn);
       }
 
       return Ok(Data::None);
