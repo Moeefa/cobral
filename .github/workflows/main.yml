@@ -47,7 +47,11 @@ jobs:
 
       - name: Read CHANGELOG file
         id: changelog
-        run: echo "content=$(cat CHANGELOG.md)" >> $GITHUB_OUTPUT
+        run: |
+          delimiter="$(openssl rand -hex 8)"
+          echo "content<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$(cat README.md)" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
 
       - uses: tauri-apps/tauri-action@v0
         env:
