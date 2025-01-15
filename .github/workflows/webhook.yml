@@ -7,6 +7,9 @@ jobs:
   webhook-request:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Read CHANGELOG
         id: read
         uses: jaywcjlove/github-action-read-file@main
