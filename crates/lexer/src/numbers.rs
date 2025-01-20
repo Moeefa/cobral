@@ -1,21 +1,26 @@
 use ::enums::{LabeledToken, Token};
+use libs::AppHandleManager;
+use tauri::Emitter;
 
-use crate::Lexer;
+use crate::{enums::errors::LexerError, Lexer};
 
 impl<'a> Lexer<'a> {
   pub fn read_number(&mut self) -> LabeledToken {
     let mut num_str = String::new();
-    let mut has_dot = false;
 
     while let Some(c) = self.current_char {
       if c.is_digit(10) {
         num_str.push(c);
         self.advance();
       } else if c == '.' {
-        if has_dot {
-          panic!("Caractere '.' inesperado: {}", num_str);
+        if num_str.matches(".").count() > 1 {
+          logger::error(LexerError::UnexpectedCharacter(self.line, c.into()));
+
+          let _ = AppHandleManager.with_handle(|handle| {
+            handle.emit("break_exec", ()).unwrap();
+          });
         }
-        has_dot = true;
+
         num_str.push(c);
         self.advance();
       } else {
@@ -25,18 +30,34 @@ impl<'a> Lexer<'a> {
     }
 
     if num_str.is_empty() {
-      panic!("Unexpected end of input while parsing number");
+      logger::error(LexerError::UnexpectedEOF(self.line));
+
+      let _ = AppHandleManager.with_handle(|handle| {
+        handle.emit("break_exec", ()).unwrap();
+      });
     }
 
-    if has_dot {
-      let float_value = num_str
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse float: {}", num_str));
+    if num_str.matches(".").count() > 0 {
+      let float_value = num_str.parse().unwrap_or_else(|_| {
+        logger::error(LexerError::FloatParseError(self.line, num_str.clone()));
+
+        let _ = AppHandleManager.with_handle(|handle| {
+          handle.emit("break_exec", ()).unwrap();
+        });
+
+        0.0
+      });
       self.token(Token::Float(float_value))
     } else {
-      let int_value = num_str
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse integer: {}", num_str));
+      let int_value = num_str.parse().unwrap_or_else(|_| {
+        logger::error(LexerError::IntegerParseError(self.line, num_str.clone()));
+
+        let _ = AppHandleManager.with_handle(|handle| {
+          handle.emit("break_exec", ()).unwrap();
+        });
+
+        0
+      });
       self.token(Token::Integer(int_value))
     }
   }

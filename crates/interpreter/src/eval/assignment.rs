@@ -10,19 +10,19 @@ impl Interpreter {
     line: usize,
   ) -> Result<Data, InterpreterError> {
     // Ensure the variable has been declared before reassigning
-    if self.variables.lock().unwrap().contains_key(&name) {
+    if self.env.variables.read().contains_key(&name) {
       let value = self.eval(LabeledExpr {
         expr: value,
         line_number: line,
       })?;
       self
+        .env
         .variables
-        .lock()
-        .unwrap()
+        .write()
         .insert(name.clone(), value.clone());
       Ok(value)
     } else {
-      if self.constants.lock().unwrap().contains_key(&name) {
+      if self.env.constants.read().contains_key(&name) {
         return Err(InterpreterError::ConstantRedeclarationError(
           line,
           name.clone(),

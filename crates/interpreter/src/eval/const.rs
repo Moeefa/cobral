@@ -9,7 +9,7 @@ impl Interpreter {
     value: Expr,
     line: usize,
   ) -> Result<Data, InterpreterError> {
-    if self.constants.lock().unwrap().contains_key(&name) {
+    if self.env.constants.read().contains_key(&name) {
       return Err(InterpreterError::ConstantRedeclarationError(
         line,
         name.clone(),
@@ -21,7 +21,7 @@ impl Interpreter {
       line_number: line,
     })?;
 
-    self.constants.lock().unwrap().insert(name, value.clone());
+    self.env.constants.write().insert(name, value.clone());
 
     Ok(value)
   }

@@ -20,16 +20,13 @@ enums.workspace = true
 logger.workspace = true
 libs.workspace = true
 
-tokio.workspace = true
 tauri.workspace = true
-tauri-plugin-shell.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-colored.workspace = true
-crossbeam.workspace = true
-crossbeam-channel.workspace = true
-num_cpus = "1.0"
+tokio.workspace = true
 
+# Plugins
+tauri-plugin-shell = "2"
 tauri-plugin-decorum = "1.1.1"
 tauri-plugin-fs = { version = "2", features = ["watch"] }
 tauri-plugin-dialog = "2"

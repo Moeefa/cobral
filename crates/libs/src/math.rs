@@ -33,3 +33,11 @@ pub fn power(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     None
   }
 }
+
+pub fn pi(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
+  if args.is_empty() {
+    Some(Data::Float(std::f64::consts::PI))
+  } else {
+    None
+  }
+}

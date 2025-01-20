@@ -28,6 +28,16 @@ impl<'a> Parser<'a> {
       ));
     }
 
+    if !libs::load(&file_path).is_none() {
+      self.env.libs.write().insert(
+        file_path.clone(),
+        libs::get_lib_funcs(&file_path)
+          .into_iter()
+          .map(String::from)
+          .collect(),
+      );
+    }
+
     self.next_token(); // Move past the string token
 
     // Optional semicolon

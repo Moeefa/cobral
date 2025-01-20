@@ -14,7 +14,7 @@ impl Interpreter {
       line_number: line,
     })?;
 
-    let data = self.variables.lock().unwrap().get(&name).unwrap().clone();
+    let data = self.env.variables.read().get(&name).unwrap().clone();
 
     match data {
       Data::List(list) => {

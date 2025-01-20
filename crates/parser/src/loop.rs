@@ -21,10 +21,9 @@ impl<'a> Parser<'a> {
     self.eat(Token::Equals)?; // Consume `=`
     let expr = self.parse_expression().unwrap();
     self
-      .context
+      .env
       .variables
-      .lock()
-      .unwrap()
+      .write()
       .insert(name.clone(), Some(expr.clone().unwrap()));
     let initializer = Some(Expr::Let(name, Box::new(expr.unwrap())));
     self.eat(Token::Semicolon)?; // Consume the first semicolon

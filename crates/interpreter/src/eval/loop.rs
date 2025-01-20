@@ -1,5 +1,7 @@
 use ::enums::{Data, Expr, LabeledExpr};
-use libs::APP_HANDLE;
+use libs::AppHandleManager;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use tauri::Listener;
 
 use crate::{enums::errors::InterpreterError, Interpreter};
@@ -13,10 +15,21 @@ impl Interpreter {
     body: Vec<Expr>,
     line: usize,
   ) -> Result<Data, InterpreterError> {
-    // Extract initialization variable name upfront if it's a Let expression
-    let cleanup_var = match initializer {
-      Expr::Let(ref name, _) => Some(name.clone()),
-      _ => None,
+    // Pre-allocate labeled expressions to avoid cloning in the loop
+    let labeled_condition = LabeledExpr {
+      expr: condition,
+      line_number: line,
+    };
+    let labeled_update = LabeledExpr {
+      expr: update,
+      line_number: line,
+    };
+
+    // Extract initialization variable name upfront
+    let cleanup_var = if let Expr::Let(ref name, _) = initializer {
+      Some(name.clone())
+    } else {
+      None
     };
 
     // Initialize
@@ -25,49 +38,37 @@ impl Interpreter {
       line_number: line,
     })?;
 
-    // Set up break detection
-    let should_break = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    // Use a local AtomicBool for break detection
+    let should_break = Arc::new(AtomicBool::new(false));
     let should_break_clone = should_break.clone();
 
-    // Listen for break_exec event
-    let unlocked_handle = APP_HANDLE.lock().unwrap();
-    let app = unlocked_handle.as_ref().unwrap();
-    let _listener = app.listen("break_exec", move |_| {
-      should_break_clone.store(true, std::sync::atomic::Ordering::SeqCst);
+    let handle = AppHandleManager.get_handle().unwrap();
+    let id = handle.listen("break_exec", move |_| {
+      should_break_clone.store(true, Ordering::Release);
     });
 
-    drop(unlocked_handle); // Release the lock
-
-    let labeled_condition = LabeledExpr {
-      expr: condition,
-      line_number: line,
-    };
-
-    let labeled_update = LabeledExpr {
-      expr: update,
-      line_number: line,
-    };
-
-    // Main loop
-    while !should_break.load(std::sync::atomic::Ordering::SeqCst) {
+    // Main loop with optimized condition checking
+    while !should_break.load(Ordering::Acquire) {
       match self.eval(labeled_condition.clone())? {
         Data::Boolean(false) => break,
-        Data::Boolean(true) => (),
+        Data::Boolean(true) => {
+          self.eval_block(&body)?; // Pass reference instead of cloning
+          self.eval(labeled_update.clone())?;
+        }
         _ => {
+          handle.unlisten(id);
           return Err(InterpreterError::EvalError(
             line,
-            "Condição do loop deve ser booleana".to_string(),
-          ))
+            "Condição do loop deve ser booleana".into(),
+          ));
         }
       }
-
-      self.eval_block(body.clone())?;
-      self.eval(labeled_update.clone())?;
     }
 
     // Cleanup
+    handle.unlisten(id);
     if let Some(name) = cleanup_var {
-      self.variables.lock().unwrap().remove(&name);
+      self.env.variables.write().remove(&name);
     }
 
     Ok(Data::None)

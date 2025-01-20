@@ -99,7 +99,7 @@ impl Interpreter {
       // Error for incompatible types
       _ => Err(InterpreterError::EvalError(
         line,
-        "Operação inválida entre tipos incompatíveis".to_string(),
+        "Operação inválida entre tipos incompatíveis".into(),
       )),
     }
   }

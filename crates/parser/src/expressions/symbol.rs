@@ -18,7 +18,7 @@ impl<'a> Parser<'a> {
 
         match self.current_token.token {
           Token::Equals => {
-            if (self.context.constants.lock().unwrap()).contains_key(&symbol_name) {
+            if self.env.constants.read().contains_key(&symbol_name) {
               return Err(ParserError::ConstantRedeclarationError(
                 labeled_token.clone(),
               ));
@@ -29,6 +29,26 @@ impl<'a> Parser<'a> {
             Ok(Some(Expr::Assignment(symbol_name, Box::new(expr.unwrap())))) // Return assignment expression
           }
           Token::ParenL => {
+            if !self.env.functions.read().contains_key(&symbol_name)
+              && !self
+                .env
+                .libs
+                .read()
+                .values()
+                .any(|libs| libs.contains(&symbol_name))
+            {
+              return Err(ParserError::InvalidExpression(
+                labeled_token.line_number,
+                if !libs::has(&symbol_name) {
+                  format!("Função desconhecida: {}", symbol_name)
+                } else {
+                  format!(
+                    "Verifique se a biblioteca foi importada corretamente.\nEx.: importe \"matematica\""
+                  )
+                },
+              ));
+            }
+
             self.eat(Token::ParenL)?; // Consume '('
             let args = self.parse_arguments()?; // Parse function arguments
             Ok(Some(Expr::FunctionCall(symbol_name, args)))
@@ -40,8 +60,8 @@ impl<'a> Parser<'a> {
 
             if let Some(Expr::Integer(idx)) = index {
               // Check if symbol_name corresponds to a list
-              let variables = self.context.variables.lock().unwrap();
-              let constants = self.context.constants.lock().unwrap();
+              let variables = self.env.variables.read();
+              let constants = self.env.constants.read();
               if let Some(expr) = variables
                 .get(&symbol_name)
                 .or_else(|| constants.get(&symbol_name))

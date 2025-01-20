@@ -13,3 +13,4 @@ enums.workspace = true
 logger.workspace = true
 libs.workspace = true
 tauri.workspace = true
+thiserror.workspace = true

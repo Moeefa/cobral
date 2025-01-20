@@ -1,6 +1,5 @@
 mod argument;
 mod r#const;
-mod context;
 mod enums;
 mod expressions;
 mod function;
@@ -13,15 +12,49 @@ mod statement;
 mod switch;
 mod r#while;
 
+use std::{collections::HashMap, sync::Arc};
+
 use ::enums::{Expr, LabeledExpr, LabeledToken, Token};
-use context::Context;
 use enums::errors::ParserError;
 use lexer::Lexer;
+use parking_lot::RwLock;
+
+#[derive(Debug)]
+pub struct Environment {
+  pub constants: Arc<RwLock<HashMap<String, Option<Expr>>>>,
+  pub variables: Arc<RwLock<HashMap<String, Option<Expr>>>>,
+  pub functions: Arc<RwLock<HashMap<String, Option<(Vec<String>, Vec<Expr>)>>>>,
+  pub libs: Arc<RwLock<HashMap<String, Vec<String>>>>,
+}
+
+impl Environment {
+  pub fn new() -> Self {
+    Environment {
+      constants: Arc::new(RwLock::new(HashMap::new())),
+      variables: Arc::new(RwLock::new(HashMap::new())),
+      functions: Arc::new(RwLock::new(HashMap::new())),
+      libs: Arc::new(RwLock::new(HashMap::from([(
+        "io".to_string(),
+        vec![
+          "escrever".to_string(),
+          "erro".to_string(),
+          "ler".to_string(),
+        ],
+      )]))),
+    }
+  }
+}
+
+impl Default for Environment {
+  fn default() -> Self {
+    Self::new()
+  }
+}
 
 #[allow(dead_code)]
 pub struct Parser<'a> {
   lexer: Lexer<'a>,
-  context: Context,
+  env: Environment,
   pub current_token: LabeledToken,
 }
 
@@ -29,7 +62,7 @@ impl<'a> Parser<'a> {
   pub fn new(lexer: Lexer<'a>) -> Result<Vec<LabeledExpr>, ParserError> {
     let mut parser = Parser {
       lexer,
-      context: Context::new(),
+      env: Environment::default(),
       current_token: LabeledToken::default(),
     };
 
@@ -58,8 +91,8 @@ impl<'a> Parser<'a> {
   fn expr_type(&self, expr: &Expr) -> &str {
     match expr {
       Expr::Symbol(s) => {
-        let variables = self.context.variables.lock().unwrap();
-        let constants = self.context.constants.lock().unwrap();
+        let variables = self.env.variables.read();
+        let constants = self.env.constants.read();
         if let Some(data) = variables
           .get(s)
           .cloned()

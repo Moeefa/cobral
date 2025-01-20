@@ -40,6 +40,7 @@ export const checkImportError = async (
 				const importPath = pathToken.value.slice(1, -1);
 
 				// Create a Promise for checking this import
+				if (["matematica", "conversao"].includes(importPath)) return [];
 				const checkPromise = exists(importPath)
 					.then((fileExists) => {
 						if (!fileExists) {

@@ -1,7 +1,8 @@
 mod context;
 
 use context::ExecutionContext;
-use libs::APP_HANDLE;
+use libs::AppHandleManager;
+use logger::batch::{LogBatchConfig, LogBatchManager};
 use tauri::{
   window::{Effect, EffectsBuilder},
   Manager,
@@ -24,7 +25,8 @@ pub fn run() {
     .manage(ExecutionContext::new())
     .invoke_handler(tauri::generate_handler![eval])
     .setup(|app| {
-      APP_HANDLE.lock().unwrap().replace(app.handle().clone());
+      let _ = AppHandleManager::init(app.handle().clone());
+      let _ = LogBatchManager::init(LogBatchConfig::default(), app.handle().clone());
 
       let main_window_builder =
         tauri::WebviewWindowBuilder::new(app.handle(), "main", tauri::WebviewUrl::App("/".into()))

@@ -12,6 +12,8 @@ path = "src/parser.rs"
 libs.workspace = true
 enums.workspace = true
 lexer.workspace = true
+thiserror.workspace = true
+parking_lot.workspace = true
 
 # Only for tests
 logger.workspace = true

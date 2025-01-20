@@ -9,8 +9,8 @@ impl Interpreter {
     line: usize,
   ) -> Result<Data, InterpreterError> {
     if let Some(func) = {
-      let libs_lock = self.libs.lock().unwrap();
-      libs_lock.get(&name).cloned()
+      let libs = self.env.libs.read();
+      libs.get(&name).cloned()
     } {
       let mut eval_fn = |expr: Expr| -> Option<Data> {
         match self.eval(LabeledExpr {
@@ -30,14 +30,15 @@ impl Interpreter {
       };
 
       let result = func(args, &mut eval_fn);
-      result.ok_or(InterpreterError::EvalError(
+      return result.ok_or(InterpreterError::EvalError(
         line,
         format!("Erro ao executar a função: {}", name),
-      ))
-    } else if let Some((params, body)) = {
-      // Limit the lock scope to this line
-      let functions_lock = self.functions.lock().unwrap();
-      functions_lock.get(&name).cloned() // Clone to move out of the lock scope
+      ));
+    }
+
+    if let Some((params, body)) = {
+      let functions = self.env.functions.read();
+      functions.get(&name).cloned()
     } {
       if args.len() != params.len() {
         return Err(InterpreterError::ArgumentMismatchError(line, name));
@@ -55,15 +56,11 @@ impl Interpreter {
         .collect::<Result<Vec<_>, _>>()?;
 
       // Store the current variable state
-      let current_vars = self.variables.lock().unwrap().clone();
+      let current_vars = self.env.variables.read().clone();
 
       // Set up argument bindings
       for (param, arg_value) in params.iter().zip(evaluated_args) {
-        self
-          .variables
-          .lock()
-          .unwrap()
-          .insert(param.clone(), arg_value);
+        self.env.variables.write().insert(param.clone(), arg_value);
       }
 
       // `functions` lock is already released here
@@ -71,15 +68,21 @@ impl Interpreter {
       let result = self.eval_function_block(body);
 
       // Restore variable state after function execution
-      *self.variables.lock().unwrap() = current_vars;
+      *self.env.variables.write() = current_vars;
 
-      result
-    } else {
-      Err(InterpreterError::EvalError(
-        line,
-        format!("Função desconhecida: {}", name),
-      ))
+      return result;
     }
+
+    Err(InterpreterError::EvalError(
+      line,
+      if !libs::has(&name) {
+        format!("Função desconhecida: {}", name)
+      } else {
+        format!(
+          "Verifique se a biblioteca foi importada corretamente.\nEx.: importe \"matematica\""
+        )
+      },
+    ))
   }
 
   fn eval_function_block(&self, block: Vec<Expr>) -> Result<Data, InterpreterError> {

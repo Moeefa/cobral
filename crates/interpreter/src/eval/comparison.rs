@@ -72,7 +72,7 @@ impl Interpreter {
       // Catch-all for invalid comparisons
       _ => Err(InterpreterError::EvalError(
         line,
-        "Comparação não suportada".to_string(),
+        "Comparação não suportada".into(),
       )),
     }
   }

@@ -4,7 +4,6 @@ use crate::{enums::errors::ParserError, Parser};
 
 impl<'a> Parser<'a> {
   pub fn parse_const(&mut self) -> Result<Option<Expr>, ParserError> {
-    println!("Parsing constant: {:?}", self.current_token);
     self.eat(Token::Const)?; // Consume `constante`
 
     let name = match &self.current_token.token {
@@ -16,7 +15,7 @@ impl<'a> Parser<'a> {
       }
     };
 
-    if (self.context.constants.lock().unwrap()).contains_key(&name) {
+    if self.env.constants.read().contains_key(&name) {
       return Err(ParserError::ConstantRedeclarationError(
         self.current_token.clone(),
       ));
@@ -28,10 +27,9 @@ impl<'a> Parser<'a> {
     let expr = self.parse_expression()?;
 
     self
-      .context
+      .env
       .constants
-      .lock()
-      .unwrap()
+      .write()
       .insert(name.clone(), Some(expr.clone().unwrap()));
 
     Ok(Some(Expr::Const(name, Box::new(expr.unwrap()))))

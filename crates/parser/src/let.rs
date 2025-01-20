@@ -21,10 +21,9 @@ impl<'a> Parser<'a> {
     let expr = self.parse_expression()?;
 
     self
-      .context
+      .env
       .variables
-      .lock()
-      .unwrap()
+      .write()
       .insert(name.clone(), Some(expr.clone().unwrap()));
 
     Ok(Some(Expr::Let(name, Box::new(expr.unwrap()))))

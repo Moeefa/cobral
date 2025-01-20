@@ -6,7 +6,7 @@ mod string;
 
 use ::enums::{LabeledToken, Token};
 use enums::errors::LexerError;
-use libs::APP_HANDLE;
+use libs::AppHandleManager;
 use tauri::Emitter;
 
 fn preprocess_string(input: &str) -> &str {
@@ -188,15 +188,11 @@ impl<'a> Lexer<'a> {
         }
         _ => {
           self.advance();
-          logger::error(LexerError::UnexpectedCharacter(
-            self.line,
-            format!("Caracter inesperado: {}", c),
-          ));
+          logger::error(LexerError::UnexpectedCharacter(self.line, c.into()));
 
-          let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
-          app_handle.emit("break_exec", ()).unwrap();
-
-          drop(app_handle);
+          let _ = AppHandleManager.with_handle(|app_handle| {
+            app_handle.emit("break_exec", ()).unwrap();
+          });
         }
       };
     }

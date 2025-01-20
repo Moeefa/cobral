@@ -1,61 +1,43 @@
 use ::enums::Token;
 use std::{
-  error::Error,
   fmt,
   num::{ParseFloatError, ParseIntError},
 };
+use thiserror::Error;
 
-#[rustfmt::skip]
-#[allow(dead_code)]
+const ERROR_MESSAGE: &str = "Erro de interpretação";
+const LINE_MESSAGE: &str = "Linha";
+
+#[derive(Clone, Error)]
 pub enum InterpreterError {
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Constante não pode ser redeclarada: '{1}'")]
   ConstantRedeclarationError(usize, String),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Falha na avaliação da expressão: '{1}'")]
   ExpressionEvaluationFailure(usize, String),
+  #[error(
+    "{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Esperava um símbolo '{2:?}', mas encontrou '{1:?}'"
+  )]
   ExpectedSymbolError(usize, Token, Token),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Esperava uma variável, mas encontrou '{1:?}'")]
   ExpectedVariableError(usize, Token),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Erro de argumento: '{1}'")]
   ArgumentMismatchError(usize, String),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Erro de análise: '{1}'")]
   ParserError(usize, String),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Erro de avaliação: '{1}'")]
   EvalError(usize, String),
-  ParseInt(ParseIntError),
-  ParseFloat(ParseFloatError),
+  #[error("{ERROR_MESSAGE}:\n\tDígito inválido encontrado")]
+  ParseInt(#[from] ParseIntError),
+  #[error("{ERROR_MESSAGE}:\n\tDígito inválido encontrado")]
+  ParseFloat(#[from] ParseFloatError),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Caractere inesperado: '{1}'")]
   UnexpectedCharacter(usize, String),
+  #[error("{ERROR_MESSAGE}:\n\t{LINE_MESSAGE} {0}: Erro em tempo de execução: '{1}'")]
   RuntimeError(usize, String),
+  #[error("{ERROR_MESSAGE}:\n\tArquivo não encontrado: '{0}'")]
   FileNotFound(String),
+  #[error("{ERROR_MESSAGE}:\n\tErro ao ler arquivo '{0}': '{1}'")]
   FileReadError(String, String),
-}
-
-#[rustfmt::skip]
-impl fmt::Display for InterpreterError {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "InterpreterError: ").unwrap();
-
-    match self {
-      InterpreterError::ConstantRedeclarationError(line, message) => write!(f, "Linha {}: Constante não pode ser redeclarada: '{}'", line, message),
-      InterpreterError::ExpressionEvaluationFailure(line, message) => write!(f, "Linha {}: Falha na avaliação da expressão: '{}'", line, message),
-      InterpreterError::ExpectedSymbolError(line, found, expected) => write!(f, "Linha {}: Esperava um símbolo '{:?}', mas encontrou '{:?}'", line, expected, found),
-      InterpreterError::ExpectedVariableError(line, token) => write!(f, "Linha {}: Esperava uma variável, mas encontrou '{:?}'", line, token),
-      InterpreterError::ArgumentMismatchError(line, message) => write!(f, "Linha {}: Erro de argumento: '{}'", line, message),
-      InterpreterError::EvalError(line, message) => write!(f, "Linha {}: Erro de avaliação: '{}'", line, message),
-      InterpreterError::ParserError(_line, message) => write!(f, "{}", message),
-      InterpreterError::ParseInt(_err) => write!(f, "Dígito inválido encontrado"),
-      InterpreterError::ParseFloat(_err) => write!(f, "Dígito inválido encontrado"),
-      InterpreterError::UnexpectedCharacter(line, character) => write!(f, "Linha {}: Caractere inesperado: '{}'", line, character),
-      InterpreterError::RuntimeError(line, message) => write!(f, "Linha {}: Erro em tempo de execução: '{}'", line, message),
-      InterpreterError::FileNotFound(file) => write!(f, "Arquivo não encontrado: '{}'", file),
-      InterpreterError::FileReadError(file, message) => write!(f, "Erro ao ler arquivo '{}': '{}'", file, message),
-    }
-  }
-}
-
-impl From<ParseIntError> for InterpreterError {
-  fn from(err: ParseIntError) -> InterpreterError {
-    InterpreterError::ParseInt(err)
-  }
-}
-
-impl From<ParseFloatError> for InterpreterError {
-  fn from(err: ParseFloatError) -> InterpreterError {
-    InterpreterError::ParseFloat(err)
-  }
 }
 
 impl fmt::Debug for InterpreterError {
@@ -63,5 +45,3 @@ impl fmt::Debug for InterpreterError {
     write!(f, "InterpreterError: {}", self)
   }
 }
-
-impl Error for InterpreterError {}

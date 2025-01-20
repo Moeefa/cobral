@@ -2,9 +2,10 @@ pub mod enums;
 mod eval;
 
 use libs::io::*;
+use parking_lot::RwLock;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::Mutex;
 
 use ::enums::{Data, Expr, LabeledExpr};
 use enums::errors::InterpreterError;
@@ -12,29 +13,59 @@ use enums::errors::InterpreterError;
 pub type LibFn =
   Arc<dyn Fn(Vec<Expr>, &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> + Send + Sync>;
 
+#[derive(Clone)]
+struct Environment {
+  variables: Arc<RwLock<BTreeMap<String, Data>>>,
+  constants: Arc<RwLock<BTreeMap<String, Data>>>,
+  functions: Arc<RwLock<HashMap<String, (Vec<String>, Vec<Expr>)>>>,
+  libs: Arc<RwLock<HashMap<String, LibFn>>>,
+}
+
 pub struct Interpreter {
-  variables: Arc<Mutex<HashMap<String, Data>>>,
-  constants: Arc<Mutex<HashMap<String, Data>>>,
-  functions: Arc<Mutex<HashMap<String, (Vec<String>, Vec<Expr>)>>>,
-  libs: Arc<Mutex<HashMap<String, LibFn>>>,
+  env: Environment,
+}
+
+impl Default for Environment {
+  fn default() -> Self {
+    let default_libs = HashMap::from([
+      ("escrever".to_string(), Arc::new(write) as LibFn),
+      ("erro".to_string(), Arc::new(error) as LibFn),
+      ("ler".to_string(), Arc::new(read) as LibFn),
+    ]);
+
+    Environment {
+      variables: Arc::new(RwLock::new(BTreeMap::new())),
+      constants: Arc::new(RwLock::new(BTreeMap::new())),
+      functions: Arc::new(RwLock::new(HashMap::new())),
+      libs: Arc::new(RwLock::new(default_libs)),
+    }
+  }
+}
+
+impl Default for Interpreter {
+  fn default() -> Self {
+    Interpreter {
+      env: Environment::default(),
+    }
+  }
+}
+
+#[allow(dead_code)]
+#[derive(Debug)]
+struct ExprResult {
+  line_number: usize,
+  result: Result<Data, InterpreterError>,
 }
 
 impl Interpreter {
+  #[inline]
   pub fn new(exprs: Vec<LabeledExpr>) -> Result<Data, InterpreterError> {
-    let interpreter = Interpreter {
-      variables: Arc::new(Mutex::new(HashMap::new())),
-      constants: Arc::new(Mutex::new(HashMap::new())),
-      functions: Arc::new(Mutex::new(HashMap::new())),
-      libs: Arc::new(Mutex::new(HashMap::from([
-        ("escrever".to_string(), Arc::new(write) as LibFn),
-        ("erro".to_string(), Arc::new(error) as LibFn),
-        ("ler".to_string(), Arc::new(read) as LibFn),
-      ]))),
-    };
+    let interpreter = Interpreter::default();
 
-    Ok(interpreter.run(exprs)?)
+    interpreter.run(exprs)
   }
 
+  #[inline]
   fn run(&self, exprs: Vec<LabeledExpr>) -> Result<Data, InterpreterError> {
     let mut result = Data::None;
     for expr in exprs {
@@ -44,10 +75,11 @@ impl Interpreter {
     Ok(result)
   }
 
+  #[inline]
   fn eval(&self, labeled_expr: LabeledExpr) -> Result<Data, InterpreterError> {
     let line = labeled_expr.line_number;
 
-    let evaluated = match labeled_expr.expr {
+    match labeled_expr.expr {
       Expr::Assignment(name, value) => self.eval_assignment(name, *value, line),
       Expr::Let(name, value) => self.eval_let(name, *value, line),
       Expr::Const(name, value) => self.eval_const(name, *value, line),
@@ -70,7 +102,7 @@ impl Interpreter {
       Expr::PrefixIncrement(expr) => self.eval_prefix_increment(*expr, line),
       Expr::Switch(condition, cases, default) => self.eval_switch(*condition, cases, default, line),
       Expr::FunctionDeclaration(name, params, body) => {
-        self.functions.lock().unwrap().insert(name, (params, body));
+        self.env.functions.write().insert(name, (params, body));
         Ok(Data::None) // No result for function declaration
       }
 
@@ -92,8 +124,8 @@ impl Interpreter {
       }
 
       Expr::Symbol(value) => {
-        let variables = self.variables.lock().unwrap();
-        let constants = self.constants.lock().unwrap();
+        let variables = self.env.variables.read();
+        let constants = self.env.constants.read();
         if let Some(data) = variables
           .get(&value)
           .cloned()
@@ -111,10 +143,8 @@ impl Interpreter {
       #[allow(unreachable_patterns)]
       _ => Err(InterpreterError::EvalError(
         line,
-        "Expressão não suportada".to_string(),
+        "Expressão não suportada".into(),
       )),
-    };
-
-    evaluated
+    }
   }
 }

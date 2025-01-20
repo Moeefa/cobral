@@ -12,9 +12,9 @@ impl Interpreter {
       // Add functions from the library to the interpreter's library map
       for (name, func) in lib {
         self
+          .env
           .libs
-          .lock()
-          .unwrap()
+          .write()
           .insert(name.to_string(), Arc::new(func) as LibFn);
       }
 

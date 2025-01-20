@@ -1,5 +1,5 @@
 use ::enums::{Data, Expr, LabeledExpr};
-use libs::APP_HANDLE;
+use libs::AppHandleManager;
 use tauri::Listener;
 
 use crate::{enums::errors::InterpreterError, Interpreter};
@@ -16,13 +16,10 @@ impl Interpreter {
     let should_break_clone = should_break.clone();
 
     // Listen for break_exec event
-    let unlocked_handle = APP_HANDLE.lock().unwrap();
-    let app = unlocked_handle.as_ref().unwrap();
-    let _listener = app.listen("break_exec", move |_| {
+    let handle = AppHandleManager.get_handle().unwrap();
+    let id = handle.listen("break_exec", move |_| {
       should_break_clone.store(true, std::sync::atomic::Ordering::SeqCst);
     });
-
-    drop(unlocked_handle); // Release the lock
 
     let labeled_condition = LabeledExpr {
       expr: condition,
@@ -35,15 +32,18 @@ impl Interpreter {
         Data::Boolean(false) => break,
         Data::Boolean(true) => (),
         _ => {
+          handle.unlisten(id);
           return Err(InterpreterError::EvalError(
             line,
-            "Condição do loop deve ser booleana".to_string(),
-          ))
+            "Condição do loop deve ser booleana".into(),
+          ));
         }
       }
 
-      self.eval_block(body.clone())?;
+      self.eval_block(&body)?;
     }
+
+    handle.unlisten(id);
 
     Ok(Data::None)
   }

@@ -1,7 +1,7 @@
 use interpreter::Interpreter;
 use lexer::Lexer;
-use libs::APP_HANDLE;
-use logger::{emit_logs, Payload, LOG_BUFFER};
+use libs::AppHandleManager;
+use logger::{batch::LogBatchManager, Payload};
 use parser::Parser;
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Listener, Manager, UserAttentionType};
@@ -16,36 +16,33 @@ impl ExecutionContext {
 
   pub async fn eval(&self, input: String) {
     let has_received_event = Arc::new(Notify::new());
-    let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
+    let handle = AppHandleManager.get_handle().unwrap();
 
-    // Listen for the "break_exec" event
-    {
-      let notify_clone = Arc::clone(&has_received_event);
-      let app_handle_clone = app_handle.clone();
-      app_handle.listen("break_exec", move |_| {
-        notify_clone.notify_one();
-        app_handle_clone
-          .get_webview_window("main")
-          .unwrap()
-          .request_user_attention(Some(UserAttentionType::Informational))
-          .unwrap();
-        emit_logs(&app_handle_clone, true);
-      });
-    }
+    let notify_clone = Arc::clone(&has_received_event);
+    let handle_clone = handle.clone();
+    let id = handle.listen("break_exec", move |_| {
+      notify_clone.notify_one();
+      handle_clone
+        .get_webview_window("main")
+        .unwrap()
+        .request_user_attention(Some(UserAttentionType::Informational))
+        .unwrap();
+
+      LogBatchManager.process_batch();
+    });
 
     // Offload the evaluation task to a background thread
     let input_clone = input.clone();
     task::spawn(async move {
-      fn finish_exec(app_handle: AppHandle, start: std::time::Instant) {
-        let mut buffer = LOG_BUFFER.lock().unwrap();
-        buffer.push(Payload {
+      fn finish_exec(handle: &AppHandle, start: std::time::Instant) {
+        let log_batch_manager = LogBatchManager;
+        let _ = log_batch_manager.add(Payload {
           message: format!("Tempo de execução: {:?}", start.elapsed()),
           level: String::from("info"),
         });
-        drop(buffer);
 
-        app_handle.emit("exec_finished", ()).unwrap();
-        emit_logs(&app_handle, true);
+        handle.emit("exec_finished", ()).unwrap();
+        log_batch_manager.process_batch();
       }
 
       let start = std::time::Instant::now();
@@ -62,7 +59,8 @@ impl ExecutionContext {
       // Wait for the `break_exec` notification or continue normally
       tokio::select! {
         _ = has_received_event.notified() => {
-          finish_exec(app_handle, start);
+          finish_exec(&handle, start);
+
           return;
         }
         _ = async {} => { /* Continue execution */ }
@@ -70,10 +68,11 @@ impl ExecutionContext {
 
       if let Err(e) = interpreter {
         logger::error(e);
-        app_handle.emit("break_exec", ()).unwrap();
+        handle.emit("break_exec", ()).unwrap();
       }
 
-      finish_exec(app_handle, start);
+      handle.unlisten(id);
+      finish_exec(&handle, start);
     });
   }
 }

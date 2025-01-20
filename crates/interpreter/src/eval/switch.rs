@@ -41,7 +41,7 @@ impl Interpreter {
 
       if should_execute {
         found_match = true;
-        result = self.eval_block(case_statements)?;
+        result = self.eval_block(&case_statements)?;
 
         if has_break {
           return Ok(result);
@@ -52,7 +52,7 @@ impl Interpreter {
     // If no case matched or no break was encountered, try default case
     if !found_match || !matches!(result, Data::None) {
       if let Some((default_statements, has_break)) = default_case {
-        result = self.eval_block(default_statements)?;
+        result = self.eval_block(&default_statements)?;
         if has_break {
           return Ok(result);
         }

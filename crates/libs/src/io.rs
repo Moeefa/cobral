@@ -1,12 +1,12 @@
 use std::sync::{Arc, Condvar, Mutex};
 
 use ::enums::{Data, Expr};
-use logger::{emit_logs, Payload, LOG_BUFFER};
+use logger::{batch::LogBatchManager, Payload};
 use tauri::{Emitter, Listener};
 
-use crate::APP_HANDLE;
+use crate::AppHandleManager;
 
-pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
+fn args_to_string(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<String> {
   let output: Vec<Option<String>> = args
     .iter()
     .map(|arg| {
@@ -19,84 +19,46 @@ pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opt
     .collect();
 
   if output.iter().any(|o| o.is_none()) {
-    return Some(Data::None);
+    return None;
   }
 
-  let output: String = output
-    .into_iter()
-    .map(|o| o.unwrap())
-    .collect::<Vec<String>>()
-    .join(" ");
+  Some(
+    output
+      .into_iter()
+      .map(|o| o.unwrap())
+      .collect::<Vec<String>>()
+      .join(" "),
+  )
+}
 
-  {
-    let mut buffer = LOG_BUFFER.lock().unwrap();
-    buffer.push(Payload {
-      message: output.clone(),
-      level: String::from("info"),
-    });
-  }
+pub fn write(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
+  let output = args_to_string(args, eval)?;
 
-  emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), false);
+  let _ = LogBatchManager.add(Payload {
+    message: output.clone(),
+    level: String::from("info"),
+  });
 
   Some(Data::String(output))
 }
 
 pub fn error(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
-  let output: Vec<Option<String>> = args
-    .iter()
-    .map(|arg| {
-      let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      match data {
-        Some(d) => Some(d.to_string()),
-        _ => None,
-      }
-    })
-    .collect();
+  let output = args_to_string(args, eval)?;
 
-  if output.iter().any(|o| o.is_none()) {
-    return Some(Data::None);
-  }
-
-  let output: String = output
-    .into_iter()
-    .map(|o| o.unwrap())
-    .collect::<Vec<String>>()
-    .join(" ");
-
-  {
-    let mut buffer = LOG_BUFFER.lock().unwrap();
-    buffer.push(Payload {
-      message: output.clone(),
-      level: String::from("info"),
-    });
-  }
-
-  emit_logs(APP_HANDLE.lock().unwrap().as_ref().unwrap(), false);
+  let _ = LogBatchManager.add(Payload {
+    message: output.clone(),
+    level: String::from("info"),
+  });
 
   Some(Data::String(output))
 }
 
 pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Option<Data> {
-  let app_handle = APP_HANDLE.lock().unwrap().as_ref().unwrap().clone();
+  let handle = AppHandleManager.get_handle().unwrap();
 
-  let output: Vec<Option<String>> = args
-    .iter()
-    .map(|arg| {
-      let data = eval(arg.clone()); // Correctly passing `Expr` to `eval`
-      match data {
-        Some(d) => Some(d.to_string()),
-        _ => None,
-      }
-    })
-    .collect();
+  let output = args_to_string(args, eval)?;
 
-  let output: String = output
-    .into_iter()
-    .map(|o| o.unwrap())
-    .collect::<Vec<String>>()
-    .join(" ");
-
-  let _ = app_handle.emit("read", output);
+  let _ = handle.emit("read", output);
 
   // Shared state for input and break signal
   let shared_state: Arc<(Mutex<Option<Data>>, Condvar)> =
@@ -104,7 +66,7 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
   let shared_state_clone: Arc<(Mutex<Option<Data>>, Condvar)> = Arc::clone(&shared_state);
 
   // Listener for "read_input" event
-  let read_listener = app_handle.listen("read_input", move |msg| {
+  let read_listener = handle.listen("read_input", move |msg| {
     let (lock, cvar) = &*shared_state_clone;
     let mut input = lock.lock().unwrap();
     *input = Some(Data::String(msg.payload().trim_matches('"').to_string()));
@@ -113,7 +75,7 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
 
   // Break signal listener
   let shared_state_clone = Arc::clone(&shared_state);
-  let break_listener = app_handle.listen("break_exec", move |_| {
+  let break_listener = handle.listen("break_exec", move |_| {
     let (lock, cvar) = &*shared_state_clone;
     let mut input = lock.lock().unwrap();
     *input = Some(Data::None);
@@ -128,8 +90,8 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
   }
 
   // Cleanup listeners
-  app_handle.unlisten(read_listener);
-  app_handle.unlisten(break_listener);
+  handle.unlisten(read_listener);
+  handle.unlisten(break_listener);
 
   // Handle the received input
   match input.take() {

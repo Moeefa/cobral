@@ -21,12 +21,7 @@ impl<'a> Parser<'a> {
     let mut params = Vec::new();
     while let Token::Symbol(param) = &self.current_token.token {
       params.push(param.clone());
-      self
-        .context
-        .variables
-        .lock()
-        .unwrap()
-        .insert(param.clone(), None);
+      self.env.variables.write().insert(param.clone(), None);
 
       self.next_token();
       if self.current_token.token != Token::Comma {
@@ -38,6 +33,12 @@ impl<'a> Parser<'a> {
 
     // Parse function body
     let body = self.parse_block()?;
+
+    self
+      .env
+      .functions
+      .write()
+      .insert(name.clone(), Some((params.clone(), body.clone())));
 
     Ok(Some(Expr::FunctionDeclaration(name, params, body)))
   }

@@ -10,9 +10,9 @@ impl Interpreter {
     })?;
 
     self
+      .env
       .variables
-      .lock()
-      .unwrap()
+      .write()
       .insert(name.clone(), value.clone());
 
     Ok(value)

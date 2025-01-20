@@ -63,20 +63,3 @@ export const extractImports = async (text: string): Promise<Scope> => {
 
 	return importedScope;
 };
-
-// Helper function to merge scopes safely
-const mergeScopeData = (target: Scope, source: Scope) => {
-	// Merge variables
-	source.variables.forEach((value, key) => {
-		if (!target.variables.has(key)) {
-			target.addVariable(key, value.type);
-		}
-	});
-
-	// Merge functions
-	source.functions.forEach((value, key) => {
-		if (!target.functions.has(key)) {
-			target.addFunction(key, value.parameters, value.returnType);
-		}
-	});
-};
