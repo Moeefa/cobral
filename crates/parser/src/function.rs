@@ -31,14 +31,15 @@ impl<'a> Parser<'a> {
     }
     self.eat(Token::ParenR)?;
 
-    // Parse function body
-    let body = self.parse_block()?;
-
+    // Add function to environment before parsing body
     self
       .env
       .functions
       .write()
-      .insert(name.clone(), Some((params.clone(), body.clone())));
+      .insert(name.clone(), Some(params.clone()));
+
+    // Parse function body
+    let body = self.parse_block()?;
 
     Ok(Some(Expr::FunctionDeclaration(name, params, body)))
   }

@@ -23,7 +23,7 @@ use parking_lot::RwLock;
 pub struct Environment {
   pub constants: Arc<RwLock<HashMap<String, Option<Expr>>>>,
   pub variables: Arc<RwLock<HashMap<String, Option<Expr>>>>,
-  pub functions: Arc<RwLock<HashMap<String, Option<(Vec<String>, Vec<Expr>)>>>>,
+  pub functions: Arc<RwLock<HashMap<String, Option<Vec<String>>>>>,
   pub libs: Arc<RwLock<HashMap<String, Vec<String>>>>,
 }
 

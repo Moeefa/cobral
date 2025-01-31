@@ -5,7 +5,7 @@ use std::{
 };
 use thiserror::Error;
 
-const ERROR_MESSAGE: &str = "Erro de interpretação";
+const ERROR_MESSAGE: &str = "Erro no interpretador";
 const LINE_MESSAGE: &str = "Linha";
 
 #[derive(Clone, Error)]

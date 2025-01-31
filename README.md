@@ -1,7 +1,7 @@
 # Portugol CobraL
 
 CobraL é uma linguagem extremamente rápida baseada no [Portugol (Português estruturado)](https://pt.wikipedia.org/wiki/Portugol) com o objetivo de ensinar conceitos básicos de programação de forma simples e intuitiva. O código é interpretado e executado em Rust, mas com algumas restrições e adições.
-Vale ressaltar de que este projeto não tem nenhuma correlação com o Portugol Studio, cujo o mesmo é uma IDE para Portugol, e são projetos totalmente distintos.
+**Vale ressaltar de que este projeto não tem nenhuma correlação com o Portugol Studio, e são projetos totalmente distintos.**
 
 O projeto ainda está em desenvolvimento e novas funcionalidades serão adicionadas em breve. Se você quiser contribuir, fique à vontade para abrir uma issue ou um pull request.
 
@@ -29,43 +29,10 @@ Os benchmarks a seguir foram realizados em um computador com as seguintes especi
   - [Operadores aritméticos](#operadores-aritméticos)
   - [Estruturas de controle](#estruturas-de-controle)
   - [Estruturas de repetição](#estruturas-de-repetição)
+  - [Entrada e saída](#entrada-e-saída)
   - [Bibliotecas](#bibliotecas)
-    - [Entrada e saída](#entrada-e-saída)
     - [Matemática](#matemática)
     - [Conversão de tipos de dados](#conversão-de-tipos-de-dados)
-
-## Roadmap
-
-- [x] Implementar tipos de dados
-  - [ ] Adicionar tipos de dados explicitamente de maneira opcional
-- [x] Implementar estruturas de controle
-- [x] Implementar biblioteca de entrada e saída
-- [x] Implementar biblioteca de matemática
-- [x] Implementar biblioteca para conversão de tipos de dados
-- [x] Implementar funções
-  - [x] Corrigir chamada de funções recursivas
-- [x] Implementar loops
-- [x] Implementar vetores
-- [x] Implementar matrizes
-- [x] Implementar comentários
-- [x] Implementar operadores lógicos (e, ou, não)
-  - [x] Operador `nao` para negação de valores booleanos
-  - [x] Operador `e` para conjunção de valores booleanos
-  - [x] Operador `ou` para disjunção de valores booleanos
-- [x] Implementar operadores aritméticos
-- [x] Implementar operadores de incremento e decremento
-- [x] Implementar operadores de concatenação
-- [x] Implementar operadores de comparação
-- [x] Ajustar o Textmate para a sintaxe de CobraL
-- [x] Implementar análise de código
-- [ ] Implementar execução de código passo a passo
-  - [ ] Destacar linha durante a execução passo a passo
-- [ ] Incluir testes unitários
-- [x] Leitura e escrita de arquivos
-- [x] Console interativo para execução de código
-- [x] Incluir exemplos de código e documentação
-- [x] Implementar tipo de dados/dicas ao passar o mouse sobre uma variável, constante ou função
-- [x] Implementar condições escolha-caso (switch-case)
 
 ## Como funciona?
 

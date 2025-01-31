@@ -80,7 +80,7 @@ impl Interpreter {
     let line = labeled_expr.line_number;
 
     match labeled_expr.expr {
-      Expr::Assignment(name, value) => self.eval_assignment(name, *value, line),
+      Expr::Assignment(name, index, value) => self.eval_assignment(name, index, *value, line),
       Expr::Let(name, value) => self.eval_let(name, *value, line),
       Expr::Const(name, value) => self.eval_const(name, *value, line),
       Expr::FunctionCall(name, args) => self.eval_function_call(name, args, line),

@@ -5,7 +5,7 @@ use enums::LabeledToken;
 use lexer::enums::errors::LexerError;
 use thiserror::Error;
 
-const ERROR_MESSAGE: &str = "Erro de análise";
+const ERROR_MESSAGE: &str = "Erro de análise semântica";
 const LINE_MESSAGE: &str = "Linha";
 
 #[derive(Error)]

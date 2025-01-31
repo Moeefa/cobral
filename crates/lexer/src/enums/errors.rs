@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-const ERROR_MESSAGE: &str = "Erro de análise léxica";
+const ERROR_MESSAGE: &str = "Erro de análise sintática";
 const LINE_MESSAGE: &str = "Linha";
 
 #[derive(Debug, Error)]

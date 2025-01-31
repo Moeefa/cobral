@@ -3,7 +3,7 @@ use crate::token::Token;
 #[derive(Debug, Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum Expr {
-  Assignment(String, Box<Expr>),
+  Assignment(String, Option<Box<Expr>>, Box<Expr>),
   Let(String, Box<Expr>),
   Const(String, Box<Expr>),
 
@@ -58,7 +58,7 @@ impl std::fmt::Display for Expr {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
       Expr::Index(name, index) => write!(f, "{}[{}]", name, index),
-      Expr::Assignment(name, value) => write!(f, "{} = {}", name, value),
+      Expr::Assignment(name, index, value) => write!(f, "{} = {}", name, value),
       Expr::Let(name, value) => write!(f, "let {} = {}", name, value),
       Expr::Const(name, value) => write!(f, "const {} = {}", name, value),
       Expr::FunctionDeclaration(name, args, block) => write!(

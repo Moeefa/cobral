@@ -356,7 +356,7 @@ const FileTreeView = ({
 		}, []);
 	};
 
-	if (!files.length) return <></>;
+	if (!files.length && !absolutePath) return <></>;
 
 	if (!absolutePath)
 		return (

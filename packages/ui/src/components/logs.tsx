@@ -87,7 +87,7 @@ export const Logs = React.memo(() => {
 					rowRenderer={rowRenderer}
 					overscanRowCount={20}
 					deferredMeasurementCache={cache}
-					className="border-border pl-2 bg-[var(--vscode-editor-background)] ![font-family:'SF_Pro_Mono',monospace]"
+					className="border-border monaco-editor pl-2 bg-[var(--vscode-editor-background)] ![font-family:'SF_Pro_Mono',monospace]"
 				/>
 			)}
 		</AutoSizer>

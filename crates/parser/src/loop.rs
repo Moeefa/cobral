@@ -27,7 +27,10 @@ impl<'a> Parser<'a> {
       .insert(name.clone(), Some(expr.clone().unwrap()));
     let initializer = Some(Expr::Let(name, Box::new(expr.unwrap())));
     self.eat(Token::Semicolon)?; // Consume the first semicolon
-    if !matches!(initializer, Some(Expr::Let(_, _) | Expr::Assignment(_, _))) {
+    if !matches!(
+      initializer,
+      Some(Expr::Let(_, _) | Expr::Assignment(_, _, _))
+    ) {
       return Err(ParserError::InvalidExpression(
         self.current_token.line_number,
         "Era esperado a inicialização de uma variável".to_string(),
@@ -55,7 +58,7 @@ impl<'a> Parser<'a> {
     if !matches!(
       update,
       Some(
-        Expr::Assignment(_, _)
+        Expr::Assignment(_, _, _)
           | Expr::PostfixDecrement(_)
           | Expr::PostfixIncrement(_)
           | Expr::PrefixDecrement(_)

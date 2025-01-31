@@ -111,7 +111,7 @@ const Left = () => {
 		>
 			<h4
 				data-tauri-drag-region
-				className="text-sm font-medium ![font-family:'SF_Pro',sans] select-none px-4 p-2.5"
+				className="text-sm font-medium select-none px-4 p-2.5"
 			>
 				{currentFile?.name || "arquivo.cl"}
 			</h4>

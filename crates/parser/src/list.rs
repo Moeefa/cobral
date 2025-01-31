@@ -6,7 +6,7 @@ impl<'a> Parser<'a> {
   pub fn parse_list(&mut self) -> Result<Vec<Expr>, ParserError> {
     let mut elements = Vec::new();
 
-    if self.current_token.token == Token::List(vec![]) {
+    if let Token::List(_) = self.current_token.token {
       self.eat(Token::BracketL)?; // Consume the opening bracket `[`
 
       while self.current_token.token != Token::BracketR && self.current_token.token != Token::EOF {

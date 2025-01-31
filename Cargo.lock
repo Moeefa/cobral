@@ -463,7 +463,7 @@ dependencies = [
 
 [[package]]
 name = "cobral"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "enums",
  "interpreter",
@@ -1051,7 +1051,7 @@ dependencies = [
 
 [[package]]
 name = "enums"
-version = "0.9.3"
+version = "0.9.4"
 
 [[package]]
 name = "equivalent"
@@ -2089,7 +2089,7 @@ dependencies = [
 
 [[package]]
 name = "interpreter"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "enums",
  "lexer",
@@ -2276,7 +2276,7 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "lexer"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "enums",
  "libs",
@@ -2348,7 +2348,7 @@ dependencies = [
 
 [[package]]
 name = "libs"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "enums",
  "logger",
@@ -2425,7 +2425,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "colored",
  "enums",
@@ -3107,7 +3107,7 @@ dependencies = [
 
 [[package]]
 name = "parser"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "colored",
  "enums",

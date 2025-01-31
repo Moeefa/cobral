@@ -58,6 +58,8 @@ pub fn read(args: Vec<Expr>, eval: &mut dyn FnMut(Expr) -> Option<Data>) -> Opti
 
   let output = args_to_string(args, eval)?;
 
+  LogBatchManager.process_batch();
+
   let _ = handle.emit("read", output);
 
   // Shared state for input and break signal

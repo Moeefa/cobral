@@ -14,7 +14,7 @@ resolver = "2"
 package.edition = "2021"
 package.authors = ["Luiz Henrique Xinaider"]
 package.repository = "https://github.com/Moeefa/cobral.git"
-package.version = "0.9.3"
+package.version = "0.9.4"
 
 [workspace.dependencies]
 cobral = { path = "crates/cobral" }

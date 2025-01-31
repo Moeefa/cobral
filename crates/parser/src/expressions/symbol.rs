@@ -26,7 +26,11 @@ impl<'a> Parser<'a> {
 
             self.eat(Token::Equals)?; // Consume the '=' token
             let expr = self.parse_expression()?; // Parse the right-hand side of the assignment
-            Ok(Some(Expr::Assignment(symbol_name, Box::new(expr.unwrap())))) // Return assignment expression
+            Ok(Some(Expr::Assignment(
+              symbol_name,
+              None,
+              Box::new(expr.unwrap()),
+            ))) // Return assignment expression
           }
           Token::ParenL => {
             if !self.env.functions.read().contains_key(&symbol_name)
@@ -55,11 +59,17 @@ impl<'a> Parser<'a> {
           }
           Token::BracketL => {
             self.eat(Token::BracketL)?; // Consume '['
-
             let index = self.parse_expression()?; // Parse the index expression
+            self.eat(Token::BracketR)?;
 
-            if let Some(Expr::Integer(idx)) = index {
-              // Check if symbol_name corresponds to a list
+            println!("Creating Assignment with index expr: {:?}", index);
+
+            // Check for assignment
+            if self.current_token.token == Token::Equals {
+              self.eat(Token::Equals)?; // Consume '='
+              let value = self.parse_expression()?; // Parse the value to assign
+
+              // Validate the symbol exists and is a list
               let variables = self.env.variables.read();
               let constants = self.env.constants.read();
               if let Some(expr) = variables
@@ -67,21 +77,12 @@ impl<'a> Parser<'a> {
                 .or_else(|| constants.get(&symbol_name))
               {
                 if let Some(Expr::List(ref list)) = expr {
-                  if idx < 0 || idx as usize >= list.len() {
-                    return Err(ParserError::InvalidExpression(
-                      self.current_token.line_number,
-                      format!(
-                        "Índice {} está fora do alcance do vetor {}",
-                        idx, symbol_name
-                      ),
-                    ));
-                  }
-
-                  drop(variables);
-                  drop(constants);
-
-                  self.eat(Token::BracketR)?; // Consume ']'
-                  return Ok(Some(Expr::Index(symbol_name, Box::new(Expr::Integer(idx)))));
+                  // Return an index assignment expression with the original index expression
+                  return Ok(Some(Expr::Assignment(
+                    symbol_name,
+                    Some(Box::new(index.unwrap())),
+                    Box::new(value.unwrap()),
+                  )));
                 } else {
                   return Err(ParserError::InvalidExpression(
                     self.current_token.line_number,
@@ -94,12 +95,10 @@ impl<'a> Parser<'a> {
                   format!("{} não foi definido", symbol_name),
                 ));
               }
-            } else {
-              return Err(ParserError::InvalidExpression(
-                self.current_token.line_number,
-                "Era esperado um índice do tipo inteiro".to_string(),
-              ));
             }
+
+            // If not an assignment, return index access
+            Ok(Some(Expr::Index(symbol_name, Box::new(index.unwrap()))))
           }
           _ => Ok(Some(Expr::Symbol(symbol_name))), // Just return the symbol
         }
