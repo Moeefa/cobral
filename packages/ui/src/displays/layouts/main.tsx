@@ -10,6 +10,7 @@ import { Outlet } from "react-router-dom";
 import { Sidebar } from "@/components/sidebar";
 import { Titlebar } from "@/components/titlebar";
 import { Toaster } from "@/components/ui/toaster";
+import { emit } from "@tauri-apps/api/event";
 import { resolveTheme } from "@/lib/utils";
 
 export const Layout = () => {
@@ -38,7 +39,11 @@ export const Layout = () => {
 	return (
 		<div className="flex h-full main-wrapper !outline-none monaco-editor !bg-transparent">
 			<ResizablePanelGroup direction="horizontal">
-				<ResizablePanel defaultSize={16} minSize={16}>
+				<ResizablePanel
+					defaultSize={16}
+					minSize={16}
+					onResize={async () => await emit("resize")}
+				>
 					<Sidebar />
 				</ResizablePanel>
 				<ResizableHandle />

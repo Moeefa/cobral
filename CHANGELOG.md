@@ -1,8 +1,10 @@
-# 🏷️ Atualização 0.9.4
+# 🏷️ Atualização 0.10.0
 
 ### ✨ Novidades:
-- Mudanças na interface do registro de execução.
+- Melhoria na exibição de erros (agora exibe a linha e coluna do erro).
+- Estrutura do projeto reorganizada.
 
 ### 🐛 Correções:
-- Corrigido erro onde não era possível utilizar funções recursivas.
-- Estilo da fonte do nome do arquivo corrigido.
+- Corrigido erro que ao mudar tamanho da barra lateral, os registros não quebravam linha.
+- Previnido erro ao tentar fazer validação de uma expressão/declaração vazia.
+- Erros do analisador léxico agora são exibidos corretamente.

@@ -529,11 +529,11 @@ export const Sidebar = () => {
 	};
 
 	return (
-		<div className="h-full bg-white/85 dark:bg-neutral-900/70">
+		<div className="h-full bg-white/70 dark:bg-neutral-900/70">
 			<div className="flex flex-col h-full [&>span]:h-full">
 				<div
 					data-tauri-drag-region
-					className="flex items-center justify-between w-full border-b border-border min-h-11 p-[3.5px]"
+					className="flex items-center justify-between w-full border-border min-h-11 p-[3.5px]"
 				>
 					{currentPlatform !== "macos" && (
 						<p

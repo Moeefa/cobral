@@ -16,9 +16,9 @@ export const LogEntry = React.memo(
 			</span>
 			<p
 				data-level={level}
-				className="break-all relative whitespace-pre-wrap min-w-full ![font-family:'SF_Pro_Mono',monospace] log-entry dark:data-[level=error]:bg-red-500 data-[level=error]:bg-red-400"
+				className="break-all relative w-full whitespace-pre-wrap ![font-family:'SF_Pro_Mono',monospace] log-entry dark:data-[level=error]:bg-red-500 data-[level=error]:bg-red-400"
 			>
-				<div className="current-line invisible group-hover:visible w-full h-full -z-10" />
+				<div className="current-line w-full invisible group-hover:visible -z-10" />
 				{message}
 			</p>
 		</div>

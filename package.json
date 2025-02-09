@@ -1,6 +1,6 @@
 {
 	"name": "cobral",
-	"version": "0.9.4",
+	"version": "0.10.0",
 	"description": "",
 	"type": "module",
 	"scripts": {
@@ -36,7 +36,9 @@
 		"@tauri-apps/plugin-dialog": "^2.2.0",
 		"@tauri-apps/plugin-fs": "^2.2.0",
 		"@tauri-apps/plugin-os": "^2.2.0",
+		"@tauri-apps/plugin-process": "~2",
 		"@tauri-apps/plugin-shell": "^2.2.0",
+		"@tauri-apps/plugin-updater": "~2",
 		"@types/node": "^20.17.12",
 		"@types/react-virtualized": "^9.22.0",
 		"@types/react-window": "^1.8.8",

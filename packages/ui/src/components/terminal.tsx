@@ -25,7 +25,6 @@ export const Terminal = () => {
 		clearLogs();
 
 		await emit("break_exec");
-
 		await invoke("eval", { input: value });
 	};
 

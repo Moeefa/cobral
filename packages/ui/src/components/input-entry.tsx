@@ -8,7 +8,7 @@ export const InputEntry = React.memo(
 		timestamp,
 		onSubmit,
 	}: {
-		message: string;
+		message: { [index: string]: unknown };
 		timestamp: string;
 		onSubmit: (value: string) => void;
 	}) => {
@@ -36,7 +36,7 @@ export const InputEntry = React.memo(
 				<div className="w-full log-entry !relative">
 					<span className="break-all whitespace-pre-wrap w-full [font-family:'SF_Pro_Mono',monospace] inline-block">
 						<div className="current-line invisible group-hover:visible w-full h-full -z-10" />
-						{message}
+						{Object.values(message).join("")}
 						<Input
 							key={`input-${message}`}
 							className="inline-block !w-max [font-family:'SF_Pro_Mono',monospace] log-input h-max rounded-none p-0 border-0 outline-none ring-0 focus-visible:ring-0 focus:ring-0 align-baseline"

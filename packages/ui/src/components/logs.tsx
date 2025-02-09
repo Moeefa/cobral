@@ -8,6 +8,7 @@ import {
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 
 import { EditorContext } from "@/contexts/editor-context";
+import { listen } from "@tauri-apps/api/event";
 
 const cache = new CellMeasurerCache({
 	defaultHeight: 24,
@@ -28,10 +29,18 @@ export const Logs = React.memo(() => {
 			cache.clearAll();
 		});
 
+		console.log("sidebar", document.getElementById("sidebar"));
+
+		const unlisten = listen("resize", () => {
+			cache.clearAll();
+		});
+
 		return () => {
 			window.removeEventListener("resize", () => {
 				cache.clearAll();
 			});
+
+			unlisten.then((f) => f());
 		};
 	}, []);
 
