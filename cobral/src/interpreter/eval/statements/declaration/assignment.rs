@@ -21,12 +21,12 @@ impl Interpreter {
     };
 
     // First evaluate the value to be assigned
-    let evaluated_value = self.eval_expr(value)?;
+    let evaluated_value = self.eval_expr(&value)?;
 
     // Check if it's a variable assignment
     if self.environment.get_symbol(&name.clone()).is_some() {
       if let Some(index) = index {
-        let index = self.eval_expr(*index)?;
+        let index = self.eval_expr(&*index)?;
 
         let mut variables = self.environment.symbols.write();
 

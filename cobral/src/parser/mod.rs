@@ -17,13 +17,12 @@ pub struct Parser {
 
 impl Parser {
   pub fn new(tokens: Vec<LabeledToken>) -> Result<Vec<Statement>, ParserError> {
-    let mut parser = Parser {
+    Parser {
       tokens: tokens.clone(),
       env: Environment::new(),
       current_token: tokens[0].clone(),
-    };
-
-    parser.run()
+    }
+    .run()
   }
 
   fn run(&mut self) -> Result<Vec<Statement>, ParserError> {
@@ -75,6 +74,7 @@ impl Parser {
     while self.current_token.token != Token::BraceR && self.current_token.token != Token::EOF {
       let item = self.parse_statement()?;
       items.push(item);
+      self.try_eat(Token::Semicolon)?;
     }
 
     self.eat(Token::BraceR)?;

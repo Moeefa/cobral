@@ -8,7 +8,9 @@ pub fn parse_if_stmt(parser: &mut Parser) -> Result<Statement, ParserError> {
   parser.eat(Token::If)?;
   parser.eat(Token::ParenL)?;
 
-  let condition = parser.parse_expression()?;
+  let condition = parser
+    .parse_expression()
+    .map_err(|_| parser.invalid_expr("Condição inválida"))?;
 
   parser.eat(Token::ParenR)?;
 
@@ -23,7 +25,9 @@ pub fn parse_if_stmt(parser: &mut Parser) -> Result<Statement, ParserError> {
       parser.eat(Token::If)?;
       parser.eat(Token::ParenL)?;
 
-      let else_if_condition = parser.parse_expression()?;
+      let else_if_condition = parser
+        .parse_expression()
+        .map_err(|_| parser.invalid_expr("Condição inválida"))?;
 
       parser.eat(Token::ParenR)?;
       let else_if_block = parser.parse_block()?;

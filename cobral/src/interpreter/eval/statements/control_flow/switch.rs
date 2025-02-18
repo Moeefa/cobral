@@ -10,14 +10,14 @@ impl Interpreter {
     cases: Vec<(Box<Expression>, Vec<Statement>, bool)>, // Added bool for break
     default_case: Option<(Vec<Statement>, bool)>,        // Added bool for break
   ) -> Result<Value, InterpreterError> {
-    let switch_value = self.eval_expr(switch_expr)?;
+    let switch_value = self.eval_expr(&switch_expr)?;
 
     let mut found_match = false;
     let mut result = Value::None;
 
     // Evaluate cases
     for (case_value, case_statements, has_break) in cases {
-      let case_result = self.eval_expr(*case_value)?;
+      let case_result = self.eval_expr(&*case_value)?;
 
       // If we found a match previously and there was no break, continue executing
       let should_execute = found_match
@@ -36,7 +36,7 @@ impl Interpreter {
 
       if should_execute {
         found_match = true;
-        result = self.eval_block(case_statements)?;
+        result = self.eval_block(&case_statements)?;
 
         if has_break {
           return Ok(result);
@@ -47,7 +47,7 @@ impl Interpreter {
     // If no case matched or no break was encountered, try default case
     if !found_match || !matches!(result, Value::None) {
       if let Some((default_statements, has_break)) = default_case {
-        result = self.eval_block(default_statements)?;
+        result = self.eval_block(&default_statements)?;
         if has_break {
           return Ok(result);
         }

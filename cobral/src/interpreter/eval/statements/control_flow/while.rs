@@ -24,7 +24,7 @@ impl Interpreter {
 
     // Main loop
     while !should_break.load(std::sync::atomic::Ordering::SeqCst) {
-      match self.eval_expr(condition.clone())? {
+      match self.eval_expr(&condition)? {
         Value::Boolean(false) => break,
         Value::Boolean(true) => (),
         _ => {
@@ -36,7 +36,7 @@ impl Interpreter {
         }
       }
 
-      self.eval_block(body.clone())?;
+      self.eval_block(&body)?;
     }
 
     handle.unlisten(id);

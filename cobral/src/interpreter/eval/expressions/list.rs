@@ -7,7 +7,7 @@ impl Interpreter {
   pub fn eval_list_expr(&mut self, elements: Vec<Expression>) -> Result<Value, InterpreterError> {
     let mut evaluated_elements = Vec::new();
     for element in elements {
-      let value = self.eval_expr(element)?;
+      let value = self.eval_expr(&element)?;
       evaluated_elements.push(value);
     }
 
@@ -17,7 +17,7 @@ impl Interpreter {
 
 impl Interpreter {
   pub fn eval_index(&mut self, name: String, value: Expression) -> Result<Value, InterpreterError> {
-    let index = self.eval_expr(value)?;
+    let index = self.eval_expr(&value)?;
 
     if let Some(symbol_lock) = self.environment.get_symbol(&name) {
       let symbol = symbol_lock.write();

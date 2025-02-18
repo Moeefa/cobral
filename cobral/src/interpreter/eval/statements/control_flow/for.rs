@@ -19,7 +19,7 @@ impl Interpreter {
     let state = self.environment.symbols.read().clone();
 
     // Initialize
-    self.eval_stmt(initializer)?;
+    self.eval_stmt(&initializer)?;
 
     // Use a local AtomicBool for break detection
     let should_break = Arc::new(AtomicBool::new(false));
@@ -27,25 +27,26 @@ impl Interpreter {
 
     let handle = AppHandleManager.get_handle().unwrap();
     let id = handle.listen("break_exec", move |_| {
-      should_break_clone.store(true, Ordering::Release);
+      should_break_clone.store(true, Ordering::SeqCst);
     });
 
     // Main loop with optimized condition checking
-    while !should_break.load(Ordering::Acquire) {
-      match self.eval_expr(condition.clone())? {
+    while !should_break.load(Ordering::SeqCst) {
+      match self.eval_expr(&condition)? {
         Value::Boolean(false) => break,
         Value::Boolean(true) => {
           // Execute the body first
-          self.eval_block(body.clone())?;
+          self.eval_block(&body)?;
 
           // Handle the update statement
-          self.eval_stmt(update.clone())?;
+          self.eval_stmt(&update)?;
         }
         _ => {
           handle.unlisten(id);
+          *self.environment.symbols.write() = state;
           return Err(InterpreterError::EvalError(
             self.location,
-            "Condição do loop deve ser booleana".into(),
+            "Condição de laço inválida".into(),
           ));
         }
       }

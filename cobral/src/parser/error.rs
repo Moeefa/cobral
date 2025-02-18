@@ -7,6 +7,8 @@ use crate::{
   shared::ast::Location,
 };
 
+use super::Parser;
+
 const ERROR_MESSAGE: &str = "Erro de análise sintática";
 
 #[derive(Error)]
@@ -30,5 +32,11 @@ pub enum ParserError {
 impl fmt::Debug for ParserError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "ParserError: {}", self)
+  }
+}
+
+impl Parser {
+  pub fn invalid_expr(&self, msg: &str) -> ParserError {
+    ParserError::InvalidExpression(self.current_token.location, msg.to_string())
   }
 }

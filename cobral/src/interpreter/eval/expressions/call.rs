@@ -22,7 +22,7 @@ impl Interpreter {
     if let Some(func) = self.environment.get_lib(&name.clone()) {
       let location = self.location;
       let mut eval_fn = move |expr: Expression| -> Result<Value, InterpreterError> {
-        match self.eval_expr(expr) {
+        match self.eval_expr(&expr) {
           Ok(data) => Ok(data),
           Err(e) => Err(InterpreterError::ExpressionEvaluationFailure(
             self.location,
@@ -43,7 +43,7 @@ impl Interpreter {
       // Evaluate arguments
       let evaluated_args = args
         .into_iter()
-        .map(|arg| self.eval_expr(arg))
+        .map(|arg| self.eval_expr(&arg))
         .collect::<Result<Vec<_>, _>>()?;
 
       // Store the current variable state
@@ -78,7 +78,7 @@ impl Interpreter {
 
   fn eval_function_block(&mut self, block: Vec<Statement>) -> Result<Value, InterpreterError> {
     for stmt in block {
-      let result = self.eval_stmt(stmt)?;
+      let result = self.eval_stmt(&stmt)?;
 
       if let Value::Return(value) = result {
         return Ok(*value); // Early return

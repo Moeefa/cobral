@@ -46,7 +46,7 @@ impl Interpreter {
     };
 
     for stmt in stmts {
-      match self.eval_stmt(stmt) {
+      match self.eval_stmt(&stmt) {
         Ok(_) => {}
         Err(e) => return Err(InterpreterError::FileReadError(file.clone(), e.to_string())),
       }

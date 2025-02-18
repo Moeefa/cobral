@@ -156,7 +156,7 @@ se (x == y) { // x é igual a y
 ```cobral
 declare x = 3;
 
-escolha x {
+escolha (x) {
   caso 1:
     escrever("x é igual a 1");
     pare;
@@ -208,7 +208,6 @@ escrever("Você digitou: ", x);
 
 ### Bibliotecas
 
-- [Entrada e saída](#entrada-e-saída): para entrada e saída de dados
 - [Matemática](#matemática): para operações matemáticas
 - [Conversão de tipos de dados](#conversão-de-tipos-de-dados): para conversão de tipos de dados
 

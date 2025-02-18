@@ -12,10 +12,10 @@ impl Interpreter {
     rhs: Expression,
   ) -> Result<Value, InterpreterError> {
     // Evaluate left-hand side expression
-    let lhs_value = self.eval_expr(lhs)?;
+    let lhs_value = self.eval_expr(&lhs)?;
 
     // Evaluate right-hand side expression
-    let rhs_value = self.eval_expr(rhs)?;
+    let rhs_value = self.eval_expr(&rhs)?;
 
     match (lhs_value, rhs_value, op) {
       (Value::Integer(l), Value::Integer(r), Token::Greater) => Ok(Value::Boolean(l > r)),

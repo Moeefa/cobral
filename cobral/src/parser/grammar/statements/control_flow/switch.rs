@@ -20,7 +20,14 @@ pub fn parse_switch_stmt(parser: &mut Parser) -> Result<Statement, ParserError> 
     match parser.current_token.token {
       Token::Case => {
         parser.eat(Token::Case)?;
-        let case_value = parser.parse_expression()?;
+        let case_value = parser
+          .parse_expression()
+          .map_err(|_| parser.invalid_expr("Valor de caso inválido"))?;
+
+        if !case_value.is_literal() {
+          return Err(parser.invalid_expr("Valor de caso deve ser literal"));
+        }
+
         parser.eat(Token::Colon)?;
 
         let mut block_items = Vec::new();

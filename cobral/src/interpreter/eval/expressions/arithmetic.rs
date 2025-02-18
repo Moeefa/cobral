@@ -11,9 +11,9 @@ impl Interpreter {
     op: Token,
     rhs: Expression,
   ) -> Result<Value, InterpreterError> {
-    let lhs_value = self.eval_expr(lhs)?;
+    let lhs_value = self.eval_expr(&lhs)?;
 
-    let rhs_value = self.eval_expr(rhs)?;
+    let rhs_value = self.eval_expr(&rhs)?;
 
     match (lhs_value, rhs_value, op) {
       // Handle integer arithmetic
@@ -118,7 +118,7 @@ impl Interpreter {
     token: Token,
     expr: Expression,
   ) -> Result<Value, InterpreterError> {
-    let value = self.eval_expr(expr)?;
+    let value = self.eval_expr(&expr)?;
 
     match token {
       Token::Plus => match value {

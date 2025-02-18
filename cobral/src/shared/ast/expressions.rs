@@ -70,6 +70,17 @@ pub enum Expression {
 }
 
 impl Expression {
+  pub fn is_literal(&self) -> bool {
+    match self {
+      Expression::Integer(_, _) => true,
+      Expression::Float(_, _) => true,
+      Expression::String(_, _) => true,
+      Expression::Boolean(_, _) => true,
+      Expression::Nil(_) => true,
+      _ => false,
+    }
+  }
+
   pub fn location(&self) -> Location {
     match self {
       Expression::Logical { location, .. } => location.clone(),

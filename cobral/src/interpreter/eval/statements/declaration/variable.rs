@@ -9,7 +9,7 @@ impl Interpreter {
     name: String,
     value: Expression,
   ) -> Result<Value, InterpreterError> {
-    let value = self.eval_expr(value)?;
+    let value = self.eval_expr(&value)?;
 
     self
       .environment

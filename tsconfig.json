@@ -26,14 +26,14 @@
 		"baseUrl": ".",
 
 		"paths": {
-			"@/*": ["./packages/ui/src/*"],
+			"@/*": ["./packages/ui/*"],
 			"@packages/*": ["./packages/*"]
 		}
 	},
 	"include": [
 		"packages",
 		"vite-env.d.ts",
-		"packages/ui/src/**/*.tsx",
+		"packages/ui/**/*.tsx",
 		"rollup.config.ts"
 	],
 	"references": [{ "path": "./tsconfig.node.json" }]

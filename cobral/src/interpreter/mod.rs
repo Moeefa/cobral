@@ -38,16 +38,16 @@ impl Interpreter {
   fn run(&mut self, stmts: Vec<Statement>) -> Result<(), InterpreterError> {
     stmts
       .into_iter()
-      .try_for_each(|stmt| self.eval_stmt(stmt).map(|_| ()))?;
+      .try_for_each(|stmt| self.eval_stmt(&stmt).map(|_| ()))?;
 
     Ok(())
   }
 
-  fn eval_stmt(&mut self, stmt: Statement) -> Result<Value, InterpreterError> {
+  fn eval_stmt(&mut self, stmt: &Statement) -> Result<Value, InterpreterError> {
     self.location = stmt.location();
 
-    match stmt {
-      Statement::Expression(expr, _location) => self.eval_expr(expr),
+    match stmt.clone() {
+      Statement::Expression(expr, _location) => self.eval_expr(&expr),
       Statement::Assignment {
         target,
         index,
@@ -104,10 +104,10 @@ impl Interpreter {
     }
   }
 
-  fn eval_expr(&mut self, expr: Expression) -> Result<Value, InterpreterError> {
+  fn eval_expr(&mut self, expr: &Expression) -> Result<Value, InterpreterError> {
     self.location = expr.location();
 
-    match expr {
+    match expr.clone() {
       Expression::Logical {
         left,
         operator,
@@ -159,9 +159,9 @@ impl Interpreter {
     }
   }
 
-  fn eval_block(&mut self, block: Vec<Statement>) -> Result<Value, InterpreterError> {
+  fn eval_block(&mut self, block: &Vec<Statement>) -> Result<Value, InterpreterError> {
     for stmt in block {
-      self.eval_stmt(stmt)?;
+      self.eval_stmt(&stmt)?;
     }
 
     Ok(Value::None)

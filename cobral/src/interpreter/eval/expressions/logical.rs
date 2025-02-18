@@ -12,7 +12,7 @@ impl Interpreter {
     rhs: Expression,
   ) -> Result<Value, InterpreterError> {
     // Evaluate the left-hand side (LHS) expression
-    let lhs_value = self.eval_expr(lhs)?;
+    let lhs_value = self.eval_expr(&lhs)?;
 
     // Ensure the LHS is a boolean
     let lhs_bool = match lhs_value {
@@ -29,7 +29,7 @@ impl Interpreter {
     };
 
     // Evaluate the right-hand side (RHS) expression
-    let rhs_value = self.eval_expr(rhs)?;
+    let rhs_value = self.eval_expr(&rhs)?;
 
     // Ensure the RHS is a boolean
     let rhs_bool = match rhs_value {
