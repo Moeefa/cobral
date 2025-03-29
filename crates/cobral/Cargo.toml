@@ -1,0 +1,20 @@
+[package]
+name = "cobral"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lib]
+name = "cobral"
+crate-type = ["lib", "cdylib", "staticlib"]
+path = "src/lib.rs"
+
+[dependencies]
+colored.workspace = true
+once_cell.workspace = true
+thiserror.workspace = true
+parking_lot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rand = "0.9.0"
+wasi = "0.14.1"
