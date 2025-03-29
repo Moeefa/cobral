@@ -82,7 +82,7 @@ pub fn run() {
               .build(),
           );
 
-      #[cfg(any(target_os = "windows", target_os = "macos"))]
+      #[cfg(target_os = "windows")]
       let main_window_builder = main_window_builder.transparent(true);
 
       main_window_builder.build().unwrap();
