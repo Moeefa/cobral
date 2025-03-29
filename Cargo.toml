@@ -1,14 +1,14 @@
 [workspace]
-members = [
-  "cobral",
+members = [ 
+  "crates/*",
 ]
-default-members = ["cobral"]
+default-members = ["crates/app"]
 resolver = "2"
 
 package.edition = "2021"
 package.authors = ["Luiz Henrique Xinaider"]
 package.repository = "https://github.com/Moeefa/cobral.git"
-package.version = "0.10.0"
+package.version = "0.10.1"
 
 [workspace.dependencies]
 tauri-build = { version = "2", features = [] }

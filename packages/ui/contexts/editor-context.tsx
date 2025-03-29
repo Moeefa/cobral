@@ -88,10 +88,10 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 	// Event listeners
 	useEffect(() => {
 		const clearListener = listen("clear", clearLogs);
-		const readListener = listen<string>("read", (event) =>
+		const readListener = listen<string>("spawn_input", (event) =>
 			addInput(event.payload),
 		);
-		const logListener = listen<Entry[]>("log_batch", (event) =>
+		const logListener = listen<Entry[]>("process_logs", (event) =>
 			addLog(event.payload),
 		);
 

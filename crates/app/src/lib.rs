@@ -1,19 +1,15 @@
 mod context;
-mod logger;
-mod shared;
+mod utils;
 
-mod interpreter;
-mod lexer;
-mod parser;
-
+use cobral::{event::GLOBAL_EVENT_SYSTEM, logger};
 use context::ExecutionContext;
 use logger::batcher::{LogBatchConfig, LogBatchManager};
-use shared::AppHandleManager;
 use tauri::{
   window::{Effect, EffectsBuilder},
-  Manager,
+  Emitter, Listener, Manager,
 };
 use tauri_plugin_decorum::WebviewWindowExt;
+use utils::AppHandleManager;
 
 #[tauri::command]
 async fn eval(context: tauri::State<'_, ExecutionContext>, input: String) -> Result<(), String> {
@@ -40,6 +36,38 @@ pub fn run() {
         .handle()
         .plugin(tauri_plugin_updater::Builder::new().build())?;
 
+      app.listen("break_exec", |_| {
+        GLOBAL_EVENT_SYSTEM.emit("break_exec", "".to_string());
+      });
+
+      app.listen("submit_pending_input", |event| {
+        GLOBAL_EVENT_SYSTEM.emit("submit_pending_input", event.payload().to_owned());
+      });
+
+      GLOBAL_EVENT_SYSTEM.listen(
+        "process_logs",
+        Box::new(|batch_data| {
+          let _ = AppHandleManager.with_handle(|handle| {
+            let data: serde_json::Value =
+              serde_json::from_str(&batch_data).expect("failed to deserialize batch data");
+            handle
+              .emit("process_logs", data)
+              .expect("failed to emit log_batch event");
+          });
+        }),
+      );
+
+      GLOBAL_EVENT_SYSTEM.listen(
+        "spawn_input",
+        Box::new(|input| {
+          let _ = AppHandleManager.with_handle(|handle| {
+            handle
+              .emit("spawn_input", Some(input))
+              .expect("failed to emit read_input event");
+          });
+        }),
+      );
+
       let main_window_builder =
         tauri::WebviewWindowBuilder::new(app.handle(), "main", tauri::WebviewUrl::App("/".into()))
           .title("Cobral")
@@ -50,11 +78,11 @@ pub fn run() {
           .center()
           .effects(
             EffectsBuilder::new()
-              .effects([Effect::Acrylic, Effect::FullScreenUI])
+              .effects([Effect::Acrylic, Effect::Sidebar])
               .build(),
           );
 
-      #[cfg(target_os = "windows")]
+      #[cfg(any(target_os = "windows", target_os = "macos"))]
       let main_window_builder = main_window_builder.transparent(true);
 
       main_window_builder.build().unwrap();

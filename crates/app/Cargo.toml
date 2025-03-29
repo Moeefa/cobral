@@ -1,11 +1,11 @@
 [package]
-name = "cobral"
+name = "tauri_app"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 
 [lib]
-name = "lib"
+name = "tauri_app"
 crate-type = ["lib", "cdylib", "staticlib"]
 path = "src/lib.rs"
 
@@ -13,16 +13,13 @@ path = "src/lib.rs"
 tauri-build.workspace = true
 
 [dependencies]
-colored.workspace = true
+cobral = { path = "../cobral" }
+serde_json.workspace = true
+parking_lot.workspace = true
 once_cell.workspace = true
 thiserror.workspace = true
-parking_lot.workspace = true
-tauri.workspace = true
-serde.workspace = true
-serde_json.workspace = true
 tokio.workspace = true
-
-# Plugins
+tauri.workspace = true
 tauri-plugin-shell = "2"
 tauri-plugin-decorum = "1.1.1"
 tauri-plugin-fs = { version = "2", features = ["watch"] }
